@@ -1027,8 +1027,8 @@ class PriorityThreadManager::PriorityImplT : public PriorityThreadManager {
     }
   }
 
-  void setThreadInitCallback(InitCallback /*initCallback*/) override {
-    throw IllegalStateException("Not implemented");
+  void setThreadInitCallback(InitCallback initCallback) override {
+    initCallback_ = initCallback;
   }
 
   void enableCodel(bool enabled) override {
@@ -1049,6 +1049,7 @@ private:
   unique_ptr<ThreadManager> managers_[N_PRIORITIES];
   size_t counts_[N_PRIORITIES];
   Mutex mutex_;
+  InitCallback initCallback_;
 };
 
 static const size_t NORMAL_PRIORITY_MINIMUM_THREADS = 1;
