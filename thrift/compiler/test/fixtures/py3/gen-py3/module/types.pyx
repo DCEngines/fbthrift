@@ -10,12 +10,17 @@ from libcpp.string cimport string
 from libcpp cimport bool as cbool
 from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
-from libc.stdint cimport int8_t, int16_t, int32_t, int64_t
+from libc.stdint cimport int8_t, int16_t, int32_t, int64_t, uint32_t
 from cython.operator cimport dereference as deref, preincrement as inc
 import thrift.py3.types
 cimport thrift.py3.types
+cimport thrift.py3.exceptions
 from thrift.py3.types import NOTSET
 cimport thrift.py3.std_libcpp as std_libcpp
+from thrift.py3.serializer cimport IOBuf
+from thrift.py3.serializer import Protocol
+cimport thrift.py3.serializer as serializer
+from thrift.py3.serializer import deserialize, serialize
 
 import sys
 from collections.abc import Sequence, Set, Mapping, Iterable
@@ -39,7 +44,7 @@ cdef cAnEnum AnEnum_to_cpp(value):
         return AnEnum__FOUR
 
 
-cdef class SimpleException(thrift.py3.types.Exception):
+cdef class SimpleException(thrift.py3.exceptions.Error):
 
     def __init__(
         SimpleException self,
@@ -109,7 +114,8 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         small_int=None,
         nice_sized_int=None,
         big_int=None,
-        real=None
+        real=None,
+        smaller_real=None
     ):
         self.c_SimpleStruct = make_shared[cSimpleStruct]()
 
@@ -138,6 +144,33 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
             deref(inst.c_SimpleStruct).real = real
             deref(inst.c_SimpleStruct).__isset.real = True
 
+        if smaller_real is not None:
+            deref(inst.c_SimpleStruct).smaller_real = smaller_real
+            deref(inst.c_SimpleStruct).__isset.smaller_real = True
+
+
+    cdef bytes _serialize(SimpleStruct self, proto):
+        cdef string c_str
+        if proto is Protocol.COMPACT:
+            serializer.CompactSerialize[cSimpleStruct](deref(self.c_SimpleStruct.get()), &c_str)
+        elif proto is Protocol.BINARY:
+            serializer.BinarySerialize[cSimpleStruct](deref(self.c_SimpleStruct.get()), &c_str)
+        elif proto is Protocol.JSON:
+            serializer.JSONSerialize[cSimpleStruct](deref(self.c_SimpleStruct.get()), &c_str)
+        return <bytes> c_str
+
+    cdef uint32_t _deserialize(SimpleStruct self, const IOBuf* buf, proto):
+        cdef uint32_t needed
+        if proto is Protocol.COMPACT:
+            needed = serializer.CompactDeserialize[cSimpleStruct](buf, deref(self.c_SimpleStruct.get()))
+        elif proto is Protocol.BINARY:
+            needed = serializer.BinaryDeserialize[cSimpleStruct](buf, deref(self.c_SimpleStruct.get()))
+        elif proto is Protocol.JSON:
+            needed = serializer.JSONDeserialize[cSimpleStruct](buf, deref(self.c_SimpleStruct.get()))
+        return needed
+
+    def __reduce__(self):
+        return (deserialize, (SimpleStruct, serialize(self)))
 
     def __call__(
         SimpleStruct self,
@@ -146,7 +179,8 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         small_int=NOTSET,
         nice_sized_int=NOTSET,
         big_int=NOTSET,
-        real=NOTSET
+        real=NOTSET,
+        smaller_real=NOTSET
     ):
         changes = any((
             is_on is not NOTSET,
@@ -160,6 +194,8 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
             big_int is not NOTSET,
 
             real is not NOTSET,
+
+            smaller_real is not NOTSET,
         ))
 
         if not changes:
@@ -200,6 +236,11 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
             deref(inst.c_SimpleStruct).__isset.real = False
         if real is NOTSET:
             real = None
+        if smaller_real is None:
+            deref(inst.c_SimpleStruct).smaller_real = deref(defaults.c_SimpleStruct).smaller_real
+            deref(inst.c_SimpleStruct).__isset.smaller_real = False
+        if smaller_real is NOTSET:
+            smaller_real = None
 
         if is_on is not None:
             deref(inst.c_SimpleStruct).is_on = is_on
@@ -225,6 +266,10 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
             deref(inst.c_SimpleStruct).real = real
             deref(inst.c_SimpleStruct).__isset.real = True
 
+        if smaller_real is not None:
+            deref(inst.c_SimpleStruct).smaller_real = smaller_real
+            deref(inst.c_SimpleStruct).__isset.smaller_real = True
+
         return inst
 
     def __iter__(self):
@@ -234,9 +279,10 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         yield 'nice_sized_int', self.nice_sized_int
         yield 'big_int', self.big_int
         yield 'real', self.real
+        yield 'smaller_real', self.smaller_real
 
     def __bool__(self):
-        return deref(self.c_SimpleStruct).__isset.is_on or deref(self.c_SimpleStruct).__isset.tiny_int or deref(self.c_SimpleStruct).__isset.small_int or deref(self.c_SimpleStruct).__isset.nice_sized_int or deref(self.c_SimpleStruct).__isset.big_int or deref(self.c_SimpleStruct).__isset.real
+        return deref(self.c_SimpleStruct).__isset.is_on or deref(self.c_SimpleStruct).__isset.tiny_int or deref(self.c_SimpleStruct).__isset.small_int or deref(self.c_SimpleStruct).__isset.nice_sized_int or deref(self.c_SimpleStruct).__isset.big_int or deref(self.c_SimpleStruct).__isset.real or deref(self.c_SimpleStruct).__isset.smaller_real
 
     @staticmethod
     cdef create(shared_ptr[cSimpleStruct] c_SimpleStruct):
@@ -286,6 +332,13 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
 
         return self.c_SimpleStruct.get().real
 
+    @property
+    def smaller_real(self):
+        if not deref(self.c_SimpleStruct).__isset.smaller_real:
+            return None
+
+        return self.c_SimpleStruct.get().smaller_real
+
 
     def __richcmp__(self, other, op):
         cdef int cop = op
@@ -315,11 +368,12 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
             self.nice_sized_int,
             self.big_int,
             self.real,
+            self.smaller_real,
             ))
         return self.__hash
 
     def __repr__(SimpleStruct self):
-        return f'SimpleStruct(is_on={repr(self.is_on)}, tiny_int={repr(self.tiny_int)}, small_int={repr(self.small_int)}, nice_sized_int={repr(self.nice_sized_int)}, big_int={repr(self.big_int)}, real={repr(self.real)})'
+        return f'SimpleStruct(is_on={repr(self.is_on)}, tiny_int={repr(self.tiny_int)}, small_int={repr(self.small_int)}, nice_sized_int={repr(self.nice_sized_int)}, big_int={repr(self.big_int)}, real={repr(self.real)}, smaller_real={repr(self.smaller_real)})'
 
 
 SimpleStruct_defaults = SimpleStruct()
@@ -363,13 +417,35 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
 
         if an_enum is not None:
             deref(inst.c_ComplexStruct).an_enum = AnEnum_to_cpp(an_enum)
-        
             deref(inst.c_ComplexStruct).__isset.an_enum = True
 
         if some_bytes is not None:
             deref(inst.c_ComplexStruct).some_bytes = some_bytes
             deref(inst.c_ComplexStruct).__isset.some_bytes = True
 
+
+    cdef bytes _serialize(ComplexStruct self, proto):
+        cdef string c_str
+        if proto is Protocol.COMPACT:
+            serializer.CompactSerialize[cComplexStruct](deref(self.c_ComplexStruct.get()), &c_str)
+        elif proto is Protocol.BINARY:
+            serializer.BinarySerialize[cComplexStruct](deref(self.c_ComplexStruct.get()), &c_str)
+        elif proto is Protocol.JSON:
+            serializer.JSONSerialize[cComplexStruct](deref(self.c_ComplexStruct.get()), &c_str)
+        return <bytes> c_str
+
+    cdef uint32_t _deserialize(ComplexStruct self, const IOBuf* buf, proto):
+        cdef uint32_t needed
+        if proto is Protocol.COMPACT:
+            needed = serializer.CompactDeserialize[cComplexStruct](buf, deref(self.c_ComplexStruct.get()))
+        elif proto is Protocol.BINARY:
+            needed = serializer.BinaryDeserialize[cComplexStruct](buf, deref(self.c_ComplexStruct.get()))
+        elif proto is Protocol.JSON:
+            needed = serializer.JSONDeserialize[cComplexStruct](buf, deref(self.c_ComplexStruct.get()))
+        return needed
+
+    def __reduce__(self):
+        return (deserialize, (ComplexStruct, serialize(self)))
 
     def __call__(
         ComplexStruct self,
@@ -457,7 +533,6 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
 
         if an_enum is not None:
             deref(inst.c_ComplexStruct).an_enum = AnEnum_to_cpp(an_enum)
-        
             deref(inst.c_ComplexStruct).__isset.an_enum = True
 
         if some_bytes is not None:
@@ -3005,7 +3080,7 @@ cdef class List__AnEnum:
             index = size - index
         cdef cAnEnum citem = (
             deref(self._vector.get())[index])
-        return module.types.AnEnum(<int> citem)
+        return AnEnum(<int> citem)
 
     def __len__(self):
         return deref(self._vector).size()
@@ -3043,7 +3118,7 @@ cdef class List__AnEnum:
             raise StopIteration
         cdef cAnEnum citem
         for citem in deref(self._vector):
-            yield module.types.AnEnum(<int> citem)
+            yield AnEnum(<int> citem)
 
     def __repr__(self):
         if not self:
@@ -3059,7 +3134,7 @@ cdef class List__AnEnum:
         cdef vector[cAnEnum].reverse_iterator loc = vec.rbegin()
         while loc != vec.rend():
             citem = deref(loc)
-            yield module.types.AnEnum(<int> citem)
+            yield AnEnum(<int> citem)
             inc(loc)
 
     def index(self, item):
@@ -3301,7 +3376,6 @@ cdef class List__Map__i32_double:
 
 
 Sequence.register(List__Map__i32_double)
-
 
 A_BOOL = True
 A_BYTE = 8

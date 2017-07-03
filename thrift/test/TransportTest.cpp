@@ -1,4 +1,6 @@
 /*
+ * Copyright 2004-present Facebook, Inc.
+ *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
@@ -30,7 +32,6 @@
 
 #include <thrift/lib/cpp/transport/TBufferTransports.h>
 #include <thrift/lib/cpp/transport/TFDTransport.h>
-#include <thrift/lib/cpp/transport/TFileTransport.h>
 #include <thrift/lib/cpp/transport/TSocket.h>
 #include <thrift/lib/cpp/transport/TZlibTransport.h>
 #include <thrift/lib/cpp/transport/TMemPagedTransport.tcc>
@@ -251,19 +252,6 @@ class CoupledSocketTransports : public CoupledTransports<TSocket> {
 };
 
 /**
- * Coupled TFileTransports
- */
-class CoupledFileTransports : public CoupledTransports<TFileTransport> {
- public:
-  CoupledFileTransports() {
-    in = make_shared<TFileTransport>(tmpdir.path().string(), true);
-    out = make_shared<TFileTransport>(tmpdir.path().string());
-  }
-
-  TemporaryFile tmpdir;
-};
-
-/**
  * Wrapper around another CoupledTransports implementation that exposes the
  * transports as TTransport pointers.
  *
@@ -339,7 +327,7 @@ unsigned int numTriggersFired;
 
 void set_alarm();
 
-void alarm_handler(int signum) {
+void alarm_handler(int /* signum */) {
   // The alarm timed out, which almost certainly means we're stuck
   // on a transport that is incorrectly blocked.
   ++numTriggersFired;
@@ -852,15 +840,11 @@ class TransportTest : public testing::Test {
   TEST_BLOCKING_BEHAVIOR_A(CoupledTransports, borrow_none_available) \
 
 static GenericSizeGenerator rand4k(1, 4096);
-static constexpr size_t kConst2K = 1024*2;
 static constexpr size_t kConst16K = 1024*16;
-static constexpr size_t kConst64K = 1024*64;
-static constexpr size_t kConst128K = 1024*128;
 static constexpr size_t kConst256K = 1024*256;
 static constexpr size_t kConst1024K = 1024*1024;
 static constexpr uint32_t kFdMaxOutstanding = 4096;
 static constexpr uint32_t kSocketMaxOutstanding = 4096;
-static constexpr uint32_t kMaxWriteAtOnce = 1024*1024*16 - 4;
 
 // TMemoryBuffer tests
 TEST_RW_4(CoupledMemoryBuffers, kConst1024K, 0, 0);
@@ -929,22 +913,6 @@ TEST_RW_7(CoupledSocketTransports,
 TEST_RW_7(CoupledSocketTransports, kConst16K, 1, 1, rand4k, rand4k, 100);
 
 TEST_BLOCKING_BEHAVIOR(CoupledSocketTransports);
-
-// TFileTransport tests
-// We use smaller buffer sizes here, since TFileTransport is fairly slow.
-//
-// TFileTransport can't write more than 16MB at once
-TEST_RW_4(CoupledFileTransports, kConst1024K, kMaxWriteAtOnce, 0);
-TEST_RW_4(CoupledFileTransports, kConst128K, rand4k, rand4k);
-TEST_RW_4(CoupledFileTransports, kConst128K, 167, 163);
-TEST_RW_4(CoupledFileTransports, kConst2K, 1, 1);
-
-TEST_RW_6(CoupledFileTransports, kConst64K, 0, 0, rand4k, rand4k);
-TEST_RW_6(CoupledFileTransports, kConst64K, rand4k, rand4k, rand4k, rand4k);
-TEST_RW_6(CoupledFileTransports, kConst64K, 167, 163, rand4k, rand4k);
-TEST_RW_6(CoupledFileTransports, kConst2K, 1, 1, rand4k, rand4k);
-
-TEST_BLOCKING_BEHAVIOR(CoupledFileTransports);
 
 // Add some tests that access TBufferedTransport and TFramedTransport
 // via TTransport pointers and TBufferBase pointers.

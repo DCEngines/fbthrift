@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2014-present Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,70 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include <node.h>
 #include <node_buffer.h>
 #include <v8.h>
 
-#include <thrift/lib/cpp2/server/ThriftServer.h>
-#include <thrift/lib/cpp2/async/AsyncProcessor.h>
+#include <folly/CallOnce.h>
+#include <folly/Singleton.h>
 #include <thrift/lib/cpp/concurrency/FunctionRunner.h>
+#include <thrift/lib/cpp2/async/AsyncProcessor.h>
+#include <thrift/lib/cpp2/server/ThriftServer.h>
 
 using namespace v8;
 std::unique_ptr<folly::EventBase> integrated_uv_event_base;
 
-void run_loop(uv_async_t *handle, int status) {
+void run_loop(uv_async_t* /* handle */, int /* status */) {
   integrated_uv_event_base->loop();
 }
 
 uv_async_t async;
+
+std::string getStringAttrSafe(Local<Object>& obj, const std::string& key) {
+  auto keyStr = String::New(key.c_str());
+  if (!obj->Has(keyStr)) {
+    return "";
+  }
+  auto value = obj->Get(keyStr);
+  if (!value->IsString()) {
+    return "";
+  }
+  return *String::Utf8Value(obj->Get(keyStr)->ToString());
+}
+
+std::list<std::string> getStringListSafe(
+    Local<Object>& obj,
+    const std::string& key) {
+  std::list<std::string> result;
+  auto keyStr = String::New(key.c_str());
+  if (!obj->Has(keyStr)) {
+    return result;
+  }
+  auto value = obj->Get(keyStr);
+  if (!value->IsArray()) {
+    return result;
+  }
+  auto jsArray = Local<Array>::Cast(value);
+  auto len = jsArray->Length();
+  for (size_t i = 0; i < len; ++i) {
+    auto item = jsArray->Get(i);
+    if (item->IsString()) {
+      result.push_back(*String::Utf8Value(item->ToString()));
+    }
+  }
+  return result;
+}
+
+folly::SSLContext::SSLVerifyPeerEnum getSSLVerify(Local<Object>& cfg) {
+  auto result = folly::SSLContext::SSLVerifyPeerEnum::VERIFY;
+  auto attr = getStringAttrSafe(cfg, "verify");
+  if (attr == "verify_required") {
+    result = folly::SSLContext::SSLVerifyPeerEnum::VERIFY_REQ_CLIENT_CERT;
+  } else if (attr == "no_verify") {
+    result = folly::SSLContext::SSLVerifyPeerEnum::NO_VERIFY;
+  }
+  return result;
+}
 
 class ThriftServerCallback : public node::ObjectWrap {
  public:
@@ -113,22 +160,20 @@ class NodeProcessor : public apache::thrift::AsyncProcessor {
       : server_(server)
       , iface_(iface) {}
 
-  void process(std::unique_ptr<apache::thrift::ResponseChannel::Request> req,
-               std::unique_ptr<folly::IOBuf> buf,
-               apache::thrift::protocol::PROTOCOL_TYPES protType,
-               apache::thrift::Cpp2RequestContext* context,
-               folly::EventBase* eb,
-               apache::thrift::concurrency::ThreadManager* tm) override {
-
+  void process(
+      std::unique_ptr<apache::thrift::ResponseChannel::Request> req,
+      std::unique_ptr<folly::IOBuf> buf,
+      apache::thrift::protocol::PROTOCOL_TYPES,
+      apache::thrift::Cpp2RequestContext* context,
+      folly::EventBase* eb,
+      apache::thrift::concurrency::ThreadManager*) override {
     integrated_uv_event_base->runInEventBaseThread(
       [=, req = std::move(req), buf = std::move(buf)]() mutable {
         HandleScope scope;
         buf->coalesce();
         uint64_t resp;
         char* data;
-
         void *user_data = NULL;
-
         assert(buf->length() > 0);
         node::Buffer* inBuffer = node::Buffer::New(buf->length());
         assert(inBuffer);
@@ -138,13 +183,11 @@ class NodeProcessor : public apache::thrift::AsyncProcessor {
         Local<Object> globalObj = Context::GetCurrent()->Global();
         Local<Function> bufferConstructor = Local<Function>::Cast(
           globalObj->Get(String::New("Buffer")));
+        std::array<Handle<class v8::Value>, 2> constructorArgs = {
+            {inBuffer->handle_, v8::Integer::New(buf->length())}};
 
-        Handle<Value> constructorArgs[3] = {
-          inBuffer->handle_,
-          v8::Integer::New(buf->length()),
-          v8::Integer::New(0) };
-        Local<Object> bufin = bufferConstructor->NewInstance(
-          3, constructorArgs);
+        Local<Object> bufin =
+            bufferConstructor->NewInstance(2, constructorArgs.data());
 
         auto callback = ThriftServerCallback::NewInstance();
         ThriftServerCallback::setRequest(
@@ -160,14 +203,13 @@ class NodeProcessor : public apache::thrift::AsyncProcessor {
 
         // Delete objects created since scope creation on stack (i.e. inBuffer)
         scope.Close(Undefined());
-
       });
     uv_async_send(&async);
   }
 
   bool isOnewayMethod(
-      const folly::IOBuf* buf,
-      const apache::thrift::transport::THeader* header) override {
+      const folly::IOBuf*,
+      const apache::thrift::transport::THeader*) override {
     return false;
   }
  private:
@@ -232,6 +274,54 @@ class CppThriftServer : public node::ObjectWrap {
     return args.This();
   }
 
+  static Handle<Value> setSSLConfigJs(const Arguments& args) {
+    auto obj = ObjectWrap::Unwrap<CppThriftServer>(args.This());
+    auto sslConfig = args[0]->ToObject();
+
+    auto certPath = getStringAttrSafe(sslConfig, "certPath");
+    auto keyPath = getStringAttrSafe(sslConfig, "keyPath");
+    if (certPath.empty() ^ keyPath.empty()) {
+      return ThrowException(
+          String::New("certPath and keyPath must both be populated"));
+    }
+    auto cfg = std::make_shared<wangle::SSLContextConfig>();
+    cfg->clientCAFile = getStringAttrSafe(sslConfig, "clientCaPath");
+    if (!certPath.empty()) {
+      auto keyPwPath = getStringAttrSafe(sslConfig, "keyPwPath");
+      cfg->setCertificate(certPath, keyPath, keyPwPath);
+    }
+
+    cfg->clientVerification = getSSLVerify(sslConfig);
+    auto eccCurve = getStringAttrSafe(sslConfig, "eccCurveName");
+    if (!eccCurve.empty()) {
+      cfg->eccCurveName = eccCurve;
+    }
+    auto alpnProtocols = getStringListSafe(sslConfig, "alpnProtocols");
+    cfg->setNextProtocols(alpnProtocols);
+
+    auto sessionContext = getStringAttrSafe(sslConfig, "sessionContext");
+    if (!sessionContext.empty()) {
+      cfg->sessionContext = sessionContext;
+    }
+
+    obj->server_.setSSLConfig(cfg);
+
+    auto policyAttr = getStringAttrSafe(sslConfig, "policy");
+    auto policy = apache::thrift::SSLPolicy::PERMITTED;
+    if (policyAttr == "required") {
+      policy = apache::thrift::SSLPolicy::REQUIRED;
+    }
+    obj->server_.setSSLPolicy(policy);
+
+    obj->server_.watchCertForChanges(certPath);
+    auto ticketFilePath = getStringAttrSafe(sslConfig, "ticketFilePath");
+    if (!ticketFilePath.empty()) {
+      obj->server_.watchTicketPathForChanges(ticketFilePath, true);
+    }
+
+    return args.This();
+  }
+
   static void Init(v8::Handle<v8::Object> exports) {
     Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
     tpl->SetClassName(String::NewSymbol("CppThriftServer"));
@@ -249,6 +339,9 @@ class CppThriftServer : public node::ObjectWrap {
     tpl->PrototypeTemplate()->Set(
       String::NewSymbol("setInterface"),
       FunctionTemplate::New(CppThriftServer::setInterface)->GetFunction());
+    tpl->PrototypeTemplate()->Set(
+        String::NewSymbol("setSSLConfig"),
+        FunctionTemplate::New(CppThriftServer::setSSLConfigJs)->GetFunction());
     constructor = Persistent<Function>::New(tpl->GetFunction());
     exports->Set(String::NewSymbol("CppThriftServer"), constructor);
   }
@@ -278,10 +371,12 @@ class CppThriftServer : public node::ObjectWrap {
 Persistent<Function> CppThriftServer::constructor;
 
 void init(Handle<Object> exports) {
+  static folly::once_flag flag;
+  folly::call_once(
+      flag, [] { folly::SingletonVault::singleton()->registrationComplete(); });
   integrated_uv_event_base.reset(new folly::EventBase());
   CppThriftServer::Init(exports);
   ThriftServerCallback::Init(exports);
-
   uv_async_init(uv_default_loop(), &async, run_loop);
 }
 

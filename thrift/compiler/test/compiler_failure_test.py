@@ -116,3 +116,57 @@ class CompilerFailureTest(unittest.TestCase):
             err,
             "[FAILURE:foo.thrift:3] Redefinition of value Bar in enum Foo\n"
         )
+
+    def test_duplicate_enum_value(self):
+        write_file("foo.thrift", textwrap.dedent("""\
+            enum Foo {
+                Bar = 1,
+                Baz = 1,
+            }
+        """))
+        ret, out, err = self.run_thrift("foo.thrift")
+        self.assertEqual(
+            err,
+            "[FAILURE:foo.thrift:3] "
+            "Duplicate value Baz=1 with value Bar in enum Foo. "
+            "Add thrift.duplicate_values annotation to enum to suppress this "
+            "error\n"
+        )
+
+    def test_unset_enum_value(self):
+        write_file("foo.thrift", textwrap.dedent("""\
+            enum Foo {
+                Bar,
+                Baz,
+            }
+        """))
+        ret, out, err = self.run_thrift("foo.thrift")
+        self.assertEqual(
+            err,
+            "[FAILURE:foo.thrift:2] Unset enum value Bar in enum Foo. "
+            "Add an explicit value to suppress this error\n"
+            "[FAILURE:foo.thrift:3] Unset enum value Baz in enum Foo. "
+            "Add an explicit value to suppress this error\n"
+        )
+
+    def test_circular_include_dependencies(self):
+        # tests overriding a method of the parent and the grandparent services
+        write_file("foo.thrift", textwrap.dedent("""\
+            include "bar.thrift"
+            service MySBB {
+                void lol(),
+            }
+        """))
+        write_file("bar.thrift", textwrap.dedent("""\
+            include "foo.thrift"
+            service MySB extends foo.MySBB {
+                void meh(),
+            }
+        """))
+        ret, out, err = self.run_thrift("foo.thrift")
+        self.assertEqual(ret, 1)
+        self.assertEqual(
+            err,
+            "[FAILURE:bar.thrift:5] Circular dependency found: file "
+            "foo.thrift is already parsed.\n"
+        )

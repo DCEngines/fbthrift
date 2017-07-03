@@ -7,6 +7,9 @@
 
 #pragma once
 #include <src/gen-cpp2/SimpleService.h>
+#include <src/gen-cpp2/DerivedService.h>
+#include <src/gen-cpp2/RederivedService.h>
+#include <folly/python/futures.h>
 #include <Python.h>
 
 #include <memory>
@@ -17,8 +20,9 @@ namespace simple {
 class SimpleServiceWrapper : virtual public SimpleServiceSvIf {
   protected:
     PyObject *if_object;
+    folly::Executor *executor;
   public:
-    explicit SimpleServiceWrapper(PyObject *if_object);
+    explicit SimpleServiceWrapper(PyObject *if_object, folly::Executor *exc);
     virtual ~SimpleServiceWrapper();
     folly::Future<int32_t> future_get_five() override;
     folly::Future<int32_t> future_add_five(
@@ -136,6 +140,24 @@ class SimpleServiceWrapper : virtual public SimpleServiceSvIf {
     ) override;
 };
 
-std::shared_ptr<apache::thrift::ServerInterface> SimpleServiceInterface(PyObject *if_object);
+std::shared_ptr<apache::thrift::ServerInterface> SimpleServiceInterface(PyObject *if_object, folly::Executor *exc);
+
+
+class DerivedServiceWrapper : public py3::simple::SimpleServiceWrapper, virtual public DerivedServiceSvIf {
+  public:
+    explicit DerivedServiceWrapper(PyObject *if_object, folly::Executor *exc);
+    folly::Future<int32_t> future_get_six() override;
+};
+
+std::shared_ptr<apache::thrift::ServerInterface> DerivedServiceInterface(PyObject *if_object, folly::Executor *exc);
+
+
+class RederivedServiceWrapper : public py3::simple::DerivedServiceWrapper, virtual public RederivedServiceSvIf {
+  public:
+    explicit RederivedServiceWrapper(PyObject *if_object, folly::Executor *exc);
+    folly::Future<int32_t> future_get_seven() override;
+};
+
+std::shared_ptr<apache::thrift::ServerInterface> RederivedServiceInterface(PyObject *if_object, folly::Executor *exc);
 } // namespace py3
 } // namespace simple

@@ -96,7 +96,6 @@ class SharedServerTests
       }
       default:
         FAIL();
-        break;
     }
 
     switch (std::get<1>(GetParam())) {
@@ -116,7 +115,6 @@ class SharedServerTests
       }
       default:
         FAIL();
-        break;
     }
   }
 
@@ -510,7 +508,7 @@ TEST_P(SharedServerTests, CallbackOrderingTest) {
 
   auto channel = static_cast<ClientChannel*>(client->getChannel());
   auto socket = channel->getTransport();
-  client->noResponse([](ClientReceiveState&& state) {}, 1000);
+  client->noResponse([](ClientReceiveState&&) {}, 1000);
   base->tryRunAfterDelay([&]() { socket->closeNow(); }, 100);
   base->tryRunAfterDelay([&]() { base->terminateLoopSoon(); }, 500);
   base->loopForever();

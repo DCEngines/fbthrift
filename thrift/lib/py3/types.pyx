@@ -1,6 +1,4 @@
-from thrift.py3.exceptions import TException as Exception
-
-__all__ = ['Exception', 'Struct', 'BadEnum', 'NOTSET']
+__all__ = ['Struct', 'BadEnum', 'NOTSET']
 
 NOTSET = object()
 
@@ -9,7 +7,11 @@ cdef class Struct:
     """
     Base class for all thrift structs
     """
-    pass
+    cdef bytes _serialize(self, proto):
+        return b''
+
+    cdef uint32_t _deserialize(self, const IOBuf* buf, proto):
+        return 0
 
 
 cdef class BadEnum:

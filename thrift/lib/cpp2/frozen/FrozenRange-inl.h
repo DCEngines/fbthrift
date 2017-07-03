@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2014-present Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 namespace apache { namespace thrift { namespace frozen {
 
 namespace detail {
@@ -48,26 +47,29 @@ struct ArrayLayout : public LayoutBase {
   FieldPosition layout(LayoutRoot& root, const T& coll, LayoutPosition self) {
     FieldPosition pos = startFieldPosition();
     size_t n = coll.size();
+    pos = root.layoutField(self, pos, countField, n);
     if (!n) {
+      pos = root.layoutField(self, pos, distanceField, 0);
       return pos;
     }
     size_t itemBytes = itemField.layout.size;
     size_t itemBits = itemBytes ? 0 : itemField.layout.bits;
+    size_t align = IsBlitType<Item>::value ? alignof(Item) : 1;
     size_t dist = root.layoutBytesDistance(
-        self.start, itemBits ? (n * itemBits + 7) / 8 : n * itemBytes);
+        self.start, itemBits ? (n * itemBits + 7) / 8 : n * itemBytes, align);
 
     pos = root.layoutField(self, pos, distanceField, dist);
-    pos = root.layoutField(self, pos, countField, n);
 
     LayoutPosition write{self.start + dist, 0};
     FieldPosition writeStep(itemBytes, itemBits);
     return layoutItems(root, coll, self, pos, write, writeStep);
   }
 
-  virtual FieldPosition layoutItems(LayoutRoot& root,
+  virtual FieldPosition layoutItems(
+      LayoutRoot& root,
       const T& coll,
-                                    LayoutPosition self,
-                                    FieldPosition pos,
+      LayoutPosition /* self */,
+      FieldPosition pos,
       LayoutPosition write,
       FieldPosition writeStep) {
     FieldPosition noField; // not really used
@@ -81,28 +83,36 @@ struct ArrayLayout : public LayoutBase {
 
   void freeze(FreezeRoot& root, const T& coll, FreezePosition self) const {
     size_t n = coll.size();
+    root.freezeField(self, countField, n);
+    if (!n) {
+      root.freezeField(self, distanceField, 0);
+      return;
+    }
     size_t itemBytes = itemField.layout.size;
     size_t itemBits = itemBytes ? 0 : itemField.layout.bits;
     folly::MutableByteRange range;
     size_t dist;
-    root.appendBytes(self.start,
-                     itemBits ? (n * itemBits + 7) / 8 : n * itemBytes,
-                     range,
-                     dist);
+    size_t align = IsBlitType<Item>::value ? alignof(Item) : 1;
+    root.appendBytes(
+        self.start,
+        itemBits ? (n * itemBits + 7) / 8 : n * itemBytes,
+        range,
+        dist,
+        align);
 
     root.freezeField(self, distanceField, dist);
-    root.freezeField(self, countField, n);
 
-    FreezePosition write{self.start + dist, 0};
+    FreezePosition write{range.begin(), 0};
     FieldPosition writeStep(itemBytes, itemBits);
     freezeItems(root, coll, self, write, writeStep);
   }
 
-  virtual void freezeItems(FreezeRoot& root,
-                           const T& coll,
-                           FreezePosition self,
-                           FreezePosition write,
-                           FieldPosition writeStep) const {
+  virtual void freezeItems(
+      FreezeRoot& root,
+      const T& coll,
+      FreezePosition /* self */,
+      FreezePosition write,
+      FieldPosition writeStep) const {
     for (const auto& it : coll) {
       root.freezeField(write, itemField, it);
       write = write(writeStep);
@@ -151,16 +161,17 @@ struct ArrayLayout : public LayoutBase {
     typedef typename Layout<Item>::View ItemView;
     class Iterator;
 
-    static ViewPosition indexPosition(const byte* start,
-                                      size_t i,
-                                      const LayoutBase* itemLayout) {
-      if (!itemLayout) {
-        return {start, 0};
-      } else if (itemLayout->size) {
-        return ViewPosition{start + itemLayout->size * i, 0};
+    static ViewPosition
+    indexPosition(const byte* start, size_t i, const LayoutBase& itemLayout) {
+      if (itemLayout.size) {
+        return ViewPosition{start + itemLayout.size * i, 0};
       } else {
-        return ViewPosition{start, itemLayout->bits * i};
+        return ViewPosition{start, itemLayout.bits * i};
       }
+    }
+
+    const Layout<Item>& itemLayout() const {
+      return this->layout_->itemField.layout;
     }
 
    public:
@@ -169,30 +180,41 @@ struct ArrayLayout : public LayoutBase {
     typedef Iterator iterator;
     typedef Iterator const_iterator;
 
-    View() : data_(nullptr), count_(0), itemLayout_(nullptr) {}
+    View() {}
     View(const LayoutSelf* layout, ViewPosition self)
-        : ViewBase<View, ArrayLayout, T>(layout, self),
-          data_(nullptr),
-          count_(0),
-          itemLayout_(&layout->itemField.layout) {
-      size_t dist;
+        : ViewBase<View, ArrayLayout, T>(layout, self) {
       thawField(self, layout->countField, count_);
       if (count_) {
+        size_t dist;
         thawField(self, layout->distanceField, dist);
         data_ = self.start + dist;
       }
     }
 
     ItemView operator[](ptrdiff_t index) const {
-      return itemLayout_->view(indexPosition(data_, index, itemLayout_));
+      return itemLayout().view(indexPosition(data_, index, itemLayout()));
+    }
+
+    ItemView front() const {
+      assert(!empty());
+      return (*this)[0];
+    }
+
+    ItemView back() const {
+      assert(!empty());
+      return (*this)[size() - 1];
     }
 
     const_iterator begin() const {
-      return const_iterator(data_, 0, itemLayout_);
+      return const_iterator(*this, 0);
     }
 
     const_iterator end() const {
-      return const_iterator(data_, count_, itemLayout_);
+      return const_iterator(*this);
+    }
+
+    size_t count() const {
+      return count_;
     }
 
     bool empty() const { return !count_; }
@@ -209,27 +231,33 @@ struct ArrayLayout : public LayoutBase {
      * Simple iterator on a range, with additional '.thaw()' member for thawing
      * a single member.
      */
-    class Iterator : public std::iterator<std::random_access_iterator_tag,
-                                          ItemView,
-                                          std::ptrdiff_t,
-                                          ItemView,
-                                          ItemView> {
+    class Iterator {
      public:
-      Iterator(const byte* data, size_t index, const Layout<Item>* itemLayout)
-          : index_(index),
-            data_(data),
-            itemLayout_(itemLayout) {}
+      using difference_type = ptrdiff_t;
+      using value_type = const ItemView;
+      using pointer = value_type*;
+      using reference = value_type&;
+      using iterator_category = std::random_access_iterator_tag;
 
-      ViewPosition position() const {
-        return indexPosition(data_, index_, itemLayout_);
+      Iterator() {}
+
+      Iterator(const View& outer, size_t index) : outer_(outer), index_(index) {
+        updateItemView();
       }
 
-      ItemView operator*() const { return itemLayout_->view(position()); }
-      ItemView operator->() const { return operator*(); }
+      explicit Iterator(const View& outer)
+          : outer_(outer), index_(outer.count_) {}
+
+      const ItemView& operator*() const {
+        return item_;
+      }
+      const ItemView* operator->() const {
+        return &item_;
+      }
 
       Item thaw() const {
         Item item;
-        itemLayout_->thaw(position(), item);
+        outer_.itemLayout().thaw(position(), item);
         return item;
       }
 
@@ -239,28 +267,32 @@ struct ArrayLayout : public LayoutBase {
 
       Iterator& operator++() {
         ++index_;
+        updateItemView();
         return *this;
       }
       Iterator& operator+=(ptrdiff_t delta) {
         index_ += delta;
+        updateItemView();
         return *this;
       }
       Iterator& operator--() {
         --index_;
+        updateItemView();
         return *this;
       }
       Iterator& operator-=(ptrdiff_t delta) {
         index_ -= delta;
+        updateItemView();
         return *this;
       }
       Iterator operator++(int) {
         Iterator ret(*this);
-        ++ret;
+        ++*this;
         return ret;
       }
       Iterator operator--(int) {
         Iterator ret(*this);
-        --ret;
+        --*this;
         return ret;
       }
       Iterator operator+(ptrdiff_t delta) const {
@@ -275,22 +307,32 @@ struct ArrayLayout : public LayoutBase {
       }
 
       bool operator==(const Iterator& other) const {
-        return index_ == other.index_ && data_ == other.data_;
+        return index_ == other.index_;
       }
 
       bool operator!=(const Iterator& other) const {
-        return !this->operator==(other);
+        return !(*this == other);
       }
 
      private:
-      size_t index_;
-      const byte* data_;
-      const Layout<Item>* itemLayout_;
+      ViewPosition position() const {
+        return indexPosition(outer_.data_, index_, outer_.itemLayout());
+      }
+
+      View outer_;
+      // NB: Begin/End addresses won't work with Frozen because of the
+      // possibility of zero-byte items.
+      size_t index_{0};
+      ItemView item_;
+      void updateItemView() {
+        if (index_ < outer_.count_) {
+          item_ = outer_.itemLayout().view(position());
+        }
+      }
     };
 
-    const byte* data_;
-    size_t count_;
-    const Layout<Item>* itemLayout_;
+    const byte* data_{nullptr};
+    size_t count_{0};
   };
 
   View view(ViewPosition self) const { return View(this, self); }

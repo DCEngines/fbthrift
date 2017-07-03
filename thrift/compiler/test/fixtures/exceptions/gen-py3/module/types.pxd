@@ -13,13 +13,15 @@ from libcpp.memory cimport shared_ptr, unique_ptr
 from libcpp.vector cimport vector
 from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
-from thrift.py3.exceptions cimport cTException
+from libcpp.unordered_set cimport unordered_set as cuset
+from libcpp.unordered_map cimport unordered_map as cumap
+from thrift.py3.exceptions cimport cTException, Error as __Error
 cimport thrift.py3.types
 
 
 
 
-cdef extern from "src/gen-cpp2/module_types.h" namespace "cpp2":
+cdef extern from "src/gen-cpp2/module_types_custom_protocol.h" namespace "cpp2":
     cdef cppclass cBanal__isset "cpp2::Banal::__isset":
         pass
 
@@ -51,9 +53,9 @@ cdef extern from "<utility>" namespace "std" nogil:
     cdef shared_ptr[cFiery] move(unique_ptr[cFiery])
 
 # Forward Definition of the cython struct
-cdef class Banal(thrift.py3.types.Exception)
+cdef class Banal(__Error)
 
-cdef class Banal(thrift.py3.types.Exception):
+cdef class Banal(__Error):
     cdef object __hash
     cdef object __weakref__
     cdef shared_ptr[cBanal] c_Banal
@@ -62,9 +64,9 @@ cdef class Banal(thrift.py3.types.Exception):
     cdef create(shared_ptr[cBanal] c_Banal)
 
 # Forward Definition of the cython struct
-cdef class Fiery(thrift.py3.types.Exception)
+cdef class Fiery(__Error)
 
-cdef class Fiery(thrift.py3.types.Exception):
+cdef class Fiery(__Error):
     cdef object __hash
     cdef object __weakref__
     cdef shared_ptr[cFiery] c_Fiery

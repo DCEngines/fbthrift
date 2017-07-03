@@ -6,6 +6,10 @@
  *  @generated
  */
 
+/**
+ * Original thrift struct:-
+ * A
+ */
 class A implements \IThriftStruct, \IThriftShapishStruct {
   public static array $_TSPEC = array(
     1 => array(
@@ -20,6 +24,10 @@ class A implements \IThriftStruct, \IThriftShapishStruct {
     'a' => string,
   );
   const int STRUCTURAL_ID = 7939807933046472325;
+  /**
+   * Original thrift field:-
+   * 1: string a
+   */
   public string $a;
 
   public function __construct(?string $a = null  ) {
@@ -107,6 +115,10 @@ class A implements \IThriftStruct, \IThriftShapishStruct {
 
 }
 
+/**
+ * Original thrift struct:-
+ * B
+ */
 class B implements \IThriftStruct, \IThriftShapishStruct {
   public static array $_TSPEC = array(
     1 => array(
@@ -519,30 +531,130 @@ class B implements \IThriftStruct, \IThriftShapishStruct {
     'optional_map_of_string_to_set_of_i32' => ?array<string, array<int, bool>>,
   );
   const int STRUCTURAL_ID = 5337530759322918209;
+  /**
+   * Original thrift field:-
+   * 1: struct module.A just_an_A
+   */
   public ?A $just_an_A;
+  /**
+   * Original thrift field:-
+   * 2: set<i32> set_of_i32
+   */
   public Set<int> $set_of_i32;
+  /**
+   * Original thrift field:-
+   * 3: list<i32> list_of_i32
+   */
   public Vector<int> $list_of_i32;
+  /**
+   * Original thrift field:-
+   * 4: list<string> list_of_string
+   */
   public Vector<string> $list_of_string;
+  /**
+   * Original thrift field:-
+   * 5: map<string, i32> map_of_string_to_i32
+   */
   public Map<string, int> $map_of_string_to_i32;
+  /**
+   * Original thrift field:-
+   * 6: map<string, struct module.A> map_of_string_to_A
+   */
   public Map<string, A> $map_of_string_to_A;
+  /**
+   * Original thrift field:-
+   * 7: map<string, list<i32>> map_of_string_to_list_of_i32
+   */
   public Map<string, Vector<int>> $map_of_string_to_list_of_i32;
+  /**
+   * Original thrift field:-
+   * 8: map<string, list<struct module.A>> map_of_string_to_list_of_A
+   */
   public Map<string, Vector<A>> $map_of_string_to_list_of_A;
+  /**
+   * Original thrift field:-
+   * 9: map<string, set<i32>> map_of_string_to_set_of_i32
+   */
   public Map<string, Set<int>> $map_of_string_to_set_of_i32;
+  /**
+   * Original thrift field:-
+   * 10: map<string, map<string, i32>> map_of_string_to_map_of_string_to_i32
+   */
   public Map<string, Map<string, int>> $map_of_string_to_map_of_string_to_i32;
+  /**
+   * Original thrift field:-
+   * 11: map<string, map<string, struct module.A>> map_of_string_to_map_of_string_to_A
+   */
   public Map<string, Map<string, A>> $map_of_string_to_map_of_string_to_A;
+  /**
+   * Original thrift field:-
+   * 12: list<set<i32>> list_of_set_of_i32
+   */
   public Vector<Set<int>> $list_of_set_of_i32;
+  /**
+   * Original thrift field:-
+   * 13: list<map<string, list<struct module.A>>> list_of_map_of_string_to_list_of_A
+   */
   public Vector<Map<string, Vector<A>>> $list_of_map_of_string_to_list_of_A;
+  /**
+   * Original thrift field:-
+   * 14: list<map<string, struct module.A>> list_of_map_of_string_to_A
+   */
   public Vector<Map<string, A>> $list_of_map_of_string_to_A;
+  /**
+   * Original thrift field:-
+   * 15: list<struct module.B> list_of_self
+   */
   public Vector<B> $list_of_self;
+  /**
+   * Original thrift field:-
+   * 16: map<string, struct module.B> map_of_string_to_self
+   */
   public Map<string, B> $map_of_string_to_self;
+  /**
+   * Original thrift field:-
+   * 51: struct module.A optional_just_an_A
+   */
   public ?A $optional_just_an_A;
+  /**
+   * Original thrift field:-
+   * 52: set<i32> optional_set_of_i32
+   */
   public ?Set<int> $optional_set_of_i32;
+  /**
+   * Original thrift field:-
+   * 53: list<i32> optional_list_of_i32
+   */
   public ?Vector<int> $optional_list_of_i32;
+  /**
+   * Original thrift field:-
+   * 54: list<string> optional_list_of_string
+   */
   public ?Vector<string> $optional_list_of_string;
+  /**
+   * Original thrift field:-
+   * 55: map<string, i32> optional_map_of_string_to_i32
+   */
   public ?Map<string, int> $optional_map_of_string_to_i32;
+  /**
+   * Original thrift field:-
+   * 56: map<string, struct module.A> optional_map_of_string_to_A
+   */
   public ?Map<string, A> $optional_map_of_string_to_A;
+  /**
+   * Original thrift field:-
+   * 57: map<string, list<i32>> optional_map_of_string_to_list_of_i32
+   */
   public ?Map<string, Vector<int>> $optional_map_of_string_to_list_of_i32;
+  /**
+   * Original thrift field:-
+   * 58: map<string, list<struct module.A>> optional_map_of_string_to_list_of_A
+   */
   public ?Map<string, Vector<A>> $optional_map_of_string_to_list_of_A;
+  /**
+   * Original thrift field:-
+   * 59: map<string, set<i32>> optional_map_of_string_to_set_of_i32
+   */
   public ?Map<string, Set<int>> $optional_map_of_string_to_set_of_i32;
 
   public function __construct(?A $just_an_A = null, ?Set<int> $set_of_i32 = null, ?Vector<int> $list_of_i32 = null, ?Vector<string> $list_of_string = null, ?Map<string, int> $map_of_string_to_i32 = null, ?Map<string, A> $map_of_string_to_A = null, ?Map<string, Vector<int>> $map_of_string_to_list_of_i32 = null, ?Map<string, Vector<A>> $map_of_string_to_list_of_A = null, ?Map<string, Set<int>> $map_of_string_to_set_of_i32 = null, ?Map<string, Map<string, int>> $map_of_string_to_map_of_string_to_i32 = null, ?Map<string, Map<string, A>> $map_of_string_to_map_of_string_to_A = null, ?Vector<Set<int>> $list_of_set_of_i32 = null, ?Vector<Map<string, Vector<A>>> $list_of_map_of_string_to_list_of_A = null, ?Vector<Map<string, A>> $list_of_map_of_string_to_A = null, ?Vector<B> $list_of_self = null, ?Map<string, B> $map_of_string_to_self = null, ?A $optional_just_an_A = null, ?Set<int> $optional_set_of_i32 = null, ?Vector<int> $optional_list_of_i32 = null, ?Vector<string> $optional_list_of_string = null, ?Map<string, int> $optional_map_of_string_to_i32 = null, ?Map<string, A> $optional_map_of_string_to_A = null, ?Map<string, Vector<int>> $optional_map_of_string_to_list_of_i32 = null, ?Map<string, Vector<A>> $optional_map_of_string_to_list_of_A = null, ?Map<string, Set<int>> $optional_map_of_string_to_set_of_i32 = null  ) {
@@ -844,7 +956,7 @@ class B implements \IThriftStruct, \IThriftShapishStruct {
 
   public static function __fromShape(self::TShape $shape): this {
     $me = /* HH_IGNORE_ERROR[4060] */ new static();
-    $me->just_an_A = $shape['just_an_A'] === null ? null : A::__fromShape(nullthrows($shape['just_an_A']));
+    $me->just_an_A = Shapes::idx($shape, 'just_an_A') === null ? null : A::__fromShape(nullthrows(Shapes::idx($shape, 'just_an_A')));
     $me->set_of_i32 = new Set(array_keys($shape['set_of_i32']));
     $me->list_of_i32 = (new Vector($shape['list_of_i32']));
     $me->list_of_string = (new Vector($shape['list_of_string']));
@@ -892,30 +1004,30 @@ class B implements \IThriftStruct, \IThriftShapishStruct {
     $me->map_of_string_to_self = (new Map($shape['map_of_string_to_self']))->map(
       $val90 ==> B::__fromShape($val90),
     );
-    $me->optional_just_an_A = $shape['optional_just_an_A'] === null ? null : A::__fromShape(nullthrows($shape['optional_just_an_A']));
-    $me->optional_set_of_i32 = $shape['optional_set_of_i32'] === null ? null : new Set(array_keys(nullthrows($shape['optional_set_of_i32'])));
-    $me->optional_list_of_i32 = $shape['optional_list_of_i32'] === null ? null : 
-      (new Vector($shape['optional_list_of_i32']));
-    $me->optional_list_of_string = $shape['optional_list_of_string'] === null ? null : 
-      (new Vector($shape['optional_list_of_string']));
-    $me->optional_map_of_string_to_i32 = $shape['optional_map_of_string_to_i32'] === null ? null : 
-      (new Map($shape['optional_map_of_string_to_i32']));
-    $me->optional_map_of_string_to_A = $shape['optional_map_of_string_to_A'] === null ? null : 
-      (new Map($shape['optional_map_of_string_to_A']))->map(
+    $me->optional_just_an_A = Shapes::idx($shape, 'optional_just_an_A') === null ? null : A::__fromShape(nullthrows(Shapes::idx($shape, 'optional_just_an_A')));
+    $me->optional_set_of_i32 = Shapes::idx($shape, 'optional_set_of_i32') === null ? null : new Set(array_keys(nullthrows(Shapes::idx($shape, 'optional_set_of_i32'))));
+    $me->optional_list_of_i32 = Shapes::idx($shape, 'optional_list_of_i32') === null ? null : 
+      (new Vector(Shapes::idx($shape, 'optional_list_of_i32')));
+    $me->optional_list_of_string = Shapes::idx($shape, 'optional_list_of_string') === null ? null : 
+      (new Vector(Shapes::idx($shape, 'optional_list_of_string')));
+    $me->optional_map_of_string_to_i32 = Shapes::idx($shape, 'optional_map_of_string_to_i32') === null ? null : 
+      (new Map(Shapes::idx($shape, 'optional_map_of_string_to_i32')));
+    $me->optional_map_of_string_to_A = Shapes::idx($shape, 'optional_map_of_string_to_A') === null ? null : 
+      (new Map(Shapes::idx($shape, 'optional_map_of_string_to_A')))->map(
         $val91 ==> A::__fromShape($val91),
       );
-    $me->optional_map_of_string_to_list_of_i32 = $shape['optional_map_of_string_to_list_of_i32'] === null ? null : 
-      (new Map($shape['optional_map_of_string_to_list_of_i32']))->map(
+    $me->optional_map_of_string_to_list_of_i32 = Shapes::idx($shape, 'optional_map_of_string_to_list_of_i32') === null ? null : 
+      (new Map(Shapes::idx($shape, 'optional_map_of_string_to_list_of_i32')))->map(
         $val92 ==> (new Vector($val92)),
       );
-    $me->optional_map_of_string_to_list_of_A = $shape['optional_map_of_string_to_list_of_A'] === null ? null : 
-      (new Map($shape['optional_map_of_string_to_list_of_A']))->map(
+    $me->optional_map_of_string_to_list_of_A = Shapes::idx($shape, 'optional_map_of_string_to_list_of_A') === null ? null : 
+      (new Map(Shapes::idx($shape, 'optional_map_of_string_to_list_of_A')))->map(
         $val93 ==> (new Vector($val93))->map(
           $val94 ==> A::__fromShape($val94),
         ),
       );
-    $me->optional_map_of_string_to_set_of_i32 = $shape['optional_map_of_string_to_set_of_i32'] === null ? null : 
-      (new Map($shape['optional_map_of_string_to_set_of_i32']))->map(
+    $me->optional_map_of_string_to_set_of_i32 = Shapes::idx($shape, 'optional_map_of_string_to_set_of_i32') === null ? null : 
+      (new Map(Shapes::idx($shape, 'optional_map_of_string_to_set_of_i32')))->map(
         $val95 ==> new Set(array_keys($val95)),
       );
     return $me;

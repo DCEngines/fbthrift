@@ -104,7 +104,7 @@ class ClientLoadConfig : public loadgen::WeightedLoadConfig {
    */
   template<typename T>
   void makeBigContainer(std::vector<T>& items) {
-    for (int i=0; i < this->pickContainerSize(); i++) {
+    for (auto i = 0u; i < this->pickContainerSize(); i++) {
       T item;
       this->makeBigStruct(item);
       items.push_back(std::move(item));
@@ -141,6 +141,8 @@ class ClientLoadConfig : public loadgen::WeightedLoadConfig {
 
   bool zlib() const;
 
+  std::string server() const;
+  uint32_t port() const;
   std::string SASLPolicy() const;
   std::string SASLServiceTier() const;
   std::string key() const;

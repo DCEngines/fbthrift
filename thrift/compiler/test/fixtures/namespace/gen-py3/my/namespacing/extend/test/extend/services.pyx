@@ -16,12 +16,17 @@ from libcpp.map cimport map as cmap
 from cython.operator cimport dereference as deref
 from cpython.ref cimport PyObject
 from thrift.py3.exceptions cimport cTApplicationException
-from thrift.py3.server cimport ServiceInterface
-from thrift.py3.folly cimport (
+from thrift.py3.server cimport ServiceInterface, RequestContext, Cpp2RequestContext
+from thrift.py3.server import RequestContext
+from folly cimport (
   cFollyPromise,
   cFollyUnit,
   c_unit
 )
+
+cimport folly.futures
+from folly.executor cimport get_executor
+
 cimport my.namespacing.extend.test.extend.types
 import my.namespacing.extend.test.extend.types
 cimport hsmodule.services
@@ -51,28 +56,58 @@ cdef class Promise_bool:
         inst.cPromise = move(cPromise)
         return inst
 
+cdef class ExtendTestServiceInterface(
+    hsmodule.services.HsTestServiceInterface
+):
+    def __cinit__(self):
+        self.interface_wrapper = cExtendTestServiceInterface(
+            <PyObject *> self,
+            get_executor()
+        )
+
+    async def check(
+            self,
+            struct1):
+        raise NotImplementedError("async def check is not implemented")
+
+
+
+
 cdef api void call_cy_ExtendTestService_check(
     object self,
+    Cpp2RequestContext* ctx,
     cFollyPromise[cbool] cPromise,
     unique_ptr[hsmodule.types.cHsFoo] struct1
-) with gil:
+):  
+    cdef ExtendTestServiceInterface iface
+    iface = self
     promise = Promise_bool.create(move(cPromise))
-    arg_struct1 = hsmodule.types.HsFoo.create(hsmodule.types.move(struct1))
-    asyncio.run_coroutine_threadsafe(
+    arg_struct1 = hsmodule.types.HsFoo.create(shared_ptr[hsmodule.types.cHsFoo](struct1.release()))
+    context = None
+    if iface._pass_context_check:
+        context = RequestContext.create(ctx)
+    asyncio.get_event_loop().create_task(
         ExtendTestService_check_coro(
             self,
+            context,
             promise,
-            arg_struct1),
-        loop=self.loop)
+            arg_struct1
+        )
+    )
 
 async def ExtendTestService_check_coro(
     object self,
+    object ctx,
     Promise_bool promise,
     struct1
 ):
     try:
-      result = await self.check(
-          struct1)
+        if ctx is not None:
+            result = await self.check(ctx, 
+                      struct1)
+        else:
+            result = await self.check(
+                      struct1)
     except Exception as ex:
         print(
             "Unexpected error in service handler check:",
@@ -83,17 +118,4 @@ async def ExtendTestService_check_coro(
         ))
     else:
         promise.cPromise.setValue(<cbool> result)
-
-
-cdef class ExtendTestServiceInterface(
-    hsmodule.services.HsTestServiceInterface
-):
-    def __cinit__(self):
-        self.interface_wrapper = cExtendTestServiceInterface(<PyObject *> self)
-
-    async def check(
-            self,
-            struct1):
-        raise NotImplementedError("async def check is not implemented")
-
 

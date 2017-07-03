@@ -47,6 +47,22 @@ std::map<int32_t, std::string> getRandomMap() {
   return m;
 }
 
+folly::sorted_vector_set<int32_t> getRandomFollySet() {
+  folly::sorted_vector_set<int32_t> s;
+  for (int i = 0; i < kNumOfInserts; ++i) {
+    s.insert(i);
+  }
+  return s;
+}
+
+folly::sorted_vector_map<int32_t, std::string> getRandomFollyMap() {
+  folly::sorted_vector_map<int32_t, std::string> m;
+  for (int i = 0; i < kNumOfInserts; ++i) {
+    m[std::move(i)] = std::to_string(i);
+  }
+  return m;
+}
+
 void buildRandomStructA(cpp2::StructA& obj) {
   obj.fieldA = folly::Random::rand32(rng_) % 2;
   obj.fieldB = folly::Random::rand32(rng_);
@@ -73,7 +89,83 @@ void buildRandomStructA(cpp2::StructA& obj) {
   }
 }
 
-BENCHMARK(Deserialization, iters) {
+void buildRandomStructB(cpp2::StructB& obj) {
+  obj.fieldA = folly::Random::rand32(rng_) % 2;
+  obj.fieldB = folly::Random::rand32(rng_);
+  obj.fieldC = std::to_string(folly::Random::rand32(rng_));
+  obj.fieldD = getRandomVector();
+  obj.fieldE = getRandomFollySet();
+  obj.fieldF = getRandomFollyMap();
+
+  for (int32_t i = 0; i < kNumOfInserts; ++i) {
+    std::vector<std::vector<int32_t>> g1;
+    folly::sorted_vector_set<folly::sorted_vector_set<int32_t>> h1;
+    std::vector<folly::sorted_vector_set<int32_t>> j1;
+    folly::sorted_vector_set<std::vector<int32_t>> j2;
+    for (int32_t j = 0; j < kNumOfInserts; ++j) {
+      g1.push_back(getRandomVector());
+      h1.insert(getRandomFollySet());
+      j1.push_back(getRandomFollySet());
+      j2.insert(getRandomVector());
+    }
+    obj.fieldG.push_back(g1);
+    obj.fieldH.insert(h1);
+    obj.fieldI[std::move(getRandomFollyMap())] = getRandomFollyMap();
+    obj.fieldJ[std::move(j1)] = j2;
+  }
+}
+
+BENCHMARK(CompactSerialization_custom_container, iters) {
+  using serializer = apache::thrift::CompactSerializer;
+
+  folly::BenchmarkSuspender braces; // stop the clock by default
+
+  for (size_t i = 0; i < iters; ++i) {
+    // Prep, untimed:
+    cpp2::StructB obj;
+    buildRandomStructB(obj);
+
+    // Serialize, timed:
+    braces.dismissing([&] { serializer::serialize<folly::IOBufQueue>(obj); });
+  }
+}
+
+BENCHMARK(CompactDeserialization_custom_container, iters) {
+  using serializer = apache::thrift::CompactSerializer;
+
+  folly::BenchmarkSuspender braces; // stop the clock by default
+
+  for (size_t i = 0; i < iters; ++i) {
+    // Prep, untimed:
+    cpp2::StructB obj;
+    buildRandomStructB(obj);
+
+    // Serialize, untimed:
+    auto buf = serializer::serialize<folly::IOBufQueue>(obj).move();
+    buf->coalesce(); // so we can ignore serialization artifacts later
+
+    // Deserialize, timed:
+    cpp2::StructB obj2;
+    braces.dismissing([&] { serializer::deserialize(buf.get(), obj2); });
+  }
+}
+
+BENCHMARK(CompactSerialization, iters) {
+  using serializer = apache::thrift::CompactSerializer;
+
+  folly::BenchmarkSuspender braces; // stop the clock by default
+
+  for (size_t i = 0; i < iters; ++i) {
+    // Prep, untimed:
+    cpp2::StructA obj;
+    buildRandomStructA(obj);
+
+    // Serialize, timed:
+    braces.dismissing([&] { serializer::serialize<folly::IOBufQueue>(obj); });
+  }
+}
+
+BENCHMARK(CompactDeserialization, iters) {
   using serializer = apache::thrift::CompactSerializer;
 
   folly::BenchmarkSuspender braces; // stop the clock by default
@@ -95,6 +187,41 @@ BENCHMARK(Deserialization, iters) {
   }
 }
 
+BENCHMARK(JsonSerialization, iters) {
+  using serializer = apache::thrift::SimpleJSONSerializer;
+
+  folly::BenchmarkSuspender braces; // stop the clock by default
+
+  for (size_t i = 0; i < iters; ++i) {
+    // Prep, untimed:
+    cpp2::StructA obj;
+    buildRandomStructA(obj);
+
+    // Serialize, timed:
+    braces.dismissing([&] { serializer::serialize<folly::IOBufQueue>(obj); });
+  }
+}
+
+BENCHMARK(JsonDeserialization, iters) {
+  using serializer = apache::thrift::SimpleJSONSerializer;
+
+  folly::BenchmarkSuspender braces; // stop the clock by default
+
+  for (size_t i = 0; i < iters; ++i) {
+    // Prep, untimed:
+    cpp2::StructA obj;
+    buildRandomStructA(obj);
+
+    // Serialize, untimed:
+    auto buf = serializer::serialize<folly::IOBufQueue>(obj).move();
+    buf->coalesce(); // so we can ignore serialization artifacts later
+
+    // Deserialize, timed:
+    cpp2::StructA obj2;
+    braces.dismissing([&] { serializer::deserialize(buf.get(), obj2); });
+  }
+}
+
 int main(int argc, char** argv) {
   folly::init(&argc, &argv);
   folly::runBenchmarks();
@@ -105,6 +232,11 @@ int main(int argc, char** argv) {
 ============================================================================
 thrift/test/DeserializationBench.cpp            relative  time/iter  iters/s
 ============================================================================
-Deserialization                                               1.36s  734.51m
+CompactSerialization_custom_container                         2.76s  362.93m
+CompactDeserialization_custom_container                    728.59ms     1.37
+CompactSerialization                                          2.71s  368.92m
+CompactDeserialization                                     760.46ms     1.31
+JsonSerialization                                             6.02s  166.06m
+JsonDeserialization                                          11.17s   89.49m
 ============================================================================
 */

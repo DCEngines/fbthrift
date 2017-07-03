@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2014-present Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,38 +51,61 @@ struct SortedTableLayout : public ArrayLayout<T, Item> {
     });
   }
 
-  FieldPosition layoutItems(LayoutRoot& root,
+  static void ensureDistinctKeys(
+      const typename KeyExtractor::KeyType& key1,
+      const typename KeyExtractor::KeyType& key2) {
+    if (!(key1 < key2)) {
+      throw std::domain_error("Input collection is not distinct");
+    }
+  }
+
+  FieldPosition layoutItems(
+      LayoutRoot& root,
       const T& coll,
-                            LayoutPosition self,
-                            FieldPosition pos,
+      LayoutPosition /* self */,
+      FieldPosition pos,
       LayoutPosition write,
       FieldPosition writeStep) final {
     std::vector<const Item*> index;
     maybeIndex(coll, index);
 
     FieldPosition noField; // not really used
+    const typename KeyExtractor::KeyType* lastKey = nullptr;
     if (index.empty()) {
       // either the collection was already sorted or it's empty
       for (auto& item : coll) {
         root.layoutField(write, noField, this->itemField, item);
         write = write(writeStep);
+        const typename KeyExtractor::KeyType* itemKey =
+            &KeyExtractor::getKey(item);
+        if (lastKey) {
+          ensureDistinctKeys(*lastKey, *itemKey);
+        }
+        lastKey = itemKey;
       }
     } else {
       // collection was non-empty and non-sorted, needs indirection table.
       for (auto ptr : index) {
-          root.layoutField(write, noField, this->itemField, *ptr);
-          write = write(writeStep);
+        root.layoutField(write, noField, this->itemField, *ptr);
+        write = write(writeStep);
+        const typename KeyExtractor::KeyType* itemKey =
+            &KeyExtractor::getKey(*ptr);
+        if (lastKey) {
+          ensureDistinctKeys(*lastKey, *itemKey);
+        }
+        lastKey = itemKey;
       }
     }
 
     return pos;
   }
 
-  void freezeItems(FreezeRoot& root,
-                   const T& coll,
-                   FreezePosition self,
-                   FreezePosition write,
-                   FieldPosition writeStep) const final {
+  void freezeItems(
+      FreezeRoot& root,
+      const T& coll,
+      FreezePosition /* self */,
+      FreezePosition write,
+      FieldPosition writeStep) const final {
     std::vector<const Item*> index;
     maybeIndex(coll, index);
 
@@ -113,6 +136,8 @@ struct SortedTableLayout : public ArrayLayout<T, Item> {
 
     typedef typename Base::View::iterator iterator;
 
+    void operator[](size_t) = delete;
+
     iterator lower_bound(const KeyView& key) const {
       return std::lower_bound(
           this->begin(), this->end(), key, [](ItemView a, KeyView b) {
@@ -128,11 +153,12 @@ struct SortedTableLayout : public ArrayLayout<T, Item> {
     }
 
     std::pair<iterator, iterator> equal_range(const KeyView& key) const {
-      auto begin = lower_bound(key);
-      if (begin != this->end() && KeyExtractor::getViewKey(*begin) == key) {
-        return make_pair(begin, begin + 1);
+      auto found = lower_bound(key);
+      if (found != this->end() && KeyExtractor::getViewKey(*found) == key) {
+        auto next = found;
+        return std::make_pair(found, ++next);
       } else {
-        return make_pair(begin, begin);
+        return std::make_pair(found, found);
       }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Facebook, Inc.
+ * Copyright 2004-present Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ class StreamingTest : public testing::Test {
 TEST_F(StreamingTest, Callback) {
   auto client = newClient();
 
-  int n = 0;
+  size_t n = 0;
   client->streamingMethod([&n](ClientReceiveState&& state) mutable {
       if (n < kCount) {
         EXPECT_FALSE(state.isStreamEnd());
@@ -102,15 +102,14 @@ TEST_F(StreamingTest, Observable) {
         EXPECT_EQ(x, n);
         n++;
       },
-      [&n](Error e) {
+      [](Error) {
         // onError
         FAIL();
       },
       [&n]() {
         // onCompleted
         EXPECT_EQ(n, kCount);
-      }
-  ));
+      }));
 
   eb.loop();
   EXPECT_EQ(n, kCount);
@@ -134,7 +133,7 @@ TEST_F(StreamingTest, Exception) {
         EXPECT_TRUE(e.is_compatible_with<StreamingException>());
         error = true;
       },
-      [&n]() {
+      []() {
         // onCompleted
         FAIL();
       }
@@ -167,7 +166,7 @@ TEST_F(StreamingTest, GlobalTimeout) {
         }));
         error = true;
       },
-      [&n]() {
+      []() {
         // onCompleted
         FAIL();
       }
@@ -200,7 +199,7 @@ TEST_F(StreamingTest, ChunkTimeout) {
         }));
         error = true;
       },
-      [&n]() {
+      []() {
         // onCompleted
         FAIL();
       }

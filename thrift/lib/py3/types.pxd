@@ -1,8 +1,10 @@
-from thrift.py3.exceptions cimport TException as Exception
+from folly.iobuf cimport IOBuf
+from libc.stdint cimport uint32_t
 
 
 cdef class Struct:
-    pass
+    cdef bytes _serialize(self, proto)
+    cdef uint32_t _deserialize(self, const IOBuf* buf, proto)
 
 
 cdef class BadEnum:

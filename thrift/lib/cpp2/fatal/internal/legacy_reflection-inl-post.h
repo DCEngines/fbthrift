@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Facebook, Inc.
+ * Copyright 2016-present Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,21 @@ void registering_datatype(
   schema.names[dt.name] = rid;
   f(dt);
 }
+
+template <typename T>
+struct deref {
+  using type = T;
+};
+template <typename T, typename D>
+struct deref<std::unique_ptr<T, D>> : deref<T> {};
+template <typename T>
+struct deref<std::shared_ptr<T>> : deref<T> {};
+template <typename T>
+struct deref<std::shared_ptr<T const>> : deref<T> {};
+template <typename T>
+using deref_t = folly::_t<deref<T>>;
+template <typename T>
+using deref_decay_t = deref_t<std::decay_t<T>>;
 
 // helper
 //
@@ -196,16 +211,25 @@ struct impl<T, type_class::structure> {
         fatal::indexed<MemberInfo, Index>,
         schema_t& schema,
         datatype_t& dt) {
-      using type = typename MemberInfo::type;
+      using getter = typename MemberInfo::getter;
+      using type = deref_decay_t<decltype(getter::ref(std::declval<T&>()))>;
       using type_class = typename MemberInfo::type_class;
       using type_helper = helper<type, type_class>;
       using member_name = typename MemberInfo::name;
+      using member_annotations = typename MemberInfo::annotations::map;
       type_helper::register_into(schema);
       auto& f = dt.fields[MemberInfo::id::value];
       f.isRequired = MemberInfo::optional::value != optionality::optional;
       f.type = type_helper::id();
       f.name = fatal::to_instance<std::string, member_name>();
       f.order = Index;
+      f.__isset.annotations = fatal::size<member_annotations>() > 0;
+      fatal::foreach<member_annotations>([&](auto tag) {
+        using annotation = decltype(fatal::tag_type(tag));
+        f.annotations.emplace(
+            fatal::to_instance<std::string, typename annotation::key>(),
+            fatal::to_instance<std::string, typename annotation::value>());
+      });
     }
   };
   FATAL_S(rkind, "struct");
@@ -234,7 +258,8 @@ struct impl<T, type_class::variant> {
         fatal::indexed<MemberInfo, Index>,
         schema_t& schema,
         datatype_t& dt) {
-      using type = typename MemberInfo::type;
+      typename MemberInfo::getter getter;
+      using type = deref_decay_t<decltype(getter(std::declval<T&>()))>;
       using type_class = typename MemberInfo::metadata::type_class;
       using type_helper = helper<type, type_class>;
       using member_name = typename MemberInfo::metadata::name;

@@ -20,15 +20,20 @@ class Schema;
 
 class ComplexUnion;
 
+class FinalComplexUnion;
+
+typedef std::map<int16_t, std::string>  containerTypedef;
+
 class ComplexUnion : public apache::thrift::TStructType<ComplexUnion> {
  public:
   enum class Type {
     __EMPTY__ = 0,
     intValue = 1,
-    stringValue = 2,
-    intListValue = 3,
-    stringListValue = 4,
-    stringRef = 5,
+    stringValue = 5,
+    intListValue = 2,
+    stringListValue = 3,
+    typedefValue = 9,
+    stringRef = 14,
   };
 
   ComplexUnion() : type_(Type::__EMPTY__) {}
@@ -41,28 +46,35 @@ class ComplexUnion : public apache::thrift::TStructType<ComplexUnion> {
   }
   template <typename T__ThriftWrappedArgument__Ctor>
   explicit ComplexUnion(
-    ::apache::thrift::detail::argument_wrapper<2, T__ThriftWrappedArgument__Ctor> arg):
+    ::apache::thrift::detail::argument_wrapper<5, T__ThriftWrappedArgument__Ctor> arg):
     type_(Type::__EMPTY__)
   {
     set_stringValue(arg.move());
   }
   template <typename T__ThriftWrappedArgument__Ctor>
   explicit ComplexUnion(
-    ::apache::thrift::detail::argument_wrapper<3, T__ThriftWrappedArgument__Ctor> arg):
+    ::apache::thrift::detail::argument_wrapper<2, T__ThriftWrappedArgument__Ctor> arg):
     type_(Type::__EMPTY__)
   {
     set_intListValue(arg.move());
   }
   template <typename T__ThriftWrappedArgument__Ctor>
   explicit ComplexUnion(
-    ::apache::thrift::detail::argument_wrapper<4, T__ThriftWrappedArgument__Ctor> arg):
+    ::apache::thrift::detail::argument_wrapper<3, T__ThriftWrappedArgument__Ctor> arg):
     type_(Type::__EMPTY__)
   {
     set_stringListValue(arg.move());
   }
   template <typename T__ThriftWrappedArgument__Ctor>
   explicit ComplexUnion(
-    ::apache::thrift::detail::argument_wrapper<5, T__ThriftWrappedArgument__Ctor> arg):
+    ::apache::thrift::detail::argument_wrapper<9, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_typedefValue(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  explicit ComplexUnion(
+    ::apache::thrift::detail::argument_wrapper<14, T__ThriftWrappedArgument__Ctor> arg):
     type_(Type::__EMPTY__)
   {
     set_stringRef(arg.move());
@@ -85,6 +97,10 @@ class ComplexUnion : public apache::thrift::TStructType<ComplexUnion> {
       }
       case Type::stringListValue: {
         set_stringListValue(rhs.value_.stringListValue);
+        break;
+      }
+      case Type::typedefValue: {
+        set_typedefValue(rhs.value_.typedefValue);
         break;
       }
       case Type::stringRef: {
@@ -116,6 +132,10 @@ class ComplexUnion : public apache::thrift::TStructType<ComplexUnion> {
         set_stringListValue(rhs.value_.stringListValue);
         break;
       }
+      case Type::typedefValue: {
+        set_typedefValue(rhs.value_.typedefValue);
+        break;
+      }
       case Type::stringRef: {
         set_stringRef(rhs.value_.stringRef);
         break;
@@ -143,6 +163,10 @@ class ComplexUnion : public apache::thrift::TStructType<ComplexUnion> {
       }
       case Type::stringListValue: {
         set_stringListValue(std::move(rhs.value_.stringListValue));
+        break;
+      }
+      case Type::typedefValue: {
+        set_typedefValue(std::move(rhs.value_.typedefValue));
         break;
       }
       case Type::stringRef: {
@@ -175,6 +199,10 @@ class ComplexUnion : public apache::thrift::TStructType<ComplexUnion> {
         set_stringListValue(std::move(rhs.value_.stringListValue));
         break;
       }
+      case Type::typedefValue: {
+        set_typedefValue(std::move(rhs.value_.typedefValue));
+        break;
+      }
       case Type::stringRef: {
         set_stringRef(std::move(rhs.value_.stringRef));
         break;
@@ -205,6 +233,10 @@ class ComplexUnion : public apache::thrift::TStructType<ComplexUnion> {
         using namespace std; value_.stringListValue.~vector<std::string> ();
         break;
       }
+      case Type::typedefValue: {
+        value_.typedefValue.~containerTypedef();
+        break;
+      }
       case Type::stringRef: {
         using namespace std; value_.stringRef.~string();
         break;
@@ -222,6 +254,7 @@ class ComplexUnion : public apache::thrift::TStructType<ComplexUnion> {
     std::string stringValue;
     std::vector<int64_t>  intListValue;
     std::vector<std::string>  stringListValue;
+    containerTypedef typedefValue;
     std::string stringRef;
     
     storage_type() {}
@@ -248,6 +281,11 @@ class ComplexUnion : public apache::thrift::TStructType<ComplexUnion> {
       }
       case Type::stringListValue: {
         return value_.stringListValue == rhs.value_.stringListValue;
+
+        break;
+      }
+      case Type::typedefValue: {
+        return value_.typedefValue == rhs.value_.typedefValue;
 
         break;
       }
@@ -284,6 +322,11 @@ class ComplexUnion : public apache::thrift::TStructType<ComplexUnion> {
       }
       case Type::stringListValue: {
         return value_.stringListValue < rhs.value_.stringListValue;
+
+        break;
+      }
+      case Type::typedefValue: {
+        return value_.typedefValue < rhs.value_.typedefValue;
 
         break;
       }
@@ -326,6 +369,13 @@ class ComplexUnion : public apache::thrift::TStructType<ComplexUnion> {
   }
 
   template<typename... T>
+  void set_typedefValue(T&&... t) {
+    __clear();
+    type_ = Type::typedefValue;
+    new (&value_.typedefValue) containerTypedef(std::forward<T>(t)...);
+  }
+
+  template<typename... T>
   void set_stringRef(T&&... t) {
     __clear();
     type_ = Type::stringRef;
@@ -350,6 +400,11 @@ class ComplexUnion : public apache::thrift::TStructType<ComplexUnion> {
   const std::vector<std::string> & get_stringListValue() const {
     assert(type_ == Type::stringListValue);
     return value_.stringListValue;
+  }
+
+  const containerTypedef& get_typedefValue() const {
+    assert(type_ == Type::typedefValue);
+    return value_.typedefValue;
   }
 
   const std::string& get_stringRef() const {
@@ -377,6 +432,11 @@ class ComplexUnion : public apache::thrift::TStructType<ComplexUnion> {
     return value_.stringListValue;
   }
 
+  containerTypedef& mutable_typedefValue() {
+    assert(type_ == Type::typedefValue);
+    return value_.typedefValue;
+  }
+
   std::string& mutable_stringRef() {
     assert(type_ == Type::stringRef);
     return value_.stringRef;
@@ -402,9 +462,228 @@ class ComplexUnion : public apache::thrift::TStructType<ComplexUnion> {
     return std::move(value_.stringListValue);
   }
 
+  containerTypedef move_typedefValue() {
+    assert(type_ == Type::typedefValue);
+    return std::move(value_.typedefValue);
+  }
+
   std::string move_stringRef() {
     assert(type_ == Type::stringRef);
     return std::move(value_.stringRef);
+  }
+
+  Type getType() const { return type_; }
+
+  uint32_t read(apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(apache::thrift::protocol::TProtocol* oprot) const;
+ private:
+  Type type_;
+  storage_type value_;
+
+};
+
+class FinalComplexUnion : public apache::thrift::TStructType<FinalComplexUnion> {
+ public:
+  enum class Type {
+    __EMPTY__ = 0,
+    thingOne = 1,
+    thingTwo = 2,
+  };
+
+  FinalComplexUnion() : type_(Type::__EMPTY__) {}
+  template <typename T__ThriftWrappedArgument__Ctor>
+  explicit FinalComplexUnion(
+    ::apache::thrift::detail::argument_wrapper<1, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_thingOne(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  explicit FinalComplexUnion(
+    ::apache::thrift::detail::argument_wrapper<2, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_thingTwo(arg.move());
+  }
+  FinalComplexUnion(const FinalComplexUnion& rhs) : type_(Type::__EMPTY__) {
+    if (this == &rhs) { return; }
+    if (rhs.type_ == Type::__EMPTY__) { return; }
+    switch (rhs.type_) {
+      case Type::thingOne: {
+        set_thingOne(rhs.value_.thingOne);
+        break;
+      }
+      case Type::thingTwo: {
+        set_thingTwo(rhs.value_.thingTwo);
+        break;
+      }
+      default: assert(false);
+    }
+  }
+
+  FinalComplexUnion& operator=(const FinalComplexUnion& rhs) {
+    if (this == &rhs) { return *this; }
+    __clear();
+    if (rhs.type_ == Type::__EMPTY__) { return *this; }
+    switch (rhs.type_) {
+      case Type::thingOne: {
+        set_thingOne(rhs.value_.thingOne);
+        break;
+      }
+      case Type::thingTwo: {
+        set_thingTwo(rhs.value_.thingTwo);
+        break;
+      }
+      default: assert(false);
+    }
+    return *this;
+  }
+
+  FinalComplexUnion(FinalComplexUnion&& rhs) : type_(Type::__EMPTY__) {
+    if (this == &rhs) { return; }
+    if (rhs.type_ == Type::__EMPTY__) { return; }
+    switch (rhs.type_) {
+      case Type::thingOne: {
+        set_thingOne(std::move(rhs.value_.thingOne));
+        break;
+      }
+      case Type::thingTwo: {
+        set_thingTwo(std::move(rhs.value_.thingTwo));
+        break;
+      }
+      default: assert(false);
+    }
+    rhs.__clear();
+  }
+
+  FinalComplexUnion& operator=(FinalComplexUnion&& rhs) {
+    if (this == &rhs) { return *this; }
+    __clear();
+    if (rhs.type_ == Type::__EMPTY__) { return *this; }
+    switch (rhs.type_) {
+      case Type::thingOne: {
+        set_thingOne(std::move(rhs.value_.thingOne));
+        break;
+      }
+      case Type::thingTwo: {
+        set_thingTwo(std::move(rhs.value_.thingTwo));
+        break;
+      }
+      default: assert(false);
+    }
+    rhs.__clear();
+    return *this;
+  }
+
+
+  void __clear() {
+    if (type_ == Type::__EMPTY__) { return; }
+    switch (type_) {
+      case Type::thingOne: {
+        using namespace std; value_.thingOne.~string();
+        break;
+      }
+      case Type::thingTwo: {
+        using namespace std; value_.thingTwo.~string();
+        break;
+      }
+      default: assert(false);
+    }
+    type_ = Type::__EMPTY__;
+  }
+  ~FinalComplexUnion() throw() {
+    __clear();
+  }
+
+  union storage_type {
+    std::string thingOne;
+    std::string thingTwo;
+    
+    storage_type() {}
+    ~storage_type() {}
+  };
+
+  bool operator==(const FinalComplexUnion& rhs) const {
+    if (type_ != rhs.type_) { return false; }
+    switch (type_) {
+      case Type::thingOne: {
+        return value_.thingOne == rhs.value_.thingOne;
+
+        break;
+      }
+      case Type::thingTwo: {
+        return value_.thingTwo == rhs.value_.thingTwo;
+
+        break;
+      }
+      default: return true;
+    }
+  }
+
+  bool operator!=(const FinalComplexUnion& rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator<(const FinalComplexUnion& rhs) const {
+    if (type_ != rhs.type_) return type_ < rhs.type_;
+    switch (type_) {
+      case Type::thingOne: {
+        return value_.thingOne < rhs.value_.thingOne;
+
+        break;
+      }
+      case Type::thingTwo: {
+        return value_.thingTwo < rhs.value_.thingTwo;
+
+        break;
+      }
+      default: return false;
+    }
+    return false;
+  }
+
+  template<typename... T>
+  void set_thingOne(T&&... t) {
+    __clear();
+    type_ = Type::thingOne;
+    new (&value_.thingOne) std::string(std::forward<T>(t)...);
+  }
+
+  template<typename... T>
+  void set_thingTwo(T&&... t) {
+    __clear();
+    type_ = Type::thingTwo;
+    new (&value_.thingTwo) std::string(std::forward<T>(t)...);
+  }
+
+  const std::string& get_thingOne() const {
+    assert(type_ == Type::thingOne);
+    return value_.thingOne;
+  }
+
+  const std::string& get_thingTwo() const {
+    assert(type_ == Type::thingTwo);
+    return value_.thingTwo;
+  }
+
+  std::string& mutable_thingOne() {
+    assert(type_ == Type::thingOne);
+    return value_.thingOne;
+  }
+
+  std::string& mutable_thingTwo() {
+    assert(type_ == Type::thingTwo);
+    return value_.thingTwo;
+  }
+
+  std::string move_thingOne() {
+    assert(type_ == Type::thingOne);
+    return std::move(value_.thingOne);
+  }
+
+  std::string move_thingTwo() {
+    assert(type_ == Type::thingTwo);
+    return std::move(value_.thingTwo);
   }
 
   Type getType() const { return type_; }

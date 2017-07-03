@@ -13,6 +13,7 @@
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
+#include <thrift/lib/cpp2/GeneratedSerializationCodeHelper.h>
 
 namespace cpp2 {
 
@@ -128,14 +129,16 @@ void MyServicePrioChildAsyncProcessor::throw_wrapped_pang(std::unique_ptr<apache
 }
 
 template <typename Protocol_>
-void MyServicePrioChildAsyncClient::pangT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
+void MyServicePrioChildAsyncClient::pangT(Protocol_* prot, bool useSync, apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(getChannel()->getProtocolId());
   header->setHeaders(rpcOptions.releaseWriteHeaders());
   connectionContext_->setRequestHeader(header.get());
   std::unique_ptr<apache::thrift::ContextStack> ctx = this->getContextStack(this->getServiceName(), "MyServicePrioChild.pang", connectionContext_.get());
   MyServicePrioChild_pang_pargs args;
-  apache::thrift::clientSendT<false>(prot, rpcOptions, std::move(callback), std::move(ctx), header, channel_.get(), args, "pang", [](Protocol_* p, MyServicePrioChild_pang_pargs& a) { a.write(p); }, [](Protocol_* p, MyServicePrioChild_pang_pargs& a) { return a.serializedSizeZC(p); });
+  auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
+  auto writer = [&](Protocol_* p) { args.write(p); };
+  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), std::move(ctx), header, channel_.get(), "pang", writer, sizer, false, useSync);
   connectionContext_->setRequestHeader(nullptr);
 }
 
@@ -194,7 +197,7 @@ template <typename Protocol_>
 void MyServicePrioChildAsyncClient::recv_pangT(Protocol_* prot, ::apache::thrift::ClientReceiveState& state) {
   auto ew = recv_wrapped_pangT(prot, state);
   if (ew) {
-    ew.throwException();
+    ew.throw_exception();
   }
 }
 

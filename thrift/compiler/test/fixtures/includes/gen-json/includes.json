@@ -1,0 +1,33 @@
+{
+  "thrift_module" : "includes",
+  "constants" : {
+    "IncludedConstant" : {
+      "lineno" : 10,
+      "value" : 42,
+      "type_enum" : "I64",
+      "spec_args" : null
+    }
+  },
+  "typedefs" : {
+    "IncludedInt64" : {
+      "lineno" : 8,
+      "type_enum" : "I64",
+      "spec_args" : null
+    }
+  },
+  "structs" : {
+    "Included" : {
+      "lineno" : 4,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "MyIntField" : {
+          "type_enum" : "I64",
+          "spec_args" : null,
+          "required" : true,
+          "default_value" : 0
+        }
+      }
+    }
+  }
+}

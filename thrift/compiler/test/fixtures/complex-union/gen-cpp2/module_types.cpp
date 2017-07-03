@@ -42,6 +42,11 @@ void ComplexUnion::__clear() {
       destruct(value_.stringListValue);
       break;
     }
+    case Type::typedefValue:
+    {
+      destruct(value_.typedefValue);
+      break;
+    }
     case Type::stringRef:
     {
       destruct(value_.stringRef);
@@ -62,32 +67,30 @@ bool ComplexUnion::operator==(const ComplexUnion& rhs) const {
     case Type::intValue:
     {
       return value_.intValue == rhs.value_.intValue;
-      break;
     }
     case Type::stringValue:
     {
       return value_.stringValue == rhs.value_.stringValue;
-      break;
     }
     case Type::intListValue:
     {
       return value_.intListValue == rhs.value_.intListValue;
-      break;
     }
     case Type::stringListValue:
     {
       return value_.stringListValue == rhs.value_.stringListValue;
-      break;
+    }
+    case Type::typedefValue:
+    {
+      return value_.typedefValue == rhs.value_.typedefValue;
     }
     case Type::stringRef:
     {
       return *value_.stringRef == *rhs.value_.stringRef;
-      break;
     }
     default:
     {
       return true;
-      break;
     }
   }
 }
@@ -106,6 +109,68 @@ template uint32_t ComplexUnion::read<>(apache::thrift::CompactProtocolReader*);
 template uint32_t ComplexUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t ComplexUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ComplexUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+} // cpp2
+namespace apache { namespace thrift {
+
+}} // apache::thrift
+namespace cpp2 {
+
+void FinalComplexUnion::__clear() {
+  // clear all fields
+  if (type_ == Type::__EMPTY__) { return; }
+  switch(type_) {
+    case Type::thingOne:
+    {
+      destruct(value_.thingOne);
+      break;
+    }
+    case Type::thingTwo:
+    {
+      destruct(value_.thingTwo);
+      break;
+    }
+    default:
+    {
+      assert(false);
+      break;
+    }
+  }
+  type_ = Type::__EMPTY__;
+}
+
+bool FinalComplexUnion::operator==(const FinalComplexUnion& rhs) const {
+  if (type_ != rhs.type_) { return false; }
+  switch(type_) {
+    case Type::thingOne:
+    {
+      return value_.thingOne == rhs.value_.thingOne;
+    }
+    case Type::thingTwo:
+    {
+      return value_.thingTwo == rhs.value_.thingTwo;
+    }
+    default:
+    {
+      return true;
+    }
+  }
+}
+
+void swap(FinalComplexUnion& a, FinalComplexUnion& b) {
+  FinalComplexUnion temp(std::move(a));
+  a = std::move(b);
+  b = std::move(temp);
+}
+
+template uint32_t FinalComplexUnion::read<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t FinalComplexUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t FinalComplexUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t FinalComplexUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t FinalComplexUnion::read<>(apache::thrift::CompactProtocolReader*);
+template uint32_t FinalComplexUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t FinalComplexUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t FinalComplexUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 } // cpp2
 namespace apache { namespace thrift {

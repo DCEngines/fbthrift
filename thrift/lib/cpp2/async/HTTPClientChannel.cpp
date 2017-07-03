@@ -42,7 +42,7 @@ using apache::thrift::transport::TTransportException;
 using proxygen::WheelTimerInstance;
 
 namespace {
-const std::chrono::seconds kDefaultTransactionTimeout(60);
+const std::chrono::milliseconds kDefaultTransactionTimeout(500);
 }
 
 namespace apache {
@@ -74,23 +74,28 @@ HTTPClientChannel::HTTPClientChannel(
     std::unique_ptr<proxygen::HTTPCodec> codec)
     : evb_(transport->getEventBase()),
       timeout_(kDefaultTransactionTimeout),
-      timer_(timeout_, evb_),
       closeCallback_(nullptr) {
   auto localAddress = transport->getLocalAddress();
   auto peerAddress = transport->getPeerAddress();
 
   httpSession_ = new proxygen::HTTPUpstreamSession(
-    WheelTimerInstance(timer_),
-    std::move(transport),
-    localAddress,
-    peerAddress,
-    std::move(codec),
-    wangle::TransportInfo(),
-    this);
+      WheelTimerInstance(timeout_, evb_),
+      std::move(transport),
+      localAddress,
+      peerAddress,
+      std::move(codec),
+      wangle::TransportInfo(),
+      this);
 }
 
 HTTPClientChannel::~HTTPClientChannel() {
   closeNow();
+}
+
+void HTTPClientChannel::setMaxPendingRequests(uint32_t num) {
+  if (httpSession_) {
+    httpSession_->setMaxConcurrentOutgoingStreams(num);
+  }
 }
 
 // apache::thrift::ClientChannel methods
@@ -100,44 +105,42 @@ bool HTTPClientChannel::good() {
   return transport && transport->good();
 }
 
+ClientChannel::SaturationStatus HTTPClientChannel::getSaturationStatus() {
+  if (httpSession_) {
+    return SaturationStatus(
+        httpSession_->getNumOutgoingStreams(),
+        httpSession_->getMaxConcurrentOutgoingStreams());
+  } else {
+    return SaturationStatus();
+  }
+}
+
 void HTTPClientChannel::closeNow() {
   if (httpSession_) {
-    httpSession_->setInfoCallback(nullptr);
-    httpSession_->shutdownTransport();
+    httpSession_->dropConnection();
     httpSession_ = nullptr;
-    timer_ = WheelTimerInstance();
   }
 }
 
 void HTTPClientChannel::attachEventBase(EventBase* eventBase) {
-  timer_ = WheelTimerInstance(kDefaultTransactionTimeout, eventBase);
+  assert(eventBase->isInEventBaseThread());
   if (httpSession_) {
-    auto trans = httpSession_->getTransport();
-    if (trans) {
-      trans->attachEventBase(eventBase);
-    }
+    httpSession_->attachEventBase(eventBase, kDefaultTransactionTimeout);
   }
   evb_ = eventBase;
 }
 
 void HTTPClientChannel::detachEventBase() {
-  // The two way callback must not exist right now.  It schedules a
-  // timeout, which is cancelled in the destructor, and the old call
-  // to timer_->detachEventBase would have FATAL'd.
-  timer_ = WheelTimerInstance();
+  assert(evb_->isInEventBaseThread());
+  assert(isDetachable());
   if (httpSession_) {
-    auto trans = httpSession_->getTransport();
-    if (trans) {
-      trans->detachEventBase();
-    }
+    httpSession_->detachEventBase();
   }
   evb_ = nullptr;
 }
 
 bool HTTPClientChannel::isDetachable() {
-  auto timer = timer_.getWheelTimer();
-  return timer && timer->isDetachable() &&
-         (!httpSession_ || httpSession_->getTransport()->isDetachable());
+  return !httpSession_ || httpSession_->isDetachable();
 }
 
 // end apache::thrift::ClientChannel methods
@@ -231,8 +234,8 @@ uint32_t HTTPClientChannel::sendRequest_(
     return -1;
   }
 
-  if (timeout_.count()) {
-    txn->setIdleTimeout(timeout_);
+  if (timeout.count()) {
+    txn->setIdleTimeout(timeout);
   }
   auto streamId = txn->getID();
 
@@ -240,8 +243,6 @@ uint32_t HTTPClientChannel::sendRequest_(
   addRpcOptionHeaders(header.get(), rpcOptions);
 
   auto msg = buildHTTPMessage(header.get());
-
-  httpCallback->startTimer(*timer_.getWheelTimer(), timeout);
 
   txn->sendHeaders(msg);
   txn->sendBody(std::move(buf));
@@ -277,20 +278,30 @@ proxygen::HTTPMessage HTTPClientChannel::buildHTTPMessage(THeader* header) {
   msg.setIsChunked(false);
   auto& headers = msg.getHeaders();
 
-  auto pwh = getPersistentWriteHeaders();
-
-  for (auto it = pwh.begin(); it != pwh.end(); ++it) {
-    headers.rawSet(it->first, it->second);
+  {
+    auto pwh = getPersistentWriteHeaders();
+    for (auto it = pwh.begin(); it != pwh.end(); ++it) {
+      headers.rawSet(it->first, it->second);
+    }
+    // We do not clear the persistent write headers, since http does not
+    // distinguish persistent/per request headers
+    // pwh.clear();
   }
 
-  // We do not clear the persistent write headers, since http does not
-  // distinguish persistent/per request headers
-  // pwh.clear();
+  {
+    auto wh = header->releaseWriteHeaders();
+    for (auto it = wh.begin(); it != wh.end(); ++it) {
+      headers.rawSet(it->first, it->second);
+    }
+  }
 
-  auto wh = header->releaseWriteHeaders();
-
-  for (auto it = wh.begin(); it != wh.end(); ++it) {
-    headers.rawSet(it->first, it->second);
+  {
+    auto eh = header->getExtraWriteHeaders();
+    if (eh) {
+      for (auto it = eh->cbegin(); it != eh->cend(); ++it) {
+        headers.rawSet(it->first, it->second);
+      }
+    }
   }
 
   headers.set(proxygen::HTTPHeaderCode::HTTP_HEADER_HOST, httpHost_);
@@ -349,18 +360,9 @@ HTTPClientChannel::HTTPTransactionCallback::HTTPTransactionCallback(
 }
 
 HTTPClientChannel::HTTPTransactionCallback::~HTTPTransactionCallback() {
-  cancelTimeout();
   if (txn_) {
     txn_->setHandler(nullptr);
     txn_->setTransportCallback(nullptr);
-  }
-}
-
-void HTTPClientChannel::HTTPTransactionCallback::startTimer(
-    folly::HHWheelTimer& timer,
-    std::chrono::milliseconds timeout) {
-  if (timeout.count()) {
-    timer.scheduleTimeout(this, timeout);
   }
 }
 
@@ -406,7 +408,7 @@ void HTTPClientChannel::HTTPTransactionCallback::setTransaction(
 }
 
 void HTTPClientChannel::HTTPTransactionCallback::detachTransaction() noexcept {
-  cancelTimeout();
+  VLOG(5) << "HTTPTransaction on memory " << this << " is detached.";
   delete this;
 }
 
@@ -463,9 +465,16 @@ void HTTPClientChannel::HTTPTransactionCallback::onEOM() noexcept {
 void HTTPClientChannel::HTTPTransactionCallback::onError(
     const proxygen::HTTPException& error) noexcept {
   if (!oneway_) {
-    requestError(
-        folly::make_exception_wrapper<transport::TTransportException>(
-            error.what()));
+    if (error.getProxygenError() == proxygen::ProxygenError::kErrorTimeout) {
+      TTransportException ex(TTransportException::TIMED_OUT, "Timed Out");
+      ex.setOptions(TTransportException::CHANNEL_IS_VALID);
+      requestError(
+          folly::make_exception_wrapper<TTransportException>(std::move(ex)));
+    } else {
+      requestError(
+          folly::make_exception_wrapper<transport::TTransportException>(
+              error.what()));
+    }
   }
 }
 
@@ -481,19 +490,6 @@ void HTTPClientChannel::HTTPTransactionCallback::lastByteFlushed() noexcept {
 }
 
 // end proxygen::HTTPTransaction::TransportCallback methods
-
-// folly::HHWheelTimer::Callback methods
-
-void HTTPClientChannel::HTTPTransactionCallback::timeoutExpired() noexcept {
-  using apache::thrift::transport::TTransportException;
-  TTransportException ex(TTransportException::TIMED_OUT, "Timed Out");
-  ex.setOptions(TTransportException::CHANNEL_IS_VALID);
-  requestError(
-      folly::make_exception_wrapper<TTransportException>(std::move(ex)));
-  delete this;
-}
-
-// end folly::HHWheelTimer::Callback methods
 
 }
 } // apache::thrift

@@ -6,6 +6,10 @@
  *  @generated
  */
 
+/**
+ * Original thrift service:-
+ * MyServicePrioChild
+ */
 interface MyServicePrioChildAsyncIf extends MyServicePrioParentAsyncIf {
   /**
    * Original thrift definition:-
@@ -15,6 +19,10 @@ interface MyServicePrioChildAsyncIf extends MyServicePrioParentAsyncIf {
   public function pang(): Awaitable<void>;
 }
 
+/**
+ * Original thrift service:-
+ * MyServicePrioChild
+ */
 interface MyServicePrioChildIf extends MyServicePrioParentIf {
   /**
    * Original thrift definition:-
@@ -24,6 +32,10 @@ interface MyServicePrioChildIf extends MyServicePrioParentIf {
   public function pang(): void;
 }
 
+/**
+ * Original thrift service:-
+ * MyServicePrioChild
+ */
 trait MyServicePrioChildClientBase {
   require extends ThriftClientBase;
 
@@ -137,16 +149,17 @@ class MyServicePrioChildAsyncClient extends MyServicePrioParentAsyncClient imple
 class MyServicePrioChildClient extends MyServicePrioParentClient implements MyServicePrioChildIf {
   use MyServicePrioChildClientBase;
 
-  /**
-   * Original thrift definition:-
-   * void
-   *   pang();
-   */
+  <<__Deprecated('use gen_pang()')>>
   public function pang(): void {
     $currentseqid = $this->sendImpl_pang();
     $this->recvImpl_pang($currentseqid);
   }
 
+  /**
+   * Original thrift definition:-
+   * void
+   *   pang();
+   */
   public async function gen_pang(): Awaitable<void> {
     $currentseqid = $this->sendImpl_pang();
     await $this->asyncHandler_->genWait($currentseqid);

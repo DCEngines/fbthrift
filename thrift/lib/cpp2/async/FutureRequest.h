@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2014-present Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #pragma once
 
 #include <folly/futures/Future.h>
@@ -30,7 +29,7 @@ class FutureCallbackBase : public RequestCallback {
           : promise_(std::move(promise)),
             channel_(std::move(channel)) {}
 
-    void requestSent() override{};
+    void requestSent() override{}
 
     void requestError(ClientReceiveState&& state) override {
       CHECK(state.isException());
@@ -152,7 +151,7 @@ class OneWayFutureCallback : public FutureCallbackBase<folly::Unit> {
 
     void requestSent() override {
       promise_.setValue();
-    };
+    }
 
     void replyReceived(ClientReceiveState&& /*state*/) override {
       CHECK(false);

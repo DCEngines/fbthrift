@@ -18,6 +18,7 @@ struct SimpleStruct {
   4: i32 nice_sized_int
   5: i64 big_int
   6: double real
+  7: float smaller_real
 }
 
 struct ComplexStruct {
@@ -106,4 +107,12 @@ service SimpleService {
   binary retrieve_binary(1: binary something)
   set<binary> contain_binary(1: list<binary> binaries)
   list<AnEnum> contain_enum(1:list<AnEnum> the_enum)
+}
+
+service DerivedService extends SimpleService {
+  i32 get_six()
+}
+
+service RederivedService extends DerivedService {
+  i32 get_seven()
 }

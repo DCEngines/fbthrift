@@ -23,8 +23,9 @@
 
 #include <gtest/gtest.h>
 
-/* using override */
-using namespace apache::thrift;
+namespace apache {
+namespace thrift {
+namespace test {
 
 template <typename Reader, typename Writer, bool Printable>
 struct RWPair {
@@ -49,7 +50,7 @@ void print_underlying(folly::IOBuf const& buffer, int vlog_level = 5) {
         << std::string((const char*)range.data(), range.size());
     } else {
       std::ostringstream out;
-      for(int i = 0; i < range.size(); i++) {
+      for(size_t i = 0; i < range.size(); i++) {
         out << std::setw(2) << std::setfill('0')
                 << std::hex << (int)range.data()[i] << " ";
       }
@@ -84,7 +85,9 @@ struct MultiProtocolTest : public TypedTestCommon<Pair> {};
 
 template <typename Pair>
 struct MultiProtocolTestConcrete : public TypedTestCommon<Pair> {
-  virtual void TestBody() { return; }
+  void TestBody() override {
+    return;
+  }
 };
 
 template <typename Pair>
@@ -101,3 +104,7 @@ struct CompareProtocolTest : public ::testing::Test {
     st2.debug_buffer();
   }
 };
+
+}
+}
+}

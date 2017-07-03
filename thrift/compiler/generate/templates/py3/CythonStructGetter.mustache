@@ -40,6 +40,9 @@ if they have been previously retrieved.
 }}{{#type:double?}}{{!
   }}return self.c_{{struct:name}}.get().{{field:name}}{{!
 }}{{/type:double?}}{{!
+}}{{#type:float?}}{{!
+  }}return self.c_{{struct:name}}.get().{{field:name}}{{!
+}}{{/type:float?}}{{!
 }}{{#type:string?}}{{!
   }}return self.c_{{struct:name}}.get().{{field:name}}.decode('UTF-8'){{!
 }}{{/type:string?}}{{!
@@ -47,29 +50,29 @@ if they have been previously retrieved.
   }}return self.c_{{struct:name}}.get().{{field:name}}{{!
 }}{{/type:binary?}}{{!
 }}{{#type:struct?}}{{!
-}}cdef shared_ptr[{{> ContainerCythonFieldTypeConditionally}}] item
+}}cdef shared_ptr[{{> types/CythonCppType}}] item
 if self.__{{field:name}} is None:
-    item = make_shared[{{> ContainerCythonFieldTypeConditionally}}](
+    item = make_shared[{{> types/CythonCppType}}](
         deref(self.c_{{struct:name}}).{{field:name}})
     self.__{{field:name}} = {{#type:struct}}{{!
-      }}{{#type:externalProgram?}}{{> ModulePath}}.{{/type:externalProgram?}}{{!
+      }}{{#type:externalProgram?}}{{> common/ModulePath}}.{{/type:externalProgram?}}{{!
       }}{{struct:name}}{{/type:struct}}.create(item)
 return self.__{{field:name}}
 {{/type:struct?}}{{!
 }}{{#type:container?}}{{!
-}}cdef shared_ptr[{{> ContainerCythonFieldTypeConditionally}}] item
+}}cdef shared_ptr[{{> types/CythonCppType}}] item
 if self.__{{field:name}} is None:
-    item = make_shared[{{> ContainerCythonFieldTypeConditionally}}](
+    item = make_shared[{{> types/CythonCppType}}](
         deref(self.c_{{struct:name}}).{{field:name}})
     self.__{{field:name}} = {{!
-      }}{{#type:externalProgram?}}{{> ModulePath}}.{{/type:externalProgram?}}{{!
+      }}{{#type:externalProgram?}}{{> common/ModulePath}}.{{/type:externalProgram?}}{{!
       }}{{type:flat_name}}.create(item)
 return self.__{{field:name}}
 {{/type:container?}}{{!
 }}{{#type:enum}}
 cdef int value = <int> deref(self.c_{{struct:name}}).{{field:name}}
 try:
-    return {{#type:externalProgram?}}{{> ModulePath}}.{{/type:externalProgram?}}{{enum:name}}(value)
+    return {{#type:externalProgram?}}{{> common/ModulePath}}.{{/type:externalProgram?}}{{enum:name}}(value)
 except ValueError:
-    return thrift.py3.types.BadEnum({{#type:externalProgram?}}{{> ModulePath}}.{{/type:externalProgram?}}{{enum:name}}, value)
+    return thrift.py3.types.BadEnum({{#type:externalProgram?}}{{> common/ModulePath}}.{{/type:externalProgram?}}{{enum:name}}, value)
 {{/type:enum}}

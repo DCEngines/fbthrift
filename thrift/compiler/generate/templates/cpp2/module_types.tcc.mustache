@@ -25,17 +25,28 @@
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
+#include <thrift/lib/cpp2/GeneratedSerializationCodeHelper.h>
 
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
+<% > module_types_tcc/declare_enums%>
 <%#program:structs%><%!
 %><% > common/namespace_cpp2_begin%>
 
 
+<%^struct:union?%>
+<%#struct:getters_setters?%>
 <% > module_types_tcc/container_setters%>
+<%/struct:getters_setters?%>
 <% > module_types_tcc/deserialize_struct%>
 
 <% > module_types_tcc/serialize_struct%>
+<%/struct:union?%>
+<%#struct:union?%>
+<% > module_types_tcc/deserialize_union%>
+
+<% > module_types_tcc/serialize_union%>
+<%/struct:union?%>
 
 <% > common/namespace_cpp2_end%>
 

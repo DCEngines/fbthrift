@@ -53,6 +53,9 @@ int g_arglist = 0;
 const int struct_is_struct = 0;
 const int struct_is_union = 1;
 char* y_enum_name = nullptr;
+// This global variable is used for keeping track of line number where
+// definition starts
+int y_definition_lineno = -1;
 
 %}
 
@@ -110,11 +113,6 @@ char* y_enum_name = nullptr;
 %token tok_py_module
 %token tok_perl_package
 %token tok_java_package
-%token tok_xsd_all
-%token tok_xsd_optional
-%token tok_xsd_nillable
-%token tok_xsd_namespace
-%token tok_xsd_attrs
 %token tok_ruby_namespace
 %token tok_smalltalk_category
 %token tok_smalltalk_prefix
@@ -130,7 +128,6 @@ char* y_enum_name = nullptr;
 %token tok_string
 %token tok_binary
 %token tok_slist
-%token tok_senum
 %token tok_i16
 %token tok_i32
 %token tok_i64
@@ -166,7 +163,6 @@ char* y_enum_name = nullptr;
 %token tok_required
 %token tok_optional
 %token tok_union
-%token tok_view
 
 /**
  * Grammar nodes
@@ -201,18 +197,10 @@ char* y_enum_name = nullptr;
 %type<tconstv>   FieldValue
 %type<tstruct>   FieldList
 
-%type<tfield>    ViewField
-%type<tstruct>   ViewFieldList
-%type<tstruct>   View
-
 %type<tenum>     Enum
 %type<tenum>     EnumDefList
 %type<tenumv>    EnumDef
 %type<tenumv>    EnumValue
-
-%type<ttypedef>  Senum
-%type<tbase>     SenumDefList
-%type<id>        SenumDef
 
 %type<tconst>    Const
 %type<tconstv>   ConstValue
@@ -236,10 +224,6 @@ char* y_enum_name = nullptr;
 %type<tstruct>   Throws
 %type<tservice>  Extends
 %type<tbool>     Oneway
-%type<tbool>     XsdAll
-%type<tbool>     XsdOptional
-%type<tbool>     XsdNillable
-%type<tstruct>   XsdAttributes
 
 %type<dtext>     CaptureDocText
 %type<id>        IntOrLiteral
@@ -409,15 +393,6 @@ Header:
       }
     }
 /* TODO(dreiss): Get rid of this once everyone is using the new hotness. */
-| tok_xsd_namespace tok_literal
-    {
-      pwarning(1, "'xsd_namespace' is deprecated. Use 'namespace xsd' instead");
-      pdebug("Header -> tok_xsd_namespace tok_literal");
-      if (g_parse_mode == PROGRAM) {
-        g_program->set_namespace("cocoa", $2);
-      }
-    }
-/* TODO(dreiss): Get rid of this once everyone is using the new hotness. */
 | tok_csharp_namespace tok_identifier
    {
      pwarning(1, "'csharp_namespace' is deprecated. Use 'namespace csharp' instead");
@@ -434,7 +409,11 @@ Include:
       if (g_parse_mode == INCLUDES) {
         std::string path = include_file(std::string($2));
         if (!path.empty()) {
-          g_program->add_include(path, std::string($2));
+          if (program_cache.find(path) == program_cache.end()) {
+            program_cache[path] = g_program->add_include(path, std::string($2));
+          } else {
+            g_program->add_include(program_cache[path]);
+          }
         }
       }
     }
@@ -465,10 +444,7 @@ Definition:
     {
       pdebug("Definition -> TypeDefinition");
       if (g_parse_mode == PROGRAM) {
-        g_scope->add_type($1->get_name(), $1);
-        if (g_parent_scope != NULL) {
-          g_parent_scope->add_type(g_parent_prefix + $1->get_name(), $1);
-        }
+        g_scope_cache->add_type(g_program->get_name() + "." + $1->get_name(), $1);
       }
       $$ = $1;
     }
@@ -476,10 +452,7 @@ Definition:
     {
       pdebug("Definition -> Service");
       if (g_parse_mode == PROGRAM) {
-        g_scope->add_service($1->get_name(), $1);
-        if (g_parent_scope != NULL) {
-          g_parent_scope->add_service(g_parent_prefix + $1->get_name(), $1);
-        }
+        g_scope_cache->add_service(g_program->get_name() + "." + $1->get_name(), $1);
         g_program->add_service($1);
       }
       $$ = $1;
@@ -500,23 +473,9 @@ TypeDefinition:
         g_program->add_enum($1);
       }
     }
-| Senum
-    {
-      pdebug("TypeDefinition -> Senum");
-      if (g_parse_mode == PROGRAM) {
-        g_program->add_typedef($1);
-      }
-    }
 | Struct
     {
       pdebug("TypeDefinition -> Struct");
-      if (g_parse_mode == PROGRAM) {
-        g_program->add_struct($1);
-      }
-    }
-| View
-    {
-      pdebug("TypeDefinition -> View");
       if (g_parse_mode == PROGRAM) {
         g_program->add_struct($1);
       }
@@ -530,14 +489,19 @@ TypeDefinition:
     }
 
 Typedef:
-  tok_typedef FieldType tok_identifier TypeAnnotations
+  tok_typedef
+    {
+      y_definition_lineno = yylineno;
+    }
+  FieldType tok_identifier TypeAnnotations
     {
       pdebug("TypeDef -> tok_typedef FieldType tok_identifier");
-      t_typedef *td = new t_typedef(g_program, $2, $3);
+      t_typedef *td = new t_typedef(g_program, $3, $4, g_scope_cache);
       $$ = td;
-      if ($4 != NULL) {
-        $$->annotations_ = $4->annotations_;
-        delete $4;
+      $$->set_lineno(y_definition_lineno);
+      if ($5 != NULL) {
+        $$->annotations_ = $5->annotations_;
+        delete $5;
       }
     }
 
@@ -550,19 +514,24 @@ CommaOrSemicolonOptional:
     {}
 
 Enum:
-  tok_enum tok_identifier
+  tok_enum
+    {
+      y_definition_lineno = yylineno;
+    }
+  tok_identifier
     {
       assert(y_enum_name == nullptr);
-      y_enum_name = $2;
+      y_enum_name = $3;
     }
   '{' EnumDefList '}' TypeAnnotations
     {
       pdebug("Enum -> tok_enum tok_identifier { EnumDefList }");
-      $$ = $5;
-      $$->set_name($2);
-      if ($7 != NULL) {
-        $$->annotations_ = $7->annotations_;
-        delete $7;
+      $$ = $6;
+      $$->set_name($3);
+      $$->set_lineno(y_definition_lineno);
+      if ($8 != NULL) {
+        $$->annotations_ = $8->annotations_;
+        delete $8;
       }
       y_enum_name = nullptr;
     }
@@ -573,6 +542,22 @@ EnumDefList:
       pdebug("EnumDefList -> EnumDefList EnumDef");
       $$ = $1;
       $$->append($2);
+
+      if (g_parse_mode == PROGRAM) {
+        t_const_value* const_val = new t_const_value($2->get_value());
+        const_val->set_is_enum();
+        const_val->set_enum($$);
+        const_val->set_enum_value($2);
+        t_const* tconst = new t_const(
+            g_program, g_type_i32, $2->get_name(), const_val);
+
+        assert(y_enum_name != nullptr);
+        string type_prefix = string(y_enum_name) + ".";
+        g_scope_cache->add_constant(
+            g_program->get_name() + "." + $2->get_name(), tconst);
+        g_scope_cache->add_constant(
+            g_program->get_name() + "." + type_prefix + $2->get_name(), tconst);
+      }
     }
 |
     {
@@ -588,23 +573,6 @@ EnumDef:
       $$ = $2;
       if ($1 != NULL) {
         $$->set_doc($1);
-      }
-      if (g_parse_mode == PROGRAM) {
-        // The scope constants never get deleted, so it's okay for us
-        // to share a single t_const object between our scope and the parent
-        // scope
-        t_const* constant = new t_const(g_program, g_type_i32, $2->get_name(),
-                                        new t_const_value($2->get_value()));
-        assert(y_enum_name != nullptr);
-        string type_prefix = string(y_enum_name) + ".";
-        g_scope->add_constant($2->get_name(), constant);
-        g_scope->add_constant(type_prefix + $2->get_name(), constant);
-        if (g_parent_scope != NULL) {
-          g_parent_scope->add_constant(g_parent_prefix + $2->get_name(),
-                                       constant);
-          g_parent_scope->add_constant(
-              g_parent_prefix + type_prefix + $2->get_name(), constant);
-        }
       }
       if ($3 != NULL) {
         $$->annotations_ = $3->annotations_;
@@ -629,6 +597,7 @@ EnumValue:
       }
       y_enum_val = $3;
       $$ = new t_enum_value($1, y_enum_val);
+      $$->set_lineno(yylineno);
     }
 |
   tok_identifier
@@ -637,51 +606,26 @@ EnumValue:
       if (y_enum_val == INT32_MAX) {
         failure("enum value overflow at enum %s", $1);
       }
+      $$ = new t_enum_value($1);
+
       ++y_enum_val;
-      $$ = new t_enum_value($1, y_enum_val);
-    }
-
-Senum:
-  tok_senum tok_identifier '{' SenumDefList '}'
-    {
-      pdebug("Senum -> tok_senum tok_identifier { SenumDefList }");
-      $$ = new t_typedef(g_program, $4, $2);
-    }
-
-SenumDefList:
-  SenumDefList SenumDef
-    {
-      pdebug("SenumDefList -> SenumDefList SenumDef");
-      $$ = $1;
-      $$->add_string_enum_val($2);
-    }
-|
-    {
-      pdebug("SenumDefList -> ");
-      $$ = new t_base_type("string", t_base_type::TYPE_STRING);
-      $$->set_string_enum(true);
-    }
-
-SenumDef:
-  tok_literal CommaOrSemicolonOptional
-    {
-      pdebug("SenumDef -> tok_literal");
-      $$ = $1;
+      $$->set_value(y_enum_val);
+      $$->set_lineno(yylineno);
     }
 
 Const:
-  tok_const FieldType tok_identifier '=' ConstValue CommaOrSemicolonOptional
+  tok_const
+    {
+      y_definition_lineno = yylineno;
+    }
+  FieldType tok_identifier '=' ConstValue CommaOrSemicolonOptional
     {
       pdebug("Const -> tok_const FieldType tok_identifier = ConstValue");
       if (g_parse_mode == PROGRAM) {
-        $$ = new t_const(g_program, $2, $3, $5);
+        $$ = new t_const(g_program, $3, $4, $6);
+        $$->set_lineno(y_definition_lineno);
         validate_const_type($$);
-
-        g_scope->add_constant($3, $$);
-        if (g_parent_scope != NULL) {
-          g_parent_scope->add_constant(g_parent_prefix + $3, $$);
-        }
-
+        g_scope_cache->add_constant(g_program->get_name() + "." + $4, $$);
       } else {
         $$ = NULL;
       }
@@ -717,7 +661,10 @@ ConstValue:
 | tok_identifier
     {
       pdebug("ConstValue => tok_identifier");
-      t_const* constant = g_scope->get_constant($1);
+      t_const* constant = g_scope_cache->get_constant($1);
+      if (!constant) {
+        constant = g_scope_cache->get_constant(g_program->get_name() + "." + $1);
+      }
       if (constant != nullptr) {
         $$ = constant->get_value();
       } else {
@@ -791,130 +738,22 @@ StructHead:
     }
 
 Struct:
-  StructHead tok_identifier XsdAll '{' FieldList '}' TypeAnnotations
+  StructHead
+    {
+        y_definition_lineno = yylineno;
+    }
+  tok_identifier '{' FieldList '}' TypeAnnotations
     {
       pdebug("Struct -> tok_struct tok_identifier { FieldList }");
-      $5->set_xsd_all($3);
       $5->set_union($1 == struct_is_union);
       $$ = $5;
-      $$->set_name($2);
+      $$->set_name($3);
+      $$->set_lineno(y_definition_lineno);
       if ($7 != NULL) {
         $$->annotations_ = $7->annotations_;
         delete $7;
       }
       y_field_val = -1;
-    }
-
-View:
-  tok_view tok_identifier ':' tok_identifier '{' ViewFieldList '}' TypeAnnotations
-    {
-      pdebug("View -> tok_view tok_identifier { ViewFieldList }");
-      if (g_parse_mode == INCLUDES) {
-        $$ = $6;
-        $$->set_name($2);
-      } else {
-        // Lookup the identifier in the current scope
-        t_type* parent_type = g_scope->get_type($4);
-        if (parent_type == NULL || !parent_type->is_struct()) {
-          yyerror("Struct \"%s\" has not been defined. %d", $4, g_parse_mode);
-          exit(1);
-        }
-        t_struct* parent_struct = dynamic_cast<t_struct*>(parent_type);
-        $$ = new t_struct(g_program);
-        $$->set_name($2);
-        $$->set_view_parent(parent_struct->get_view_parent());
-        $$->annotations_ = parent_struct->annotations_;
-        for (const auto& it : $6->get_members()) {
-          if (!parent_struct->has_field_named(it->get_name().c_str())) {
-            failure("view field '%s.%s' is not found in parent struct '%s'",
-                    $2, it->get_name().c_str(), $4);
-          }
-          const t_field* f = parent_struct->get_field_named(it->get_name().c_str());
-          t_field* nf;
-          if (it->get_type() != NULL) {
-            // Field is fully described, verify that definitions are compatible
-            nf = it;
-            if (nf->get_key() != f->get_key()) {
-              failure("view field '%s.%s' has a different key from parent struct '%s':"
-                      " %d vs %d",
-                      $2, it->get_name().c_str(), $4, f->get_key(), nf->get_key());
-            }
-            if (nf->get_req() != f->get_req()) {
-              failure("view field '%s.%s' has a different requirement specifier "
-                      "from parent struct '%s'",
-                      $2, it->get_name().c_str(), $4);
-            }
-            if (nf->get_type()->get_impl_full_name() != f->get_type()->get_impl_full_name()) {
-              failure("view field '%s.%s' has a different type from parent struct '%s':"
-                      " '%s' vs '%s'",
-                      $2, it->get_name().c_str(), $4,
-                      f->get_type()->get_impl_full_name().c_str(),
-                      nf->get_type()->get_impl_full_name().c_str());
-            }
-            if (f->get_value()) {
-              nf->set_value(new t_const_value(*f->get_value()));
-            }
-          } else {
-            // It's just a reference to the field, copy the definition from the
-            // parent struct
-            nf = new t_field(*f);
-            override_annotations(nf->annotations_, it->annotations_);
-          }
-          if (!$$->append(nf)) {
-            yyerror("Field identifier %d for \"%s\" has already been used", nf->get_key(), nf->get_name().c_str());
-            exit(1);
-          }
-          if (nf != it) {
-            delete it;
-          }
-        }
-        if ($8 != NULL) {
-          override_annotations($$->annotations_, $8->annotations_);
-          delete $8;
-        }
-        delete $6;
-      }
-      y_field_val = -1;
-    }
-
-XsdAll:
-  tok_xsd_all
-    {
-      $$ = true;
-    }
-|
-    {
-      $$ = false;
-    }
-
-XsdOptional:
-  tok_xsd_optional
-    {
-      $$ = true;
-    }
-|
-    {
-      $$ = false;
-    }
-
-XsdNillable:
-  tok_xsd_nillable
-    {
-      $$ = true;
-    }
-|
-    {
-      $$ = false;
-    }
-
-XsdAttributes:
-  tok_xsd_attrs '{' FieldList '}'
-    {
-      $$ = $3;
-    }
-|
-    {
-      $$ = NULL;
     }
 
 Xception:
@@ -963,14 +802,19 @@ Xception:
     }
 
 Service:
-  tok_service tok_identifier Extends '{' FlagArgs FunctionList UnflagArgs '}' FunctionAnnotations
+  tok_service
+    {
+      y_definition_lineno = yylineno;
+    }
+  tok_identifier Extends '{' FlagArgs FunctionList UnflagArgs '}' FunctionAnnotations
     {
       pdebug("Service -> tok_service tok_identifier { FunctionList }");
-      $$ = $6;
-      $$->set_name($2);
-      $$->set_extends($3);
-      if ($9) {
-        $$->annotations_ = $9->annotations_;
+      $$ = $7;
+      $$->set_name($3);
+      $$->set_extends($4);
+      $$->set_lineno(y_definition_lineno);
+      if ($10) {
+        $$->annotations_ = $10->annotations_;
       }
     }
 
@@ -990,7 +834,10 @@ Extends:
       pdebug("Extends -> tok_extends tok_identifier");
       $$ = NULL;
       if (g_parse_mode == PROGRAM) {
-        $$ = g_scope->get_service($2);
+        $$ = g_scope_cache->get_service($2);
+        if (!$$) {
+          $$ = g_scope_cache->get_service(g_program->get_name() + "." + $2);
+        }
         if ($$ == NULL) {
           yyerror("Service \"%s\" has not been defined.", $2);
           exit(1);
@@ -1023,6 +870,7 @@ Function:
       if ($1 != NULL) {
         $$->set_doc($1);
       }
+      $$->set_lineno(yylineno);
       y_field_val = -1;
     }
 
@@ -1096,7 +944,7 @@ FieldList:
     }
 
 Field:
-  CaptureDocText FieldIdentifier FieldRequiredness FieldType tok_identifier FieldValue XsdOptional XsdNillable XsdAttributes TypeAnnotations CommaOrSemicolonOptional
+  CaptureDocText FieldIdentifier FieldRequiredness FieldType tok_identifier FieldValue TypeAnnotations CommaOrSemicolonOptional
     {
       pdebug("tok_int_constant : Field -> FieldType tok_identifier");
       if ($2.auto_assigned) {
@@ -1113,16 +961,11 @@ Field:
         validate_field_value($$, $6);
         $$->set_value($6);
       }
-      $$->set_xsd_optional($7);
-      $$->set_xsd_nillable($8);
       if ($1 != NULL) {
         $$->set_doc($1);
       }
-      if ($9 != NULL) {
-        $$->set_xsd_attrs($9);
-      }
-      if ($10 != NULL) {
-        for (const auto& it : $10->annotations_) {
+      if ($7 != NULL) {
+        for (const auto& it : $7->annotations_) {
           if (it.first == "cpp.ref" || it.first == "cpp2.ref") {
             if ($3 != t_field::T_OPTIONAL) {
               pwarning(1, "cpp.ref field must be optional if it is recursive");
@@ -1130,51 +973,6 @@ Field:
             break;
           }
         }
-        $$->annotations_ = $10->annotations_;
-        delete $10;
-      }
-    }
-
-ViewFieldList:
-  ViewFieldList ViewField
-    {
-      pdebug("ViewFieldList -> ViewFieldList , ViewField");
-      $$ = $1;
-      // do not bother about field identifiers
-      if ($$->has_field_named($2->get_name().c_str())) {
-        yyerror("Field name %s has already been listed", $2->get_name().c_str());
-        exit(1);
-      }
-      $$->append($2);
-    }
-|
-    {
-      pdebug("ViewFieldList -> ");
-      $$ = new t_struct(g_program);
-    }
-
-ViewField:
-  tok_identifier TypeAnnotations CommaOrSemicolonOptional
-    {
-      pdebug("tok_int_constant : FieldTypeOptional tok_identifier");
-      // used only for tracking names, we'll reuse structs from original struct
-      $$ = new t_field(NULL, $1);
-      if ($2 != NULL) {
-        $$->annotations_ = $2->annotations_;
-        delete $2;
-      }
-    }
-| CaptureDocText tok_int_constant ':' FieldRequiredness FieldType tok_identifier TypeAnnotations CommaOrSemicolonOptional
-    {
-      // In order to make grammar parsable we have to make id specifier required
-      // if type is provided.
-      pdebug("ViewField -> tok_int_constant : FieldType tok_identifier");
-      $$ = new t_field($5, $6, $2);
-      $$->set_req($4);
-      if ($1 != NULL) {
-        $$->set_doc($1);
-      }
-      if ($7 != NULL) {
         $$->annotations_ = $7->annotations_;
         delete $7;
       }
@@ -1285,14 +1083,17 @@ FieldType:
         $$ = NULL;
       } else {
         // Lookup the identifier in the current scope
-        $$ = g_scope->get_type($1);
+        $$ = g_scope_cache->get_type($1);
+        if (!$$) {
+          $$ = g_scope_cache->get_type(g_program->get_name() + "." + $1);
+        }
         if ($$ == NULL || $2 != NULL) {
           /*
            * Either this type isn't yet declared, or it's never
              declared.  Either way allow it and we'll figure it out
              during generation.
            */
-          $$ = new t_typedef(g_program, $1);
+          $$ = new t_typedef(g_program, $1, g_scope_cache);
           if ($2 != NULL) {
             $$->annotations_ = $2->annotations_;
             delete $2;

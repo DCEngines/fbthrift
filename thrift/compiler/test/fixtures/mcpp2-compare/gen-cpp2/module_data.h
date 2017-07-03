@@ -13,4 +13,29 @@
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_types.h"
 
+namespace some { namespace valid { namespace ns {
+
+struct _MyEnumAEnumDataStorage {
+  using type = MyEnumA;
+  static constexpr const std::size_t size = 3;
+  static constexpr const std::array<MyEnumA, 3> values = {{
+    MyEnumA::fieldA,
+    MyEnumA::fieldB,
+    MyEnumA::fieldC,
+  }};
+  static constexpr const std::array<folly::StringPiece, 3> names = {{
+    "fieldA",
+    "fieldB",
+    "fieldC",
+  }};
+};
+
+}}} // some::valid::ns
+namespace apache { namespace thrift {
+
+template <> struct TEnumDataStorage< ::some::valid::ns::MyEnumA> {
+  using storage_type =  ::some::valid::ns::_MyEnumAEnumDataStorage;
+};
+
+}} // apache::thrift
 

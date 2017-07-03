@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2014-present Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,7 +187,6 @@ std::unique_ptr<std::string> KerberosSASLHandshakeServer::getTokenToSend() {
       // finish establishing it's context.
       return unique_ptr<string>(
         new string((const char*) outputToken_->value, outputToken_->length));
-      break;
     case SELECT_SECURITY_LAYER:
     {
       unique_ptr<IOBuf> wrapped_sec_layer_message = wrapMessage(
@@ -199,7 +198,6 @@ std::unique_ptr<std::string> KerberosSASLHandshakeServer::getTokenToSend() {
         (char *)wrapped_sec_layer_message->data(),
         wrapped_sec_layer_message->length()
       ));
-      break;
     }
     case COMPLETE:
     {
@@ -216,7 +214,6 @@ std::unique_ptr<std::string> KerberosSASLHandshakeServer::getTokenToSend() {
         // Send empty token back
         return unique_ptr<string>(new string(""));
       }
-      break;
     }
     default:
       break;
@@ -296,6 +293,10 @@ const string& KerberosSASLHandshakeServer::getEstablishedClientPrincipal()
   const {
 
   assert(phase_ == COMPLETE);
+  return establishedClientPrincipal_;
+}
+
+const string& KerberosSASLHandshakeServer::getClientPrincipal() const {
   return establishedClientPrincipal_;
 }
 

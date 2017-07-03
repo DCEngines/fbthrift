@@ -18,6 +18,31 @@
 
 namespace some { namespace valid { namespace ns {
 
+const _MyEnumA_EnumMapFactory::ValuesToNamesMapType _MyEnumA_VALUES_TO_NAMES = _MyEnumA_EnumMapFactory::makeValuesToNamesMap();
+const _MyEnumA_EnumMapFactory::NamesToValuesMapType _MyEnumA_NAMES_TO_VALUES = _MyEnumA_EnumMapFactory::makeNamesToValuesMap();
+
+}}} // some::valid::ns
+namespace std {
+
+} // std
+namespace apache { namespace thrift {
+
+template <> const std::size_t TEnumTraits< ::some::valid::ns::MyEnumA>::size = 3;
+template <> const folly::Range<const  ::some::valid::ns::MyEnumA*> TEnumTraits< ::some::valid::ns::MyEnumA>::values = folly::range( ::some::valid::ns::_MyEnumAEnumDataStorage::values);
+template <> const folly::Range<const folly::StringPiece*> TEnumTraits< ::some::valid::ns::MyEnumA>::names = folly::range( ::some::valid::ns::_MyEnumAEnumDataStorage::names);
+template <> const char* TEnumTraits< ::some::valid::ns::MyEnumA>::findName( ::some::valid::ns::MyEnumA value) {
+  static auto const map = folly::Indestructible< ::some::valid::ns::_MyEnumA_EnumMapFactory::ValuesToNamesMapType>{ ::some::valid::ns::_MyEnumA_EnumMapFactory::makeValuesToNamesMap()};
+  return findName(*map, value);
+}
+
+template <> bool TEnumTraits< ::some::valid::ns::MyEnumA>::findValue(const char* name,  ::some::valid::ns::MyEnumA* outValue) {
+  static auto const map = folly::Indestructible< ::some::valid::ns::_MyEnumA_EnumMapFactory::NamesToValuesMapType>{ ::some::valid::ns::_MyEnumA_EnumMapFactory::makeNamesToValuesMap()};
+  return findValue(*map, name, outValue);
+}
+
+}} // apache::thrift
+namespace some { namespace valid { namespace ns {
+
 void Empty::__clear() {
   // clear all fields
 }
@@ -53,6 +78,10 @@ void MyStruct::__clear() {
   MyIntField = 12LL;
   MyStringField = apache::thrift::StringTraits< std::string>::fromStringLiteral("test");
   MyStringField2 = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  MyBinaryField = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  MyBinaryField2 = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  MyBinaryField3 = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  MyBinaryListField4.clear();
   __isset.__clear();
 }
 
@@ -69,7 +98,30 @@ bool MyStruct::operator==(const MyStruct& rhs) const {
   if (!((MyStringField2 == rhs.MyStringField2))) {
     return false;
   }
+  if (!(apache::thrift::StringTraits<std::string>::isEqual(MyBinaryField, rhs.MyBinaryField))) {
+    return false;
+  }
+  if (__isset.MyBinaryField2 != rhs.__isset.MyBinaryField2) {
+    return false;
+  }
+  else if (__isset.MyBinaryField2 && !(apache::thrift::StringTraits<std::string>::isEqual(MyBinaryField2, rhs.MyBinaryField2))) {
+    return false;
+  }
+  if (!(apache::thrift::StringTraits<std::string>::isEqual(MyBinaryField3, rhs.MyBinaryField3))) {
+    return false;
+  }
+  if (!((MyBinaryListField4 == rhs.MyBinaryListField4))) {
+    return false;
+  }
   return true;
+}
+
+const std::vector<std::string>& MyStruct::get_MyBinaryListField4() const& {
+  return MyBinaryListField4;
+}
+
+std::vector<std::string> MyStruct::get_MyBinaryListField4() && {
+  return std::move(MyBinaryListField4);
 }
 
 void swap(MyStruct& a, MyStruct& b) {
@@ -78,6 +130,10 @@ void swap(MyStruct& a, MyStruct& b) {
   swap(a.MyIntField, b.MyIntField);
   swap(a.MyStringField, b.MyStringField);
   swap(a.MyStringField2, b.MyStringField2);
+  swap(a.MyBinaryField, b.MyBinaryField);
+  swap(a.MyBinaryField2, b.MyBinaryField2);
+  swap(a.MyBinaryField3, b.MyBinaryField3);
+  swap(a.MyBinaryListField4, b.MyBinaryListField4);
   swap(a.__isset, b.__isset);
 }
 
@@ -89,6 +145,1334 @@ template uint32_t MyStruct::read<>(apache::thrift::CompactProtocolReader*);
 template uint32_t MyStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t MyStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // some::valid::ns
+namespace apache { namespace thrift {
+
+}} // apache::thrift
+namespace some { namespace valid { namespace ns {
+
+void SimpleUnion::__clear() {
+  // clear all fields
+  if (type_ == Type::__EMPTY__) { return; }
+  switch(type_) {
+    case Type::intValue:
+    {
+      destruct(value_.intValue);
+      break;
+    }
+    case Type::stringValue:
+    {
+      destruct(value_.stringValue);
+      break;
+    }
+    default:
+    {
+      assert(false);
+      break;
+    }
+  }
+  type_ = Type::__EMPTY__;
+}
+
+bool SimpleUnion::operator==(const SimpleUnion& rhs) const {
+  if (type_ != rhs.type_) { return false; }
+  switch(type_) {
+    case Type::intValue:
+    {
+      return value_.intValue == rhs.value_.intValue;
+    }
+    case Type::stringValue:
+    {
+      return value_.stringValue == rhs.value_.stringValue;
+    }
+    default:
+    {
+      return true;
+    }
+  }
+}
+
+void swap(SimpleUnion& a, SimpleUnion& b) {
+  SimpleUnion temp(std::move(a));
+  a = std::move(b);
+  b = std::move(temp);
+}
+
+template uint32_t SimpleUnion::read<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t SimpleUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t SimpleUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t SimpleUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t SimpleUnion::read<>(apache::thrift::CompactProtocolReader*);
+template uint32_t SimpleUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t SimpleUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t SimpleUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // some::valid::ns
+namespace apache { namespace thrift {
+
+}} // apache::thrift
+namespace some { namespace valid { namespace ns {
+
+void ComplexUnion::__clear() {
+  // clear all fields
+  if (type_ == Type::__EMPTY__) { return; }
+  switch(type_) {
+    case Type::intValue:
+    {
+      destruct(value_.intValue);
+      break;
+    }
+    case Type::req_intValue:
+    {
+      destruct(value_.req_intValue);
+      break;
+    }
+    case Type::opt_intValue:
+    {
+      destruct(value_.opt_intValue);
+      break;
+    }
+    case Type::stringValue:
+    {
+      destruct(value_.stringValue);
+      break;
+    }
+    case Type::req_stringValue:
+    {
+      destruct(value_.req_stringValue);
+      break;
+    }
+    case Type::opt_stringValue:
+    {
+      destruct(value_.opt_stringValue);
+      break;
+    }
+    case Type::intValue2:
+    {
+      destruct(value_.intValue2);
+      break;
+    }
+    case Type::intValue3:
+    {
+      destruct(value_.intValue3);
+      break;
+    }
+    case Type::doubelValue:
+    {
+      destruct(value_.doubelValue);
+      break;
+    }
+    case Type::boolValue:
+    {
+      destruct(value_.boolValue);
+      break;
+    }
+    case Type::union_list:
+    {
+      destruct(value_.union_list);
+      break;
+    }
+    case Type::union_set:
+    {
+      destruct(value_.union_set);
+      break;
+    }
+    case Type::union_map:
+    {
+      destruct(value_.union_map);
+      break;
+    }
+    case Type::req_union_map:
+    {
+      destruct(value_.req_union_map);
+      break;
+    }
+    case Type::opt_union_map:
+    {
+      destruct(value_.opt_union_map);
+      break;
+    }
+    case Type::enum_field:
+    {
+      destruct(value_.enum_field);
+      break;
+    }
+    case Type::enum_container:
+    {
+      destruct(value_.enum_container);
+      break;
+    }
+    case Type::a_struct:
+    {
+      destruct(value_.a_struct);
+      break;
+    }
+    case Type::a_set_struct:
+    {
+      destruct(value_.a_set_struct);
+      break;
+    }
+    case Type::a_union:
+    {
+      destruct(value_.a_union);
+      break;
+    }
+    case Type::req_a_union:
+    {
+      destruct(value_.req_a_union);
+      break;
+    }
+    case Type::opt_a_union:
+    {
+      destruct(value_.opt_a_union);
+      break;
+    }
+    case Type::a_union_list:
+    {
+      destruct(value_.a_union_list);
+      break;
+    }
+    case Type::a_union_typedef:
+    {
+      destruct(value_.a_union_typedef);
+      break;
+    }
+    case Type::a_union_typedef_list:
+    {
+      destruct(value_.a_union_typedef_list);
+      break;
+    }
+    case Type::MyBinaryField:
+    {
+      destruct(value_.MyBinaryField);
+      break;
+    }
+    case Type::MyBinaryField2:
+    {
+      destruct(value_.MyBinaryField2);
+      break;
+    }
+    case Type::MyBinaryField3:
+    {
+      destruct(value_.MyBinaryField3);
+      break;
+    }
+    case Type::MyBinaryListField4:
+    {
+      destruct(value_.MyBinaryListField4);
+      break;
+    }
+    default:
+    {
+      assert(false);
+      break;
+    }
+  }
+  type_ = Type::__EMPTY__;
+}
+
+bool ComplexUnion::operator==(const ComplexUnion& rhs) const {
+  if (type_ != rhs.type_) { return false; }
+  switch(type_) {
+    case Type::intValue:
+    {
+      return value_.intValue == rhs.value_.intValue;
+    }
+    case Type::req_intValue:
+    {
+      return value_.req_intValue == rhs.value_.req_intValue;
+    }
+    case Type::opt_intValue:
+    {
+      return value_.opt_intValue == rhs.value_.opt_intValue;
+    }
+    case Type::stringValue:
+    {
+      return value_.stringValue == rhs.value_.stringValue;
+    }
+    case Type::req_stringValue:
+    {
+      return value_.req_stringValue == rhs.value_.req_stringValue;
+    }
+    case Type::opt_stringValue:
+    {
+      return value_.opt_stringValue == rhs.value_.opt_stringValue;
+    }
+    case Type::intValue2:
+    {
+      return value_.intValue2 == rhs.value_.intValue2;
+    }
+    case Type::intValue3:
+    {
+      return value_.intValue3 == rhs.value_.intValue3;
+    }
+    case Type::doubelValue:
+    {
+      return value_.doubelValue == rhs.value_.doubelValue;
+    }
+    case Type::boolValue:
+    {
+      return value_.boolValue == rhs.value_.boolValue;
+    }
+    case Type::union_list:
+    {
+      return value_.union_list == rhs.value_.union_list;
+    }
+    case Type::union_set:
+    {
+      return value_.union_set == rhs.value_.union_set;
+    }
+    case Type::union_map:
+    {
+      return value_.union_map == rhs.value_.union_map;
+    }
+    case Type::req_union_map:
+    {
+      return value_.req_union_map == rhs.value_.req_union_map;
+    }
+    case Type::opt_union_map:
+    {
+      return value_.opt_union_map == rhs.value_.opt_union_map;
+    }
+    case Type::enum_field:
+    {
+      return value_.enum_field == rhs.value_.enum_field;
+    }
+    case Type::enum_container:
+    {
+      return value_.enum_container == rhs.value_.enum_container;
+    }
+    case Type::a_struct:
+    {
+      return value_.a_struct == rhs.value_.a_struct;
+    }
+    case Type::a_set_struct:
+    {
+      return value_.a_set_struct == rhs.value_.a_set_struct;
+    }
+    case Type::a_union:
+    {
+      return value_.a_union == rhs.value_.a_union;
+    }
+    case Type::req_a_union:
+    {
+      return value_.req_a_union == rhs.value_.req_a_union;
+    }
+    case Type::opt_a_union:
+    {
+      return value_.opt_a_union == rhs.value_.opt_a_union;
+    }
+    case Type::a_union_list:
+    {
+      return value_.a_union_list == rhs.value_.a_union_list;
+    }
+    case Type::a_union_typedef:
+    {
+      return value_.a_union_typedef == rhs.value_.a_union_typedef;
+    }
+    case Type::a_union_typedef_list:
+    {
+      return value_.a_union_typedef_list == rhs.value_.a_union_typedef_list;
+    }
+    case Type::MyBinaryField:
+    {
+      return value_.MyBinaryField == rhs.value_.MyBinaryField;
+    }
+    case Type::MyBinaryField2:
+    {
+      return value_.MyBinaryField2 == rhs.value_.MyBinaryField2;
+    }
+    case Type::MyBinaryField3:
+    {
+      return value_.MyBinaryField3 == rhs.value_.MyBinaryField3;
+    }
+    case Type::MyBinaryListField4:
+    {
+      return value_.MyBinaryListField4 == rhs.value_.MyBinaryListField4;
+    }
+    default:
+    {
+      return true;
+    }
+  }
+}
+
+void swap(ComplexUnion& a, ComplexUnion& b) {
+  ComplexUnion temp(std::move(a));
+  a = std::move(b);
+  b = std::move(temp);
+}
+
+template uint32_t ComplexUnion::read<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ComplexUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ComplexUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ComplexUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ComplexUnion::read<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ComplexUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ComplexUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ComplexUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // some::valid::ns
+namespace apache { namespace thrift {
+
+}} // apache::thrift
+namespace some { namespace valid { namespace ns {
+
+void AnException::__clear() {
+  // clear all fields
+  code = 0;
+  req_code = 0;
+  message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  req_message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  exception_list.clear();
+  exception_set.clear();
+  exception_map.clear();
+  req_exception_map.clear();
+  enum_field = static_cast< ::some::valid::ns::MyEnumA>(0);
+  enum_container.clear();
+  ::apache::thrift::Cpp2Ops<  ::some::valid::ns::MyStruct>::clear(&a_struct);
+  a_set_struct.clear();
+  a_union_list.clear();
+  union_typedef.clear();
+  a_union_typedef_list.clear();
+  __isset.__clear();
+}
+
+bool AnException::operator==(const AnException& rhs) const {
+  if (!((code == rhs.code))) {
+    return false;
+  }
+  if (!((req_code == rhs.req_code))) {
+    return false;
+  }
+  if (!((message == rhs.message))) {
+    return false;
+  }
+  if (!((req_message == rhs.req_message))) {
+    return false;
+  }
+  if (!((exception_list == rhs.exception_list))) {
+    return false;
+  }
+  if (!((exception_set == rhs.exception_set))) {
+    return false;
+  }
+  if (!((exception_map == rhs.exception_map))) {
+    return false;
+  }
+  if (!((req_exception_map == rhs.req_exception_map))) {
+    return false;
+  }
+  if (!((enum_field == rhs.enum_field))) {
+    return false;
+  }
+  if (!((enum_container == rhs.enum_container))) {
+    return false;
+  }
+  if (!((a_struct == rhs.a_struct))) {
+    return false;
+  }
+  if (!((a_set_struct == rhs.a_set_struct))) {
+    return false;
+  }
+  if (!((a_union_list == rhs.a_union_list))) {
+    return false;
+  }
+  if (!((union_typedef == rhs.union_typedef))) {
+    return false;
+  }
+  if (!((a_union_typedef_list == rhs.a_union_typedef_list))) {
+    return false;
+  }
+  return true;
+}
+
+const std::vector<int32_t>& AnException::get_exception_list() const& {
+  return exception_list;
+}
+
+std::vector<int32_t> AnException::get_exception_list() && {
+  return std::move(exception_list);
+}
+
+const std::set<int64_t>& AnException::get_exception_set() const& {
+  return exception_set;
+}
+
+std::set<int64_t> AnException::get_exception_set() && {
+  return std::move(exception_set);
+}
+
+const std::map<std::string, int32_t>& AnException::get_exception_map() const& {
+  return exception_map;
+}
+
+std::map<std::string, int32_t> AnException::get_exception_map() && {
+  return std::move(exception_map);
+}
+
+const std::map<std::string, int32_t>& AnException::get_req_exception_map() const& {
+  return req_exception_map;
+}
+
+std::map<std::string, int32_t> AnException::get_req_exception_map() && {
+  return std::move(req_exception_map);
+}
+
+const std::vector< ::some::valid::ns::MyEnumA>& AnException::get_enum_container() const& {
+  return enum_container;
+}
+
+std::vector< ::some::valid::ns::MyEnumA> AnException::get_enum_container() && {
+  return std::move(enum_container);
+}
+
+const  ::some::valid::ns::MyStruct& AnException::get_a_struct() const& {
+  return a_struct;
+}
+
+ ::some::valid::ns::MyStruct AnException::get_a_struct() && {
+  return std::move(a_struct);
+}
+
+const std::set< ::some::valid::ns::MyStruct>& AnException::get_a_set_struct() const& {
+  return a_set_struct;
+}
+
+std::set< ::some::valid::ns::MyStruct> AnException::get_a_set_struct() && {
+  return std::move(a_set_struct);
+}
+
+const std::vector< ::some::valid::ns::SimpleUnion>& AnException::get_a_union_list() const& {
+  return a_union_list;
+}
+
+std::vector< ::some::valid::ns::SimpleUnion> AnException::get_a_union_list() && {
+  return std::move(a_union_list);
+}
+
+const  ::some::valid::ns::unionTypeDef& AnException::get_union_typedef() const& {
+  return union_typedef;
+}
+
+ ::some::valid::ns::unionTypeDef AnException::get_union_typedef() && {
+  return std::move(union_typedef);
+}
+
+const std::vector< ::some::valid::ns::unionTypeDef>& AnException::get_a_union_typedef_list() const& {
+  return a_union_typedef_list;
+}
+
+std::vector< ::some::valid::ns::unionTypeDef> AnException::get_a_union_typedef_list() && {
+  return std::move(a_union_typedef_list);
+}
+
+void swap(AnException& a, AnException& b) {
+  using ::std::swap;
+  swap(a.code, b.code);
+  swap(a.req_code, b.req_code);
+  swap(a.message, b.message);
+  swap(a.req_message, b.req_message);
+  swap(a.exception_list, b.exception_list);
+  swap(a.exception_set, b.exception_set);
+  swap(a.exception_map, b.exception_map);
+  swap(a.req_exception_map, b.req_exception_map);
+  swap(a.enum_field, b.enum_field);
+  swap(a.enum_container, b.enum_container);
+  swap(a.a_struct, b.a_struct);
+  swap(a.a_set_struct, b.a_set_struct);
+  swap(a.a_union_list, b.a_union_list);
+  swap(a.union_typedef, b.union_typedef);
+  swap(a.a_union_typedef_list, b.a_union_typedef_list);
+  swap(a.__isset, b.__isset);
+}
+
+template uint32_t AnException::read<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t AnException::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t AnException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t AnException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t AnException::read<>(apache::thrift::CompactProtocolReader*);
+template uint32_t AnException::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t AnException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t AnException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // some::valid::ns
+namespace apache { namespace thrift {
+
+}} // apache::thrift
+namespace some { namespace valid { namespace ns {
+
+void AnotherException::__clear() {
+  // clear all fields
+  code = 0;
+  req_code = 0;
+  message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  __isset.__clear();
+}
+
+bool AnotherException::operator==(const AnotherException& rhs) const {
+  if (!((code == rhs.code))) {
+    return false;
+  }
+  if (!((req_code == rhs.req_code))) {
+    return false;
+  }
+  if (!((message == rhs.message))) {
+    return false;
+  }
+  return true;
+}
+
+void swap(AnotherException& a, AnotherException& b) {
+  using ::std::swap;
+  swap(a.code, b.code);
+  swap(a.req_code, b.req_code);
+  swap(a.message, b.message);
+  swap(a.__isset, b.__isset);
+}
+
+template uint32_t AnotherException::read<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t AnotherException::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t AnotherException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t AnotherException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t AnotherException::read<>(apache::thrift::CompactProtocolReader*);
+template uint32_t AnotherException::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t AnotherException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t AnotherException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // some::valid::ns
+namespace apache { namespace thrift {
+
+}} // apache::thrift
+namespace some { namespace valid { namespace ns {
+
+void containerStruct::__clear() {
+  // clear all fields
+  fieldA = 0;
+  req_fieldA = 0;
+  opt_fieldA = 0;
+  fieldB.clear();
+  req_fieldB.clear();
+  opt_fieldB.clear();
+  fieldC.clear();
+  req_fieldC.clear();
+  opt_fieldC.clear();
+  fieldD = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  fieldE = apache::thrift::StringTraits< std::string>::fromStringLiteral("somestring");
+  req_fieldE = apache::thrift::StringTraits< std::string>::fromStringLiteral("somestring");
+  opt_fieldE = apache::thrift::StringTraits< std::string>::fromStringLiteral("somestring");
+  fieldF.clear();
+  fieldG.clear();
+  fieldH.clear();
+  fieldI = true;
+  fieldJ.clear();
+  fieldK.clear();
+  fieldL.clear();
+  fieldM.clear();
+  fieldN = 0;
+  fieldO.clear();
+  fieldP.clear();
+  fieldQ = static_cast< ::some::valid::ns::MyEnumA>(0);
+  fieldR =  ::some::valid::ns::MyEnumA::fieldB;
+  req_fieldR =  ::some::valid::ns::MyEnumA::fieldB;
+  opt_fieldR =  ::some::valid::ns::MyEnumA::fieldB;
+  fieldS =  ::some::valid::ns::MyEnumA::fieldB;
+  fieldT.clear();
+  fieldU.clear();
+  ::apache::thrift::Cpp2Ops<  ::some::valid::ns::MyStruct>::clear(&fieldV);
+  ::apache::thrift::Cpp2Ops<  ::some::valid::ns::MyStruct>::clear(&req_fieldV);
+  ::apache::thrift::Cpp2Ops<  ::some::valid::ns::MyStruct>::clear(&opt_fieldV);
+  fieldW.clear();
+  ::apache::thrift::Cpp2Ops<  ::some::valid::ns::ComplexUnion>::clear(&fieldX);
+  ::apache::thrift::Cpp2Ops<  ::some::valid::ns::ComplexUnion>::clear(&req_fieldX);
+  ::apache::thrift::Cpp2Ops<  ::some::valid::ns::ComplexUnion>::clear(&opt_fieldX);
+  fieldY.clear();
+  fieldZ.clear();
+  fieldAA.clear();
+  __isset.__clear();
+}
+
+bool containerStruct::operator==(const containerStruct& rhs) const {
+  if (!((fieldA == rhs.fieldA))) {
+    return false;
+  }
+  if (!((req_fieldA == rhs.req_fieldA))) {
+    return false;
+  }
+  if (__isset.opt_fieldA != rhs.__isset.opt_fieldA) {
+    return false;
+  }
+  else if (__isset.opt_fieldA && !((opt_fieldA == rhs.opt_fieldA))) {
+    return false;
+  }
+  if (!((fieldB == rhs.fieldB))) {
+    return false;
+  }
+  if (!((req_fieldB == rhs.req_fieldB))) {
+    return false;
+  }
+  if (__isset.opt_fieldB != rhs.__isset.opt_fieldB) {
+    return false;
+  }
+  else if (__isset.opt_fieldB && !((opt_fieldB == rhs.opt_fieldB))) {
+    return false;
+  }
+  if (!((fieldC == rhs.fieldC))) {
+    return false;
+  }
+  if (!((req_fieldC == rhs.req_fieldC))) {
+    return false;
+  }
+  if (__isset.opt_fieldC != rhs.__isset.opt_fieldC) {
+    return false;
+  }
+  else if (__isset.opt_fieldC && !((opt_fieldC == rhs.opt_fieldC))) {
+    return false;
+  }
+  if (!((fieldD == rhs.fieldD))) {
+    return false;
+  }
+  if (!((fieldE == rhs.fieldE))) {
+    return false;
+  }
+  if (!((req_fieldE == rhs.req_fieldE))) {
+    return false;
+  }
+  if (__isset.opt_fieldE != rhs.__isset.opt_fieldE) {
+    return false;
+  }
+  else if (__isset.opt_fieldE && !((opt_fieldE == rhs.opt_fieldE))) {
+    return false;
+  }
+  if (!((fieldF == rhs.fieldF))) {
+    return false;
+  }
+  if (!((fieldG == rhs.fieldG))) {
+    return false;
+  }
+  if (!((fieldH == rhs.fieldH))) {
+    return false;
+  }
+  if (!((fieldI == rhs.fieldI))) {
+    return false;
+  }
+  if (!((fieldJ == rhs.fieldJ))) {
+    return false;
+  }
+  if (!((fieldK == rhs.fieldK))) {
+    return false;
+  }
+  if (!((fieldL == rhs.fieldL))) {
+    return false;
+  }
+  if (!((fieldM == rhs.fieldM))) {
+    return false;
+  }
+  if (!((fieldN == rhs.fieldN))) {
+    return false;
+  }
+  if (!((fieldO == rhs.fieldO))) {
+    return false;
+  }
+  if (!((fieldP == rhs.fieldP))) {
+    return false;
+  }
+  if (!((fieldQ == rhs.fieldQ))) {
+    return false;
+  }
+  if (!((fieldR == rhs.fieldR))) {
+    return false;
+  }
+  if (!((req_fieldR == rhs.req_fieldR))) {
+    return false;
+  }
+  if (__isset.opt_fieldR != rhs.__isset.opt_fieldR) {
+    return false;
+  }
+  else if (__isset.opt_fieldR && !((opt_fieldR == rhs.opt_fieldR))) {
+    return false;
+  }
+  if (!((fieldS == rhs.fieldS))) {
+    return false;
+  }
+  if (!((fieldT == rhs.fieldT))) {
+    return false;
+  }
+  if (!((fieldU == rhs.fieldU))) {
+    return false;
+  }
+  if (!((fieldV == rhs.fieldV))) {
+    return false;
+  }
+  if (!((req_fieldV == rhs.req_fieldV))) {
+    return false;
+  }
+  if (__isset.opt_fieldV != rhs.__isset.opt_fieldV) {
+    return false;
+  }
+  else if (__isset.opt_fieldV && !((opt_fieldV == rhs.opt_fieldV))) {
+    return false;
+  }
+  if (!((fieldW == rhs.fieldW))) {
+    return false;
+  }
+  if (!((fieldX == rhs.fieldX))) {
+    return false;
+  }
+  if (!((req_fieldX == rhs.req_fieldX))) {
+    return false;
+  }
+  if (__isset.opt_fieldX != rhs.__isset.opt_fieldX) {
+    return false;
+  }
+  else if (__isset.opt_fieldX && !((opt_fieldX == rhs.opt_fieldX))) {
+    return false;
+  }
+  if (!((fieldY == rhs.fieldY))) {
+    return false;
+  }
+  if (!((fieldZ == rhs.fieldZ))) {
+    return false;
+  }
+  if (!((fieldAA == rhs.fieldAA))) {
+    return false;
+  }
+  return true;
+}
+
+const std::map<std::string, bool>& containerStruct::get_fieldB() const& {
+  return fieldB;
+}
+
+std::map<std::string, bool> containerStruct::get_fieldB() && {
+  return std::move(fieldB);
+}
+
+const std::map<std::string, bool>& containerStruct::get_req_fieldB() const& {
+  return req_fieldB;
+}
+
+std::map<std::string, bool> containerStruct::get_req_fieldB() && {
+  return std::move(req_fieldB);
+}
+
+const std::map<std::string, bool>* containerStruct::get_opt_fieldB() const& {
+  return __isset.opt_fieldB ? std::addressof(opt_fieldB) : nullptr;
+}
+
+std::map<std::string, bool>* containerStruct::get_opt_fieldB() & {
+  return __isset.opt_fieldB ? std::addressof(opt_fieldB) : nullptr;
+}
+
+const std::set<int32_t>& containerStruct::get_fieldC() const& {
+  return fieldC;
+}
+
+std::set<int32_t> containerStruct::get_fieldC() && {
+  return std::move(fieldC);
+}
+
+const std::set<int32_t>& containerStruct::get_req_fieldC() const& {
+  return req_fieldC;
+}
+
+std::set<int32_t> containerStruct::get_req_fieldC() && {
+  return std::move(req_fieldC);
+}
+
+const std::set<int32_t>* containerStruct::get_opt_fieldC() const& {
+  return __isset.opt_fieldC ? std::addressof(opt_fieldC) : nullptr;
+}
+
+std::set<int32_t>* containerStruct::get_opt_fieldC() & {
+  return __isset.opt_fieldC ? std::addressof(opt_fieldC) : nullptr;
+}
+
+const std::vector<std::vector<int32_t>>& containerStruct::get_fieldF() const& {
+  return fieldF;
+}
+
+std::vector<std::vector<int32_t>> containerStruct::get_fieldF() && {
+  return std::move(fieldF);
+}
+
+const std::map<std::string, std::map<std::string, std::map<std::string, int32_t>>>& containerStruct::get_fieldG() const& {
+  return fieldG;
+}
+
+std::map<std::string, std::map<std::string, std::map<std::string, int32_t>>> containerStruct::get_fieldG() && {
+  return std::move(fieldG);
+}
+
+const std::vector<std::set<int32_t>>& containerStruct::get_fieldH() const& {
+  return fieldH;
+}
+
+std::vector<std::set<int32_t>> containerStruct::get_fieldH() && {
+  return std::move(fieldH);
+}
+
+const std::map<std::string, std::vector<int32_t>>& containerStruct::get_fieldJ() const& {
+  return fieldJ;
+}
+
+std::map<std::string, std::vector<int32_t>> containerStruct::get_fieldJ() && {
+  return std::move(fieldJ);
+}
+
+const std::vector<std::vector<std::vector<std::vector<int32_t>>>>& containerStruct::get_fieldK() const& {
+  return fieldK;
+}
+
+std::vector<std::vector<std::vector<std::vector<int32_t>>>> containerStruct::get_fieldK() && {
+  return std::move(fieldK);
+}
+
+const std::set<std::set<std::set<bool>>>& containerStruct::get_fieldL() const& {
+  return fieldL;
+}
+
+std::set<std::set<std::set<bool>>> containerStruct::get_fieldL() && {
+  return std::move(fieldL);
+}
+
+const std::map<std::set<std::vector<int32_t>>, std::map<std::vector<std::set<std::string>>, std::string>>& containerStruct::get_fieldM() const& {
+  return fieldM;
+}
+
+std::map<std::set<std::vector<int32_t>>, std::map<std::vector<std::set<std::string>>, std::string>> containerStruct::get_fieldM() && {
+  return std::move(fieldM);
+}
+
+const  ::some::valid::ns::complexStructTypeDef& containerStruct::get_fieldO() const& {
+  return fieldO;
+}
+
+ ::some::valid::ns::complexStructTypeDef containerStruct::get_fieldO() && {
+  return std::move(fieldO);
+}
+
+const std::vector< ::some::valid::ns::mostComplexTypeDef>& containerStruct::get_fieldP() const& {
+  return fieldP;
+}
+
+std::vector< ::some::valid::ns::mostComplexTypeDef> containerStruct::get_fieldP() && {
+  return std::move(fieldP);
+}
+
+const std::vector< ::some::valid::ns::MyEnumA>& containerStruct::get_fieldT() const& {
+  return fieldT;
+}
+
+std::vector< ::some::valid::ns::MyEnumA> containerStruct::get_fieldT() && {
+  return std::move(fieldT);
+}
+
+const std::vector< ::some::valid::ns::MyEnumA>& containerStruct::get_fieldU() const& {
+  return fieldU;
+}
+
+std::vector< ::some::valid::ns::MyEnumA> containerStruct::get_fieldU() && {
+  return std::move(fieldU);
+}
+
+const  ::some::valid::ns::MyStruct& containerStruct::get_fieldV() const& {
+  return fieldV;
+}
+
+ ::some::valid::ns::MyStruct containerStruct::get_fieldV() && {
+  return std::move(fieldV);
+}
+
+const  ::some::valid::ns::MyStruct& containerStruct::get_req_fieldV() const& {
+  return req_fieldV;
+}
+
+ ::some::valid::ns::MyStruct containerStruct::get_req_fieldV() && {
+  return std::move(req_fieldV);
+}
+
+const  ::some::valid::ns::MyStruct* containerStruct::get_opt_fieldV() const& {
+  return __isset.opt_fieldV ? std::addressof(opt_fieldV) : nullptr;
+}
+
+ ::some::valid::ns::MyStruct* containerStruct::get_opt_fieldV() & {
+  return __isset.opt_fieldV ? std::addressof(opt_fieldV) : nullptr;
+}
+
+const std::set< ::some::valid::ns::MyStruct>& containerStruct::get_fieldW() const& {
+  return fieldW;
+}
+
+std::set< ::some::valid::ns::MyStruct> containerStruct::get_fieldW() && {
+  return std::move(fieldW);
+}
+
+const  ::some::valid::ns::ComplexUnion& containerStruct::get_fieldX() const& {
+  return fieldX;
+}
+
+ ::some::valid::ns::ComplexUnion containerStruct::get_fieldX() && {
+  return std::move(fieldX);
+}
+
+const  ::some::valid::ns::ComplexUnion& containerStruct::get_req_fieldX() const& {
+  return req_fieldX;
+}
+
+ ::some::valid::ns::ComplexUnion containerStruct::get_req_fieldX() && {
+  return std::move(req_fieldX);
+}
+
+const  ::some::valid::ns::ComplexUnion* containerStruct::get_opt_fieldX() const& {
+  return __isset.opt_fieldX ? std::addressof(opt_fieldX) : nullptr;
+}
+
+ ::some::valid::ns::ComplexUnion* containerStruct::get_opt_fieldX() & {
+  return __isset.opt_fieldX ? std::addressof(opt_fieldX) : nullptr;
+}
+
+const std::vector< ::some::valid::ns::ComplexUnion>& containerStruct::get_fieldY() const& {
+  return fieldY;
+}
+
+std::vector< ::some::valid::ns::ComplexUnion> containerStruct::get_fieldY() && {
+  return std::move(fieldY);
+}
+
+const  ::some::valid::ns::unionTypeDef& containerStruct::get_fieldZ() const& {
+  return fieldZ;
+}
+
+ ::some::valid::ns::unionTypeDef containerStruct::get_fieldZ() && {
+  return std::move(fieldZ);
+}
+
+const std::vector< ::some::valid::ns::unionTypeDef>& containerStruct::get_fieldAA() const& {
+  return fieldAA;
+}
+
+std::vector< ::some::valid::ns::unionTypeDef> containerStruct::get_fieldAA() && {
+  return std::move(fieldAA);
+}
+
+void swap(containerStruct& a, containerStruct& b) {
+  using ::std::swap;
+  swap(a.fieldA, b.fieldA);
+  swap(a.req_fieldA, b.req_fieldA);
+  swap(a.opt_fieldA, b.opt_fieldA);
+  swap(a.fieldB, b.fieldB);
+  swap(a.req_fieldB, b.req_fieldB);
+  swap(a.opt_fieldB, b.opt_fieldB);
+  swap(a.fieldC, b.fieldC);
+  swap(a.req_fieldC, b.req_fieldC);
+  swap(a.opt_fieldC, b.opt_fieldC);
+  swap(a.fieldD, b.fieldD);
+  swap(a.fieldE, b.fieldE);
+  swap(a.req_fieldE, b.req_fieldE);
+  swap(a.opt_fieldE, b.opt_fieldE);
+  swap(a.fieldF, b.fieldF);
+  swap(a.fieldG, b.fieldG);
+  swap(a.fieldH, b.fieldH);
+  swap(a.fieldI, b.fieldI);
+  swap(a.fieldJ, b.fieldJ);
+  swap(a.fieldK, b.fieldK);
+  swap(a.fieldL, b.fieldL);
+  swap(a.fieldM, b.fieldM);
+  swap(a.fieldN, b.fieldN);
+  swap(a.fieldO, b.fieldO);
+  swap(a.fieldP, b.fieldP);
+  swap(a.fieldQ, b.fieldQ);
+  swap(a.fieldR, b.fieldR);
+  swap(a.req_fieldR, b.req_fieldR);
+  swap(a.opt_fieldR, b.opt_fieldR);
+  swap(a.fieldS, b.fieldS);
+  swap(a.fieldT, b.fieldT);
+  swap(a.fieldU, b.fieldU);
+  swap(a.fieldV, b.fieldV);
+  swap(a.req_fieldV, b.req_fieldV);
+  swap(a.opt_fieldV, b.opt_fieldV);
+  swap(a.fieldW, b.fieldW);
+  swap(a.fieldX, b.fieldX);
+  swap(a.req_fieldX, b.req_fieldX);
+  swap(a.opt_fieldX, b.opt_fieldX);
+  swap(a.fieldY, b.fieldY);
+  swap(a.fieldZ, b.fieldZ);
+  swap(a.fieldAA, b.fieldAA);
+  swap(a.__isset, b.__isset);
+}
+
+template uint32_t containerStruct::read<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t containerStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t containerStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t containerStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t containerStruct::read<>(apache::thrift::CompactProtocolReader*);
+template uint32_t containerStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t containerStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t containerStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // some::valid::ns
+namespace apache { namespace thrift {
+
+}} // apache::thrift
+namespace some { namespace valid { namespace ns {
+
+void MyIncludedStruct::__clear() {
+  // clear all fields
+  MyIncludedInt = 42LL;
+  __isset.__clear();
+}
+
+bool MyIncludedStruct::operator==(const MyIncludedStruct& rhs) const {
+  if (!((MyIncludedInt == rhs.MyIncludedInt))) {
+    return false;
+  }
+  return true;
+}
+
+void swap(MyIncludedStruct& a, MyIncludedStruct& b) {
+  using ::std::swap;
+  swap(a.MyIncludedInt, b.MyIncludedInt);
+  swap(a.__isset, b.__isset);
+}
+
+template uint32_t MyIncludedStruct::read<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyIncludedStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyIncludedStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyIncludedStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyIncludedStruct::read<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyIncludedStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyIncludedStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyIncludedStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // some::valid::ns
+namespace apache { namespace thrift {
+
+}} // apache::thrift
+namespace some { namespace valid { namespace ns {
+
+AnnotatatedStruct::AnnotatatedStruct(const AnnotatatedStruct& src) {
+  no_annotation = src.no_annotation;
+  __isset.no_annotation = src.__isset.no_annotation;
+  if (src.cpp_unique_ref) cpp_unique_ref.reset(new  ::some::valid::ns::containerStruct(*src.cpp_unique_ref));
+  if (src.cpp2_unique_ref) cpp2_unique_ref.reset(new  ::some::valid::ns::containerStruct(*src.cpp2_unique_ref));
+  if (src.container_with_ref) container_with_ref.reset(new std::map<int32_t, std::vector<std::string>>(*src.container_with_ref));
+  if (src.req_cpp_unique_ref) req_cpp_unique_ref.reset(new  ::some::valid::ns::containerStruct(*src.req_cpp_unique_ref));
+  if (src.req_cpp2_unique_ref) req_cpp2_unique_ref.reset(new  ::some::valid::ns::containerStruct(*src.req_cpp2_unique_ref));
+  if (src.req_container_with_ref) req_container_with_ref.reset(new std::vector<std::string>(*src.req_container_with_ref));
+  if (src.opt_cpp_unique_ref) opt_cpp_unique_ref.reset(new  ::some::valid::ns::containerStruct(*src.opt_cpp_unique_ref));
+  if (src.opt_cpp2_unique_ref) opt_cpp2_unique_ref.reset(new  ::some::valid::ns::containerStruct(*src.opt_cpp2_unique_ref));
+  if (src.opt_container_with_ref) opt_container_with_ref.reset(new std::set<int32_t>(*src.opt_container_with_ref));
+  if (src.ref_type_unique) ref_type_unique.reset(new  ::some::valid::ns::containerStruct(*src.ref_type_unique));
+  ref_type_shared = src.ref_type_shared;
+  ref_type_const = src.ref_type_const;
+  req_ref_type_shared = src.req_ref_type_shared;
+  req_ref_type_const = src.req_ref_type_const;
+  if (src.req_ref_type_unique) req_ref_type_unique.reset(new std::vector<std::string>(*src.req_ref_type_unique));
+  opt_ref_type_const = src.opt_ref_type_const;
+  if (src.opt_ref_type_unique) opt_ref_type_unique.reset(new  ::some::valid::ns::containerStruct(*src.opt_ref_type_unique));
+  opt_ref_type_shared = src.opt_ref_type_shared;
+  base_type = src.base_type;
+  __isset.base_type = src.__isset.base_type;
+  list_type = src.list_type;
+  __isset.list_type = src.__isset.list_type;
+  set_type = src.set_type;
+  __isset.set_type = src.__isset.set_type;
+  map_type = src.map_type;
+  __isset.map_type = src.__isset.map_type;
+  map_struct_type = src.map_struct_type;
+  __isset.map_struct_type = src.__isset.map_struct_type;
+}
+
+AnnotatatedStruct& AnnotatatedStruct::operator=(const AnnotatatedStruct& src) {
+  AnnotatatedStruct tmp(src);
+  swap(*this, tmp);
+  return *this;
+}
+
+void AnnotatatedStruct::__clear() {
+  // clear all fields
+  ::apache::thrift::Cpp2Ops<  ::some::valid::ns::containerStruct>::clear(&no_annotation);
+  if (cpp_unique_ref) ::apache::thrift::Cpp2Ops<  ::some::valid::ns::containerStruct>::clear(cpp_unique_ref.get());
+  if (cpp2_unique_ref) ::apache::thrift::Cpp2Ops<  ::some::valid::ns::containerStruct>::clear(cpp2_unique_ref.get());
+  container_with_ref.reset(new typename decltype(container_with_ref)::element_type());
+  if (req_cpp_unique_ref) ::apache::thrift::Cpp2Ops<  ::some::valid::ns::containerStruct>::clear(req_cpp_unique_ref.get());
+  if (req_cpp2_unique_ref) ::apache::thrift::Cpp2Ops<  ::some::valid::ns::containerStruct>::clear(req_cpp2_unique_ref.get());
+  req_container_with_ref.reset(new typename decltype(req_container_with_ref)::element_type());
+  if (opt_cpp_unique_ref) ::apache::thrift::Cpp2Ops<  ::some::valid::ns::containerStruct>::clear(opt_cpp_unique_ref.get());
+  if (opt_cpp2_unique_ref) ::apache::thrift::Cpp2Ops<  ::some::valid::ns::containerStruct>::clear(opt_cpp2_unique_ref.get());
+  opt_container_with_ref.reset(new typename decltype(opt_container_with_ref)::element_type());
+  if (ref_type_unique) ::apache::thrift::Cpp2Ops<  ::some::valid::ns::containerStruct>::clear(ref_type_unique.get());
+  if (ref_type_shared) ::apache::thrift::Cpp2Ops<  ::some::valid::ns::containerStruct>::clear(ref_type_shared.get());
+  ref_type_const.reset(new typename decltype(ref_type_const)::element_type());
+  if (req_ref_type_shared) ::apache::thrift::Cpp2Ops<  ::some::valid::ns::containerStruct>::clear(req_ref_type_shared.get());
+  req_ref_type_const.reset();
+  req_ref_type_unique.reset(new typename decltype(req_ref_type_unique)::element_type());
+  opt_ref_type_const.reset();
+  if (opt_ref_type_unique) ::apache::thrift::Cpp2Ops<  ::some::valid::ns::containerStruct>::clear(opt_ref_type_unique.get());
+  opt_ref_type_shared.reset(new typename decltype(opt_ref_type_shared)::element_type());
+  base_type = 0;
+  list_type.clear();
+  set_type.clear();
+  map_type.clear();
+  map_struct_type.clear();
+  __isset.__clear();
+}
+
+bool AnnotatatedStruct::operator==(const AnnotatatedStruct& rhs) const {
+  if (!((no_annotation == rhs.no_annotation))) {
+    return false;
+  }
+  if (!(((cpp_unique_ref && rhs.cpp_unique_ref && *cpp_unique_ref == *rhs.cpp_unique_ref) ||(!cpp_unique_ref && !rhs.cpp_unique_ref)))) {
+    return false;
+  }
+  if (!(((cpp2_unique_ref && rhs.cpp2_unique_ref && *cpp2_unique_ref == *rhs.cpp2_unique_ref) ||(!cpp2_unique_ref && !rhs.cpp2_unique_ref)))) {
+    return false;
+  }
+  if (!(((container_with_ref && rhs.container_with_ref && *container_with_ref == *rhs.container_with_ref) ||(!container_with_ref && !rhs.container_with_ref)))) {
+    return false;
+  }
+  if (!(((req_cpp_unique_ref && rhs.req_cpp_unique_ref && *req_cpp_unique_ref == *rhs.req_cpp_unique_ref) ||(!req_cpp_unique_ref && !rhs.req_cpp_unique_ref)))) {
+    return false;
+  }
+  if (!(((req_cpp2_unique_ref && rhs.req_cpp2_unique_ref && *req_cpp2_unique_ref == *rhs.req_cpp2_unique_ref) ||(!req_cpp2_unique_ref && !rhs.req_cpp2_unique_ref)))) {
+    return false;
+  }
+  if (!(((req_container_with_ref && rhs.req_container_with_ref && *req_container_with_ref == *rhs.req_container_with_ref) ||(!req_container_with_ref && !rhs.req_container_with_ref)))) {
+    return false;
+  }
+  if (!(((opt_cpp_unique_ref && rhs.opt_cpp_unique_ref && *opt_cpp_unique_ref == *rhs.opt_cpp_unique_ref) ||(!opt_cpp_unique_ref && !rhs.opt_cpp_unique_ref)))) {
+    return false;
+  }
+  if (!(((opt_cpp2_unique_ref && rhs.opt_cpp2_unique_ref && *opt_cpp2_unique_ref == *rhs.opt_cpp2_unique_ref) ||(!opt_cpp2_unique_ref && !rhs.opt_cpp2_unique_ref)))) {
+    return false;
+  }
+  if (!(((opt_container_with_ref && rhs.opt_container_with_ref && *opt_container_with_ref == *rhs.opt_container_with_ref) ||(!opt_container_with_ref && !rhs.opt_container_with_ref)))) {
+    return false;
+  }
+  if (!(((ref_type_unique && rhs.ref_type_unique && *ref_type_unique == *rhs.ref_type_unique) ||(!ref_type_unique && !rhs.ref_type_unique)))) {
+    return false;
+  }
+  if (!(((ref_type_shared && rhs.ref_type_shared && *ref_type_shared == *rhs.ref_type_shared) ||(!ref_type_shared && !rhs.ref_type_shared)))) {
+    return false;
+  }
+  if (!(((ref_type_const && rhs.ref_type_const && *ref_type_const == *rhs.ref_type_const) ||(!ref_type_const && !rhs.ref_type_const)))) {
+    return false;
+  }
+  if (!(((req_ref_type_shared && rhs.req_ref_type_shared && *req_ref_type_shared == *rhs.req_ref_type_shared) ||(!req_ref_type_shared && !rhs.req_ref_type_shared)))) {
+    return false;
+  }
+  if (!(((req_ref_type_const && rhs.req_ref_type_const && *req_ref_type_const == *rhs.req_ref_type_const) ||(!req_ref_type_const && !rhs.req_ref_type_const)))) {
+    return false;
+  }
+  if (!(((req_ref_type_unique && rhs.req_ref_type_unique && *req_ref_type_unique == *rhs.req_ref_type_unique) ||(!req_ref_type_unique && !rhs.req_ref_type_unique)))) {
+    return false;
+  }
+  if (!(((opt_ref_type_const && rhs.opt_ref_type_const && *opt_ref_type_const == *rhs.opt_ref_type_const) ||(!opt_ref_type_const && !rhs.opt_ref_type_const)))) {
+    return false;
+  }
+  if (!(((opt_ref_type_unique && rhs.opt_ref_type_unique && *opt_ref_type_unique == *rhs.opt_ref_type_unique) ||(!opt_ref_type_unique && !rhs.opt_ref_type_unique)))) {
+    return false;
+  }
+  if (!(((opt_ref_type_shared && rhs.opt_ref_type_shared && *opt_ref_type_shared == *rhs.opt_ref_type_shared) ||(!opt_ref_type_shared && !rhs.opt_ref_type_shared)))) {
+    return false;
+  }
+  if (!((base_type == rhs.base_type))) {
+    return false;
+  }
+  if (!((list_type == rhs.list_type))) {
+    return false;
+  }
+  if (!((set_type == rhs.set_type))) {
+    return false;
+  }
+  if (!((map_type == rhs.map_type))) {
+    return false;
+  }
+  if (!((map_struct_type == rhs.map_struct_type))) {
+    return false;
+  }
+  return true;
+}
+
+const  ::some::valid::ns::containerStruct& AnnotatatedStruct::get_no_annotation() const& {
+  return no_annotation;
+}
+
+ ::some::valid::ns::containerStruct AnnotatatedStruct::get_no_annotation() && {
+  return std::move(no_annotation);
+}
+
+const folly::small_vector<int64_t, 8 /* maxInline */>& AnnotatatedStruct::get_list_type() const& {
+  return list_type;
+}
+
+folly::small_vector<int64_t, 8 /* maxInline */> AnnotatatedStruct::get_list_type() && {
+  return std::move(list_type);
+}
+
+const folly::sorted_vector_set<std::string>& AnnotatatedStruct::get_set_type() const& {
+  return set_type;
+}
+
+folly::sorted_vector_set<std::string> AnnotatatedStruct::get_set_type() && {
+  return std::move(set_type);
+}
+
+const FakeMap& AnnotatatedStruct::get_map_type() const& {
+  return map_type;
+}
+
+FakeMap AnnotatatedStruct::get_map_type() && {
+  return std::move(map_type);
+}
+
+const std::unordered_map<std::string, containerStruct>& AnnotatatedStruct::get_map_struct_type() const& {
+  return map_struct_type;
+}
+
+std::unordered_map<std::string, containerStruct> AnnotatatedStruct::get_map_struct_type() && {
+  return std::move(map_struct_type);
+}
+
+void swap(AnnotatatedStruct& a, AnnotatatedStruct& b) {
+  using ::std::swap;
+  swap(a.no_annotation, b.no_annotation);
+  swap(a.cpp_unique_ref, b.cpp_unique_ref);
+  swap(a.cpp2_unique_ref, b.cpp2_unique_ref);
+  swap(a.container_with_ref, b.container_with_ref);
+  swap(a.req_cpp_unique_ref, b.req_cpp_unique_ref);
+  swap(a.req_cpp2_unique_ref, b.req_cpp2_unique_ref);
+  swap(a.req_container_with_ref, b.req_container_with_ref);
+  swap(a.opt_cpp_unique_ref, b.opt_cpp_unique_ref);
+  swap(a.opt_cpp2_unique_ref, b.opt_cpp2_unique_ref);
+  swap(a.opt_container_with_ref, b.opt_container_with_ref);
+  swap(a.ref_type_unique, b.ref_type_unique);
+  swap(a.ref_type_shared, b.ref_type_shared);
+  swap(a.ref_type_const, b.ref_type_const);
+  swap(a.req_ref_type_shared, b.req_ref_type_shared);
+  swap(a.req_ref_type_const, b.req_ref_type_const);
+  swap(a.req_ref_type_unique, b.req_ref_type_unique);
+  swap(a.opt_ref_type_const, b.opt_ref_type_const);
+  swap(a.opt_ref_type_unique, b.opt_ref_type_unique);
+  swap(a.opt_ref_type_shared, b.opt_ref_type_shared);
+  swap(a.base_type, b.base_type);
+  swap(a.list_type, b.list_type);
+  swap(a.set_type, b.set_type);
+  swap(a.map_type, b.map_type);
+  swap(a.map_struct_type, b.map_struct_type);
+  swap(a.__isset, b.__isset);
+}
+
+template uint32_t AnnotatatedStruct::read<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t AnnotatatedStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t AnnotatatedStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t AnnotatatedStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t AnnotatatedStruct::read<>(apache::thrift::CompactProtocolReader*);
+template uint32_t AnnotatatedStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t AnnotatatedStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t AnnotatatedStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 }}} // some::valid::ns
 namespace apache { namespace thrift {

@@ -11,8 +11,8 @@
 
 namespace cpp2 {
 
-MyServiceWrapper::MyServiceWrapper(PyObject *obj)
-  : if_object(obj)
+MyServiceWrapper::MyServiceWrapper(PyObject *obj, folly::Executor* exc)
+  : if_object(obj), executor(exc)
   {
     import_service__services();
     Py_XINCREF(this->if_object);
@@ -28,16 +28,49 @@ folly::Future<folly::Unit> MyServiceWrapper::future_query(
 ) {
   folly::Promise<folly::Unit> promise;
   auto future = promise.getFuture();
-  call_cy_MyService_query(
-    this->if_object,
-    std::move(promise),
-    std::move(s),
-    std::move(i)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+s = std::move(s),
+i = std::move(i)    ]() mutable {
+        call_cy_MyService_query(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(s),
+            std::move(i)        );
+    });
+
   return future;
 }
 
-std::shared_ptr<apache::thrift::ServerInterface> MyServiceInterface(PyObject *if_object) {
-  return std::make_shared<MyServiceWrapper>(if_object);
+folly::Future<folly::Unit> MyServiceWrapper::future_has_arg_docs(
+  std::unique_ptr<cpp2::MyStruct> s,
+  std::unique_ptr<cpp2::Included> i
+) {
+  folly::Promise<folly::Unit> promise;
+  auto future = promise.getFuture();
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+s = std::move(s),
+i = std::move(i)    ]() mutable {
+        call_cy_MyService_has_arg_docs(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(s),
+            std::move(i)        );
+    });
+
+  return future;
+}
+
+std::shared_ptr<apache::thrift::ServerInterface> MyServiceInterface(PyObject *if_object, folly::Executor *exc) {
+  return std::make_shared<MyServiceWrapper>(if_object, exc);
 }
 } // namespace cpp2

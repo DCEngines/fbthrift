@@ -136,11 +136,6 @@ st_identifier ([a-zA-Z-][\.a-zA-Z_0-9-]*)
 "ruby_namespace"     { return tok_ruby_namespace;       }
 "smalltalk_category" { return tok_smalltalk_category;   }
 "smalltalk_prefix"   { return tok_smalltalk_prefix;     }
-"xsd_all"            { return tok_xsd_all;              }
-"xsd_optional"       { return tok_xsd_optional;         }
-"xsd_nillable"       { return tok_xsd_nillable;         }
-"xsd_namespace"      { return tok_xsd_namespace;        }
-"xsd_attrs"          { return tok_xsd_attrs;            }
 "include"            { return tok_include;              }
 "void"               { return tok_void;                 }
 "bool"               { return tok_bool;                 }
@@ -153,7 +148,6 @@ st_identifier ([a-zA-Z-][\.a-zA-Z_0-9-]*)
 "string"             { return tok_string;               }
 "binary"             { return tok_binary;               }
 "slist"              { return tok_slist;                }
-"senum"              { return tok_senum;                }
 "map"                { return tok_map;                  }
 "hash_map"           { return tok_hash_map;             }
 "list"               { return tok_list;                 }
@@ -164,13 +158,6 @@ st_identifier ([a-zA-Z-][\.a-zA-Z_0-9-]*)
 "typedef"            { return tok_typedef;              }
 "struct"             { return tok_struct;               }
 "union"              { return tok_union;                }
-"view"               {
-  if (g_scope_level != 0) {
-    yylval.id = strdup(yytext);
-    return tok_identifier;
-  }
-  return tok_view;
-}
 "exception"          { return tok_xception;             }
 "extends"            { return tok_extends;              }
 "throws"             { return tok_throws;               }

@@ -31,22 +31,23 @@ key, include the parallel CythonPythonToCppKey file instead.
 }}{{#type:i32?}}item{{/type:i32?}}{{!
 }}{{#type:i64?}}item{{/type:i64?}}{{!
 }}{{#type:double?}}item{{/type:double?}}{{!
+}}{{#type:float?}}item{{/type:float?}}{{!
 }}{{#type:string?}}item.encode('UTF-8'){{/type:string?}}{{!
 }}{{#type:binary?}}item{{/type:binary?}}{{!
 }}{{#type:struct}}deref((<{{!
-  }}{{#type:externalProgram?}}{{> ModulePath}}.{{/type:externalProgram?}}{{!
+  }}{{#type:externalProgram?}}{{> common/ModulePath}}.{{/type:externalProgram?}}{{!
   }}{{struct:name}}> item).c_{{struct:name}}){{!
 }}{{/type:struct}}{{!
 }}{{#type:list?}}deref({{type:flat_name}}(item)._vector.get()){{/type:list?}}{{!
-}}{{#type:set?}}cset[{{!
-  }}{{#type:setElemType}}{{> ContainerCythonFieldTypeConditionally}}{{/type:setElemType}}{{!
+}}{{#type:set?}}c{{#type:unordered?}}u{{/type:unordered?}}set[{{!
+  }}{{#type:setElemType}}{{> types/CythonCppType}}{{/type:setElemType}}{{!
   }}](deref({{type:flat_name}}(item)._set.get())){{/type:set?}}{{!
-}}{{#type:map?}}cmap[{{!
-  }}{{#type:keyType}}{{> ContainerCythonFieldTypeConditionally}}{{/type:keyType}},{{!
-  }}{{#type:valueType}}{{> ContainerCythonFieldTypeConditionally}}{{/type:valueType}}{{!
+}}{{#type:map?}}c{{#type:unordered?}}u{{/type:unordered?}}map[{{!
+  }}{{#type:keyType}}{{> types/CythonCppType}}{{/type:keyType}},{{!
+  }}{{#type:valueType}}{{> types/CythonCppType}}{{/type:valueType}}{{!
   }}](deref({{type:flat_name}}(item)._map.get())){{/type:map?}}{{!
 }}{{#type:enum}}{{!
-  }}<{{#type:externalProgram?}}{{> ModulePath}}.{{/type:externalProgram?}}{{!
+  }}<{{#type:externalProgram?}}{{> common/ModulePath}}.{{/type:externalProgram?}}{{!
   }}c{{enum:name}}> {{!
-  }}{{#type:externalProgram?}}{{> ModulePath}}.{{/type:externalProgram?}}{{!
+  }}{{#type:externalProgram?}}{{> common/ModulePath}}.{{/type:externalProgram?}}{{!
   }}{{enum:name}}_to_cpp(item){{/type:enum}}

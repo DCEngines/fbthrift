@@ -635,8 +635,7 @@ void t_cpp_generator::init_generator() {
       endl << "#include <folly/Range.h>" << endl <<
       endl << "#include <folly/Conv.h>" << endl <<
       endl << "#include <math.h>" << endl <<
-      endl << "#include <thrift/lib/cpp/Thrift.h>" << endl <<
-      endl << "using namespace folly::json;" << endl;
+      endl << "#include <thrift/lib/cpp/Thrift.h>" << endl;
   }
 
   if (!bootstrap_) {
@@ -939,32 +938,27 @@ void t_cpp_generator::generate_enum(t_enum* tenum) {
     "namespace apache { namespace thrift {" << endl <<
     "template <> struct TEnumDataStorage<" << fullname << ">;" << endl <<
     "template <> const std::size_t " <<
-    "TEnumTraitsBase<" << fullname << ">::size;" << endl <<
+    "TEnumTraits<" << fullname << ">::size;" << endl <<
     "template <> const folly::Range<const " << fullname << "*> " <<
-    "TEnumTraitsBase<" << fullname << ">::values;" << endl <<
+    "TEnumTraits<" << fullname << ">::values;" << endl <<
     "template <> const folly::Range<const folly::StringPiece*> " <<
-    "TEnumTraitsBase<" << fullname << ">::names;" << endl <<
-    "}} // apache::thrift" << endl << endl <<
-    ns_open_ << endl << endl;
+    "TEnumTraits<" << fullname << ">::names;" << endl;
 
   if (!minName.empty()) {
     f_types_ <<
-      ns_close_ << endl <<
-      "namespace apache { namespace thrift {" << endl <<
-      "template<>" << endl <<
-      "struct TEnumTraits<" << fullname <<
-      "> : public TEnumTraitsBase<" << fullname << ">" << endl <<
-      "{" << endl <<
-      "inline static constexpr " << fullname << " min() {" << endl <<
+      "template <> inline constexpr " << fullname << " " <<
+      "TEnumTraits<" << fullname << ">::min() {" << endl <<
       indent() << "return " << fullname << "::" << minName << ";" << endl <<
       "}" << endl <<
-      "inline static constexpr " << fullname << " max() {" << endl <<
+      "template <> inline constexpr " << fullname << " " <<
+      "TEnumTraits<" << fullname << ">::max() {" << endl <<
       indent() << "return " << fullname << "::" << maxName << ";" << endl <<
-      "}" << endl <<
-      "};" << endl <<
-      "}} // apache:thrift" << endl << endl <<
-      ns_open_ << endl;
+      "}" << endl;
   }
+
+  f_types_ <<
+    "}} // apache::thrift" << endl << endl <<
+    ns_open_ << endl << endl;
 
   f_types_impl_ <<
     indent() << "const typename " << map_factory << "::ValuesToNamesMapType " <<
@@ -987,32 +981,32 @@ void t_cpp_generator::generate_enum(t_enum* tenum) {
   const auto map_factory_ns = "apache::thrift::detail::TEnumMapFactory<" +
     fullname + ", " + value_type + ">";
 
-  // TEnumTraitsBase<T> class member specializations
+  // TEnumTraits<T> class member specializations
   f_types_impl_ <<
     ns_close_ << endl <<
     "namespace apache { namespace thrift {" << endl;
-  // TEnumTraitsBase<T>::size
+  // TEnumTraits<T>::size
   f_types_impl_ <<
     "template <>" <<
-    "const std::size_t TEnumTraitsBase<" << fullname << ">::size = " <<
+    "const std::size_t TEnumTraits<" << fullname << ">::size = " <<
     constants.size() << ";" << endl;
-  // TEnumTraitsBase<T>::values
+  // TEnumTraits<T>::values
   f_types_impl_ <<
     "template <>" <<
     "const folly::Range<const " << fullname << "*> " <<
-    "TEnumTraitsBase<" << fullname << ">::values = " <<
+    "TEnumTraits<" << fullname << ">::values = " <<
     storage_range_of("values") << ";" << endl;
-  // TEnumTraitsBase<T>::names
+  // TEnumTraits<T>::names
   f_types_impl_ <<
     "template <>" <<
     "const folly::Range<const folly::StringPiece*> " <<
-    "TEnumTraitsBase<" << fullname << ">::names = " <<
+    "TEnumTraits<" << fullname << ">::names = " <<
     storage_range_of("names") << ";" << endl;
   f_types_impl_ << endl;
-  // TEnumTraitsBase<T>::findName()
+  // TEnumTraits<T>::findName()
   f_types_impl_ <<
     indent() << "template<>" << endl <<
-    "const char* TEnumTraitsBase<" << fullname <<
+    "const char* TEnumTraits<" << fullname <<
       ">::findName(" << fullname << " value) {" << endl;
   indent_up();
   f_types_impl_ <<
@@ -1024,10 +1018,10 @@ void t_cpp_generator::generate_enum(t_enum* tenum) {
   indent_down();
   f_types_impl_ <<
     indent() << "}" << endl << endl;
-  // TEnumTraitsBase<T>::findValue()
+  // TEnumTraits<T>::findValue()
   f_types_impl_ <<
     indent() << "template<>" << endl <<
-      "bool TEnumTraitsBase<" << fullname <<
+      "bool TEnumTraits<" << fullname <<
       ">::findValue(const char* name, " << fullname << "* out) {" << endl;
   indent_up();
   f_types_impl_ <<
@@ -1786,13 +1780,14 @@ void t_cpp_generator::generate_cpp_union(t_struct* tstruct) {
   indent_down();
   indent(out) << "}" << endl;
 
-  if (tstruct->annotations_.find("final") == tstruct->annotations_.end()) {
-    indent(out) << "virtual ~" << tstruct->get_name() << "() throw() {" << endl;
-    indent_up();
-    indent(out) << "__clear();" << endl;
-    indent_down();
-    indent(out) << "}" << endl << endl;
-  }
+  bool virtDest =
+      tstruct->annotations_.find("final") == tstruct->annotations_.end();
+  indent(out) << (virtDest ? "virtual " : "") << "~" << tstruct->get_name()
+              << "() throw() {" << endl;
+  indent_up();
+  indent(out) << "__clear();" << endl;
+  indent_down();
+  indent(out) << "}" << endl << endl;
 
   // Declare the storage type
   indent(out) << "union storage_type {" << endl;
@@ -2726,6 +2721,7 @@ void t_cpp_generator::generate_frozen_struct_definition(t_struct* tstruct) {
   indent(f_types_impl_) << "const " << freezerName << "::ThawedType& src) {" <<
     endl;
   indent_down();
+  f_types_impl_ << indent() << "(void)src;" << endl;
   f_types_impl_ << indent() << "return 0";
   indent_up();
   for (t_field* field : members) {
@@ -2751,6 +2747,7 @@ void t_cpp_generator::generate_frozen_struct_definition(t_struct* tstruct) {
     indent() << freezerName << "::FrozenType& dst," << endl <<
     indent() << "byte*& buffer) {" << endl;
   indent_down();
+  f_types_impl_ << indent() << "(void)buffer;" << endl;
   for (t_field* field : members) {
     const string& fname = field->get_name();
 
@@ -3962,7 +3959,7 @@ void t_cpp_generator::generate_service(t_service* tservice) {
     f_header_ <<
       "#include <functional>" << endl <<
       // TODO(dreiss): Libify the base client so we don't have to include this.
-      "#include <thrift/lib/cpp/transport/TTransportUtils.h>" << endl <<
+      "#include <thrift/lib/cpp/transport/TBufferTransports.h>" << endl <<
       "namespace apache { namespace thrift { namespace async {" << endl <<
       "class TAsyncChannel;" << endl <<
       "}}}" << endl;
@@ -5450,7 +5447,7 @@ void t_cpp_generator::generate_service_client(t_service* tservice, string style)
         out << ");" << endl;
         out <<
           indent() << "if (ew) {" << endl <<
-          indent() << "  ew.throwException();" << endl <<
+          indent() << "  ew.throw_exception();" << endl <<
           indent() << "}" << endl;
         if (!is_complex_type(return_type) && !return_type->is_void()) {
           out << indent() << "return _return;" << endl;
@@ -6705,7 +6702,6 @@ void t_cpp_generator::generate_deserialize_field(ofstream& out,
     switch (tbase) {
     case t_base_type::TYPE_VOID:
       throw "compiler error: cannot serialize void field in a struct: " + name;
-      break;
     case t_base_type::TYPE_STRING:
       if (((t_base_type*)type)->is_binary()) {
         out << "readBinary(" << name << ");";
@@ -7042,7 +7038,6 @@ void t_cpp_generator::generate_serialize_field(ofstream& out,
       case t_base_type::TYPE_VOID:
         throw
           "compiler error: cannot serialize void field in a struct: " + name;
-        break;
       case t_base_type::TYPE_STRING:
         if (((t_base_type*)type)->is_binary()) {
           out << "writeBinary(" << name << ");";
@@ -7656,10 +7651,29 @@ std::string t_cpp_generator::generate_reflection_datatype(t_type* ttype) {
         "    f.order = " << order << ";" << endl;
       ++order;
 
-      if (!p.annotations.empty()) {
+      static const auto black_list = std::unordered_set<std::string>{
+          "cpp.methods",
+          "cpp.ref",
+          "cpp.ref_type",
+          "cpp.template",
+          "cpp.type",
+          "cpp2.methods",
+          "cpp2.ref",
+          "cpp2.ref_type",
+          "cpp2.template",
+          "cpp2.type",
+      };
+      std::map<std::string, std::string> filtered_annotations;
+      for (auto const& ann : p.annotations) {
+        if (!black_list.count(ann.first)) {
+          filtered_annotations.insert(ann);
+        }
+      }
+
+      if (!filtered_annotations.empty()) {
         f_reflection_impl_ <<
           "    f.__isset.annotations = true;" << endl;
-        for (auto& ann : p.annotations) {
+        for (auto& ann : filtered_annotations) {
           escape_quotes_cpp(ann.second);
           f_reflection_impl_ <<
             "    f.annotations[\"" << ann.first << "\"] = \"" <<

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Facebook, Inc.
+ * Copyright 2004-present Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@
 #include <thrift/lib/cpp/server/TServerObserver.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <folly/SocketAddress.h>
-#include <thrift/lib/cpp/transport/TTransportUtils.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 
@@ -156,8 +155,9 @@ class BaseThriftServer : public apache::thrift::server::TServer {
   // If it is set true, server will check and use client timeout header
   bool useClientTimeout_ = true;
 
+  std::string overloadedErrorCode_ = kOverloadedErrorCode;
   folly::Function<bool(const transport::THeader*)> isOverloaded_ =
-      [](const transport::THeader* header) { return false; };
+      [](const transport::THeader*) { return false; };
   std::function<int64_t(const std::string&)> getLoad_;
 
   enum class InjectedFailure { NONE, ERROR, DROP, DISCONNECT };
@@ -622,6 +622,14 @@ class BaseThriftServer : public apache::thrift::server::TServer {
    * @return listen backlog.
    */
   int getListenBacklog() const { return listenBacklog_; }
+
+  void setOverloadedErrorCode(const std::string& errorCode) {
+    overloadedErrorCode_ = errorCode;
+  }
+
+  const std::string& getOverloadedErrorCode() {
+    return overloadedErrorCode_;
+  }
 
   void setIsOverloaded(folly::Function<
       bool(const apache::thrift::transport::THeader*)> isOverloaded) {

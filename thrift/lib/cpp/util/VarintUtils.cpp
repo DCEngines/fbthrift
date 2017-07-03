@@ -94,7 +94,7 @@ uint32_t writeVarint32(uint32_t n, uint8_t* pkt) {
   }
 
   // Caller will advance pkt.
-  for (int i = 0; i < wsize; i++) {
+  for (auto i = 0u; i < wsize; i++) {
     pkt[i] = buf[i];
   }
 
@@ -106,7 +106,7 @@ uint32_t writeVarint16(uint16_t n, uint8_t* pkt) {
 }
 
 namespace detail {
-  void throwInvalidVarint() {
+  [[noreturn]] void throwInvalidVarint() {
     throw std::out_of_range("invalid varint read");
   }
 }

@@ -25,6 +25,7 @@
 #include <boost/filesystem.hpp>
 
 #include <thrift/compiler/generate/t_generator.h>
+#include <thrift/compiler/generate/t_mstch_objects.h>
 
 class t_mstch_generator : public t_generator {
  public:
@@ -46,17 +47,25 @@ class t_mstch_generator : public t_generator {
   const std::map<std::string, std::string> parsed_options_;
 
   /**
+   * If true, typedefs will be automatically resolved to their underlying
+   * type.
+   */
+  virtual bool should_resolve_typedefs() const {
+    return false;
+  }
+
+  /**
    * Fetches a particular template from the template map, throwing an error
    * if the template doesn't exist
    */
-  const std::string& get_template(const std::string& template_name) const;
+  const std::string& get_template(const std::string& template_name);
 
   /**
    * Returns the map of (file_name, template_contents) for each template
    * file for this generator
    */
-  const std::map<std::string, std::string>& get_template_map() const {
-    return this->template_map_;
+  const std::map<std::string, std::string>& get_template_map() {
+    return template_map_;
   }
 
   /**
@@ -64,7 +73,7 @@ class t_mstch_generator : public t_generator {
    */
   std::string render(
       const std::string& template_name,
-      const mstch::node& context) const;
+      const mstch::node& context);
 
   /**
    * Write an output file with the given contents to a path
@@ -94,70 +103,102 @@ class t_mstch_generator : public t_generator {
       const T& obj,
       const std::string& template_name,
       const boost::filesystem::path& path) {
-    this->render_to_file(this->dump(obj), template_name, path);
+    render_to_file(dump(obj), template_name, path);
+  }
+
+  template <typename T>
+  void render_to_file(
+      const T& obj,
+      const mstch::map& extra_context,
+      const std::string& template_name,
+      const boost::filesystem::path& path) {
+    mstch::map result = this->dump(obj);
+    result.insert(extra_context.begin(), extra_context.end());
+    this->render_to_file(result, template_name, path);
+  }
+
+  /**
+   * Render the mstch template with name `template_name` with the given context.
+   * This writes to a path under the output directory.
+   */
+  void render_to_file(
+      const std::shared_ptr<mstch_base> context,
+      const std::string& template_name,
+      const boost::filesystem::path& path) {
+    write_output(path, render(template_name, context));
   }
 
   /**
    * Dump map of command line flags passed to generator
    */
-  mstch::map dump_options() const;
+  mstch::map dump_options();
 
   /**
    * Subclasses should call the dump functions to convert elements
    * of the Thrift AST into maps that can be passed into mstch.
    */
-  mstch::map dump(const t_program&) const;
-  mstch::map dump(const t_struct&, bool shallow = false) const;
-  mstch::map dump(const t_field&) const;
-  mstch::map dump(const t_type&, const int32_t depth = 0) const;
-  mstch::map dump(const t_enum&) const;
-  mstch::map dump(const t_enum_value&) const;
-  mstch::map dump(const t_service&) const;
-  mstch::map dump(const t_function&) const;
-  mstch::map dump(const t_typedef&) const;
-  mstch::map dump(const t_const&) const;
-  mstch::map dump(const t_const_value&) const;
-  mstch::map dump(
-      const std::map<t_const_value*, t_const_value*>::value_type&) const;
+  mstch::map dump(const t_program&);
+  mstch::map dump(const t_struct&, bool shallow = false);
+  mstch::map dump(const t_field&, int32_t index = 0);
+  mstch::map dump(const t_type&);
+  mstch::map dump(const t_enum&);
+  mstch::map dump(const t_enum_value&);
+  mstch::map dump(const t_service&);
+  mstch::map dump(const t_function&);
+  mstch::map dump(const t_typedef&);
+  mstch::map dump(const t_const&);
+  mstch::map dump(const t_const_value&);
+  mstch::map dump(const std::map<t_const_value*, t_const_value*>::value_type&);
 
   using annotation = std::pair<std::string, std::string>;
-  mstch::map dump(const annotation&) const;
-  mstch::map dump(const string&) const;
+  mstch::map dump(const annotation&);
+  mstch::map dump(const string&);
 
   /**
    * Subclasses should override these functions to extend the behavior of
    * the dump functions. These will be passed the map after the default
    * dump has run, and can modify the maps in whichever ways necessary.
    */
-  virtual mstch::map extend_program(const t_program&) const;
-  virtual mstch::map extend_struct(const t_struct&) const;
-  virtual mstch::map extend_field(const t_field&) const;
-  virtual mstch::map extend_type(const t_type&, const int32_t depth = 0) const;
-  virtual mstch::map extend_enum(const t_enum&) const;
-  virtual mstch::map extend_enum_value(const t_enum_value&) const;
-  virtual mstch::map extend_service(const t_service&) const;
-  virtual mstch::map extend_function(const t_function&) const;
-  virtual mstch::map extend_typedef(const t_typedef&) const;
-  virtual mstch::map extend_const(const t_const&) const;
-  virtual mstch::map extend_const_value(const t_const_value&) const;
+  virtual mstch::map extend_program(const t_program&);
+  virtual mstch::map extend_struct(const t_struct&);
+  virtual mstch::map extend_field(const t_field&);
+  virtual mstch::map extend_type(const t_type&);
+  virtual mstch::map extend_enum(const t_enum&);
+  virtual mstch::map extend_enum_value(const t_enum_value&);
+  virtual mstch::map extend_service(const t_service&);
+  virtual mstch::map extend_function(const t_function&);
+  virtual mstch::map extend_typedef(const t_typedef&);
+  virtual mstch::map extend_const(const t_const&);
+  virtual mstch::map extend_const_value(const t_const_value&);
   virtual mstch::map extend_const_value_map_elem(
-      const std::map<t_const_value*, t_const_value*>::value_type&) const;
-  virtual mstch::map extend_annotation(const annotation&) const;
+      const std::map<t_const_value*, t_const_value*>::value_type&);
+  virtual mstch::map extend_annotation(const annotation&);
+
+  template <typename element>
+  mstch::map dump_elem(const element& elem, int32_t /*index*/) {
+    return dump(elem);
+  }
+
+  mstch::map dump_elem(const t_field& elem, int32_t index) {
+    return dump(elem, index);
+  }
 
   template <typename container>
-  mstch::array dump_elems(const container& elems) const {
+  mstch::array dump_elems(const container& elems) {
     using T = typename container::value_type;
     mstch::array result{};
+    int32_t index = 0;
     for (auto itr = elems.begin(); itr != elems.end(); ++itr) {
-      auto map = this->dump(
-          *as_const_pointer<typename std::remove_pointer<T>::type>(*itr));
+      auto map =
+          dump_elem(*as_const_pointer<std::remove_pointer_t<T>>(*itr), index);
       result.push_back(map);
+      ++index;
     }
     add_first_last(result);
     return result;
   }
 
-  void add_first_last(mstch::array& elems) const {
+  void add_first_last(mstch::array& elems) {
     for (auto itr = elems.begin(); itr != elems.end(); ++itr) {
       boost::get<mstch::map>(*itr).emplace("first?", itr == elems.begin());
       boost::get<mstch::map>(*itr).emplace("last?",
@@ -165,7 +206,9 @@ class t_mstch_generator : public t_generator {
     }
   }
 
-  std::unique_ptr<std::string> get_option(const std::string& key) const;
+  std::unique_ptr<std::string> get_option(const std::string& key);
+
+  const t_type& resolve_typedef(const t_type& type) const;
 
  private:
   std::map<std::string, std::string> template_map_{};
@@ -189,4 +232,8 @@ class t_mstch_generator : public t_generator {
   static const T* as_const_pointer(const T& x) {
     return std::addressof(x);
   }
+
+ protected:
+  std::shared_ptr<mstch_generators> generators_;
+  std::shared_ptr<mstch_cache> cache_;
 };

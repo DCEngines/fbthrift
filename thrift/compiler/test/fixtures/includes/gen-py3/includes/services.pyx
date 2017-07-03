@@ -16,12 +16,17 @@ from libcpp.map cimport map as cmap
 from cython.operator cimport dereference as deref
 from cpython.ref cimport PyObject
 from thrift.py3.exceptions cimport cTApplicationException
-from thrift.py3.server cimport ServiceInterface
-from thrift.py3.folly cimport (
+from thrift.py3.server cimport ServiceInterface, RequestContext, Cpp2RequestContext
+from thrift.py3.server import RequestContext
+from folly cimport (
   cFollyPromise,
   cFollyUnit,
   c_unit
 )
+
+cimport folly.futures
+from folly.executor cimport get_executor
+
 cimport includes.types
 import includes.types
 
@@ -35,5 +40,6 @@ import traceback
 cdef extern from "<utility>" namespace "std":
     cdef cFollyPromise[unique_ptr[string]] move(cFollyPromise[unique_ptr[string]])
     pass
+
 
 

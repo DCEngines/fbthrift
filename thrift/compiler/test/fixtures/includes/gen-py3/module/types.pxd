@@ -13,16 +13,19 @@ from libcpp.memory cimport shared_ptr, unique_ptr
 from libcpp.vector cimport vector
 from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
-from thrift.py3.exceptions cimport cTException
+from libcpp.unordered_set cimport unordered_set as cuset
+from libcpp.unordered_map cimport unordered_map as cumap
+from thrift.py3.exceptions cimport cTException, Error as __Error
 cimport thrift.py3.types
 cimport includes.types
 
 
 
 
-cdef extern from "gen-cpp2/module_types.h" namespace "cpp2":
+cdef extern from "gen-cpp2/module_types_custom_protocol.h" namespace "cpp2":
     cdef cppclass cMyStruct__isset "cpp2::MyStruct::__isset":
         bint MyIncludedField
+        bint MyIncludedInt
 
     # Forward Declaration
     cdef cppclass cMyStruct "cpp2::MyStruct"
@@ -32,6 +35,7 @@ cdef extern from "gen-cpp2/module_types.h" namespace "cpp2":
         cMyStruct(const cMyStruct&) except +
         bint operator==(cMyStruct&)
         includes.types.cIncluded MyIncludedField
+        int64_t MyIncludedInt
         cMyStruct__isset __isset
 
 

@@ -37,7 +37,6 @@
 #include <thrift/lib/cpp/server/TServerObserver.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp/transport/TSSLSocket.h>
-#include <thrift/lib/cpp/transport/TTransportUtils.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/async/HeaderServerChannel.h>
@@ -273,8 +272,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer
    */
   int32_t getPendingCount() const;
 
-  virtual bool isOverloaded(
-    const apache::thrift::transport::THeader* header = nullptr) override;
+  bool isOverloaded(
+      const apache::thrift::transport::THeader* header = nullptr) override;
 
   int64_t getRequestLoad() override;
   std::string getLoadInfo(int64_t load) override;
@@ -555,7 +554,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer
   /**
    * Get the number of connections dropped by the AsyncServerSocket
    */
-  virtual uint64_t getNumDroppedConnections() const override;
+  uint64_t getNumDroppedConnections() const override;
 
   /**
    * Clear all the workers.

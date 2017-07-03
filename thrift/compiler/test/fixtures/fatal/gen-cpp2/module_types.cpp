@@ -27,15 +27,15 @@ namespace std {
 } // std
 namespace apache { namespace thrift {
 
-template <> const std::size_t TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum1>::size = 3;
-template <> const folly::Range<const  ::test_cpp2::cpp_reflection::enum1*> TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum1>::values = folly::range( ::test_cpp2::cpp_reflection::_enum1EnumDataStorage::values);
-template <> const folly::Range<const folly::StringPiece*> TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum1>::names = folly::range( ::test_cpp2::cpp_reflection::_enum1EnumDataStorage::names);
-template <> const char* TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum1>::findName( ::test_cpp2::cpp_reflection::enum1 value) {
+template <> const std::size_t TEnumTraits< ::test_cpp2::cpp_reflection::enum1>::size = 3;
+template <> const folly::Range<const  ::test_cpp2::cpp_reflection::enum1*> TEnumTraits< ::test_cpp2::cpp_reflection::enum1>::values = folly::range( ::test_cpp2::cpp_reflection::_enum1EnumDataStorage::values);
+template <> const folly::Range<const folly::StringPiece*> TEnumTraits< ::test_cpp2::cpp_reflection::enum1>::names = folly::range( ::test_cpp2::cpp_reflection::_enum1EnumDataStorage::names);
+template <> const char* TEnumTraits< ::test_cpp2::cpp_reflection::enum1>::findName( ::test_cpp2::cpp_reflection::enum1 value) {
   static auto const map = folly::Indestructible< ::test_cpp2::cpp_reflection::_enum1_EnumMapFactory::ValuesToNamesMapType>{ ::test_cpp2::cpp_reflection::_enum1_EnumMapFactory::makeValuesToNamesMap()};
   return findName(*map, value);
 }
 
-template <> bool TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum1>::findValue(const char* name,  ::test_cpp2::cpp_reflection::enum1* outValue) {
+template <> bool TEnumTraits< ::test_cpp2::cpp_reflection::enum1>::findValue(const char* name,  ::test_cpp2::cpp_reflection::enum1* outValue) {
   static auto const map = folly::Indestructible< ::test_cpp2::cpp_reflection::_enum1_EnumMapFactory::NamesToValuesMapType>{ ::test_cpp2::cpp_reflection::_enum1_EnumMapFactory::makeNamesToValuesMap()};
   return findValue(*map, name, outValue);
 }
@@ -52,15 +52,15 @@ namespace std {
 } // std
 namespace apache { namespace thrift {
 
-template <> const std::size_t TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum2>::size = 3;
-template <> const folly::Range<const  ::test_cpp2::cpp_reflection::enum2*> TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum2>::values = folly::range( ::test_cpp2::cpp_reflection::_enum2EnumDataStorage::values);
-template <> const folly::Range<const folly::StringPiece*> TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum2>::names = folly::range( ::test_cpp2::cpp_reflection::_enum2EnumDataStorage::names);
-template <> const char* TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum2>::findName( ::test_cpp2::cpp_reflection::enum2 value) {
+template <> const std::size_t TEnumTraits< ::test_cpp2::cpp_reflection::enum2>::size = 3;
+template <> const folly::Range<const  ::test_cpp2::cpp_reflection::enum2*> TEnumTraits< ::test_cpp2::cpp_reflection::enum2>::values = folly::range( ::test_cpp2::cpp_reflection::_enum2EnumDataStorage::values);
+template <> const folly::Range<const folly::StringPiece*> TEnumTraits< ::test_cpp2::cpp_reflection::enum2>::names = folly::range( ::test_cpp2::cpp_reflection::_enum2EnumDataStorage::names);
+template <> const char* TEnumTraits< ::test_cpp2::cpp_reflection::enum2>::findName( ::test_cpp2::cpp_reflection::enum2 value) {
   static auto const map = folly::Indestructible< ::test_cpp2::cpp_reflection::_enum2_EnumMapFactory::ValuesToNamesMapType>{ ::test_cpp2::cpp_reflection::_enum2_EnumMapFactory::makeValuesToNamesMap()};
   return findName(*map, value);
 }
 
-template <> bool TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum2>::findValue(const char* name,  ::test_cpp2::cpp_reflection::enum2* outValue) {
+template <> bool TEnumTraits< ::test_cpp2::cpp_reflection::enum2>::findValue(const char* name,  ::test_cpp2::cpp_reflection::enum2* outValue) {
   static auto const map = folly::Indestructible< ::test_cpp2::cpp_reflection::_enum2_EnumMapFactory::NamesToValuesMapType>{ ::test_cpp2::cpp_reflection::_enum2_EnumMapFactory::makeNamesToValuesMap()};
   return findValue(*map, name, outValue);
 }
@@ -77,15 +77,15 @@ namespace std {
 } // std
 namespace apache { namespace thrift {
 
-template <> const std::size_t TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum3>::size = 3;
-template <> const folly::Range<const  ::test_cpp2::cpp_reflection::enum3*> TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum3>::values = folly::range( ::test_cpp2::cpp_reflection::_enum3EnumDataStorage::values);
-template <> const folly::Range<const folly::StringPiece*> TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum3>::names = folly::range( ::test_cpp2::cpp_reflection::_enum3EnumDataStorage::names);
-template <> const char* TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum3>::findName( ::test_cpp2::cpp_reflection::enum3 value) {
+template <> const std::size_t TEnumTraits< ::test_cpp2::cpp_reflection::enum3>::size = 3;
+template <> const folly::Range<const  ::test_cpp2::cpp_reflection::enum3*> TEnumTraits< ::test_cpp2::cpp_reflection::enum3>::values = folly::range( ::test_cpp2::cpp_reflection::_enum3EnumDataStorage::values);
+template <> const folly::Range<const folly::StringPiece*> TEnumTraits< ::test_cpp2::cpp_reflection::enum3>::names = folly::range( ::test_cpp2::cpp_reflection::_enum3EnumDataStorage::names);
+template <> const char* TEnumTraits< ::test_cpp2::cpp_reflection::enum3>::findName( ::test_cpp2::cpp_reflection::enum3 value) {
   static auto const map = folly::Indestructible< ::test_cpp2::cpp_reflection::_enum3_EnumMapFactory::ValuesToNamesMapType>{ ::test_cpp2::cpp_reflection::_enum3_EnumMapFactory::makeValuesToNamesMap()};
   return findName(*map, value);
 }
 
-template <> bool TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum3>::findValue(const char* name,  ::test_cpp2::cpp_reflection::enum3* outValue) {
+template <> bool TEnumTraits< ::test_cpp2::cpp_reflection::enum3>::findValue(const char* name,  ::test_cpp2::cpp_reflection::enum3* outValue) {
   static auto const map = folly::Indestructible< ::test_cpp2::cpp_reflection::_enum3_EnumMapFactory::NamesToValuesMapType>{ ::test_cpp2::cpp_reflection::_enum3_EnumMapFactory::makeNamesToValuesMap()};
   return findValue(*map, name, outValue);
 }
@@ -102,15 +102,15 @@ namespace std {
 } // std
 namespace apache { namespace thrift {
 
-template <> const std::size_t TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum_with_special_names>::size = 28;
-template <> const folly::Range<const  ::test_cpp2::cpp_reflection::enum_with_special_names*> TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum_with_special_names>::values = folly::range( ::test_cpp2::cpp_reflection::_enum_with_special_namesEnumDataStorage::values);
-template <> const folly::Range<const folly::StringPiece*> TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum_with_special_names>::names = folly::range( ::test_cpp2::cpp_reflection::_enum_with_special_namesEnumDataStorage::names);
-template <> const char* TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum_with_special_names>::findName( ::test_cpp2::cpp_reflection::enum_with_special_names value) {
+template <> const std::size_t TEnumTraits< ::test_cpp2::cpp_reflection::enum_with_special_names>::size = 28;
+template <> const folly::Range<const  ::test_cpp2::cpp_reflection::enum_with_special_names*> TEnumTraits< ::test_cpp2::cpp_reflection::enum_with_special_names>::values = folly::range( ::test_cpp2::cpp_reflection::_enum_with_special_namesEnumDataStorage::values);
+template <> const folly::Range<const folly::StringPiece*> TEnumTraits< ::test_cpp2::cpp_reflection::enum_with_special_names>::names = folly::range( ::test_cpp2::cpp_reflection::_enum_with_special_namesEnumDataStorage::names);
+template <> const char* TEnumTraits< ::test_cpp2::cpp_reflection::enum_with_special_names>::findName( ::test_cpp2::cpp_reflection::enum_with_special_names value) {
   static auto const map = folly::Indestructible< ::test_cpp2::cpp_reflection::_enum_with_special_names_EnumMapFactory::ValuesToNamesMapType>{ ::test_cpp2::cpp_reflection::_enum_with_special_names_EnumMapFactory::makeValuesToNamesMap()};
   return findName(*map, value);
 }
 
-template <> bool TEnumTraitsBase< ::test_cpp2::cpp_reflection::enum_with_special_names>::findValue(const char* name,  ::test_cpp2::cpp_reflection::enum_with_special_names* outValue) {
+template <> bool TEnumTraits< ::test_cpp2::cpp_reflection::enum_with_special_names>::findValue(const char* name,  ::test_cpp2::cpp_reflection::enum_with_special_names* outValue) {
   static auto const map = folly::Indestructible< ::test_cpp2::cpp_reflection::_enum_with_special_names_EnumMapFactory::NamesToValuesMapType>{ ::test_cpp2::cpp_reflection::_enum_with_special_names_EnumMapFactory::makeNamesToValuesMap()};
   return findValue(*map, name, outValue);
 }
@@ -157,27 +157,22 @@ bool union1::operator==(const union1& rhs) const {
     case Type::ui:
     {
       return value_.ui == rhs.value_.ui;
-      break;
     }
     case Type::ud:
     {
       return value_.ud == rhs.value_.ud;
-      break;
     }
     case Type::us:
     {
       return value_.us == rhs.value_.us;
-      break;
     }
     case Type::ue:
     {
       return value_.ue == rhs.value_.ue;
-      break;
     }
     default:
     {
       return true;
-      break;
     }
   }
 }
@@ -242,27 +237,22 @@ bool union2::operator==(const union2& rhs) const {
     case Type::ui_2:
     {
       return value_.ui_2 == rhs.value_.ui_2;
-      break;
     }
     case Type::ud_2:
     {
       return value_.ud_2 == rhs.value_.ud_2;
-      break;
     }
     case Type::us_2:
     {
       return value_.us_2 == rhs.value_.us_2;
-      break;
     }
     case Type::ue_2:
     {
       return value_.ue_2 == rhs.value_.ue_2;
-      break;
     }
     default:
     {
       return true;
-      break;
     }
   }
 }
@@ -327,27 +317,22 @@ bool union3::operator==(const union3& rhs) const {
     case Type::ui_3:
     {
       return value_.ui_3 == rhs.value_.ui_3;
-      break;
     }
     case Type::ud_3:
     {
       return value_.ud_3 == rhs.value_.ud_3;
-      break;
     }
     case Type::us_3:
     {
       return value_.us_3 == rhs.value_.us_3;
-      break;
     }
     case Type::ue_3:
     {
       return value_.ue_3 == rhs.value_.ue_3;
-      break;
     }
     default:
     {
       return true;
-      break;
     }
   }
 }
@@ -456,32 +441,26 @@ bool unionA::operator==(const unionA& rhs) const {
     case Type::i:
     {
       return value_.i == rhs.value_.i;
-      break;
     }
     case Type::d:
     {
       return value_.d == rhs.value_.d;
-      break;
     }
     case Type::s:
     {
       return value_.s == rhs.value_.s;
-      break;
     }
     case Type::e:
     {
       return value_.e == rhs.value_.e;
-      break;
     }
     case Type::a:
     {
       return value_.a == rhs.value_.a;
-      break;
     }
     default:
     {
       return true;
-      break;
     }
   }
 }
@@ -1744,147 +1723,118 @@ bool union_with_special_names::operator==(const union_with_special_names& rhs) c
     case Type::get:
     {
       return value_.get == rhs.value_.get;
-      break;
     }
     case Type::getter:
     {
       return value_.getter == rhs.value_.getter;
-      break;
     }
     case Type::lists:
     {
       return value_.lists == rhs.value_.lists;
-      break;
     }
     case Type::maps:
     {
       return value_.maps == rhs.value_.maps;
-      break;
     }
     case Type::name:
     {
       return value_.name == rhs.value_.name;
-      break;
     }
     case Type::name_to_value:
     {
       return value_.name_to_value == rhs.value_.name_to_value;
-      break;
     }
     case Type::names:
     {
       return value_.names == rhs.value_.names;
-      break;
     }
     case Type::prefix_tree:
     {
       return value_.prefix_tree == rhs.value_.prefix_tree;
-      break;
     }
     case Type::sets:
     {
       return value_.sets == rhs.value_.sets;
-      break;
     }
     case Type::setter:
     {
       return value_.setter == rhs.value_.setter;
-      break;
     }
     case Type::str:
     {
       return value_.str == rhs.value_.str;
-      break;
     }
     case Type::strings:
     {
       return value_.strings == rhs.value_.strings;
-      break;
     }
     case Type::type:
     {
       return value_.type == rhs.value_.type;
-      break;
     }
     case Type::value:
     {
       return value_.value == rhs.value_.value;
-      break;
     }
     case Type::value_to_name:
     {
       return value_.value_to_name == rhs.value_.value_to_name;
-      break;
     }
     case Type::values:
     {
       return value_.values == rhs.value_.values;
-      break;
     }
     case Type::id:
     {
       return value_.id == rhs.value_.id;
-      break;
     }
     case Type::ids:
     {
       return value_.ids == rhs.value_.ids;
-      break;
     }
     case Type::descriptor:
     {
       return value_.descriptor == rhs.value_.descriptor;
-      break;
     }
     case Type::descriptors:
     {
       return value_.descriptors == rhs.value_.descriptors;
-      break;
     }
     case Type::key:
     {
       return value_.key == rhs.value_.key;
-      break;
     }
     case Type::keys:
     {
       return value_.keys == rhs.value_.keys;
-      break;
     }
     case Type::annotation:
     {
       return value_.annotation == rhs.value_.annotation;
-      break;
     }
     case Type::annotations:
     {
       return value_.annotations == rhs.value_.annotations;
-      break;
     }
     case Type::member:
     {
       return value_.member == rhs.value_.member;
-      break;
     }
     case Type::members:
     {
       return value_.members == rhs.value_.members;
-      break;
     }
     case Type::field:
     {
       return value_.field == rhs.value_.field;
-      break;
     }
     case Type::fields:
     {
       return value_.fields == rhs.value_.fields;
-      break;
     }
     default:
     {
       return true;
-      break;
     }
   }
 }

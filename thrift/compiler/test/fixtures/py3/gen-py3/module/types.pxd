@@ -13,7 +13,9 @@ from libcpp.memory cimport shared_ptr, unique_ptr
 from libcpp.vector cimport vector
 from libcpp.set cimport set as cset
 from libcpp.map cimport map as cmap, pair as cpair
-from thrift.py3.exceptions cimport cTException
+from libcpp.unordered_set cimport unordered_set as cuset
+from libcpp.unordered_map cimport unordered_map as cumap
+from thrift.py3.exceptions cimport cTException, Error as __Error
 cimport thrift.py3.types
 
 
@@ -27,7 +29,7 @@ cdef extern from "src/gen-cpp2/module_types.h" namespace "py3::simple":
 
 cdef cAnEnum AnEnum_to_cpp(value)
 
-cdef extern from "src/gen-cpp2/module_types.h" namespace "py3::simple":
+cdef extern from "src/gen-cpp2/module_types_custom_protocol.h" namespace "py3::simple":
     cdef cppclass cSimpleException__isset "py3::simple::SimpleException::__isset":
         bint err_code
 
@@ -48,6 +50,7 @@ cdef extern from "src/gen-cpp2/module_types.h" namespace "py3::simple":
         bint nice_sized_int
         bint big_int
         bint real
+        bint smaller_real
 
     # Forward Declaration
     cdef cppclass cSimpleStruct "py3::simple::SimpleStruct"
@@ -62,6 +65,7 @@ cdef extern from "src/gen-cpp2/module_types.h" namespace "py3::simple":
         int32_t nice_sized_int
         int64_t big_int
         double real
+        float smaller_real
         cSimpleStruct__isset __isset
 
     cdef cppclass cComplexStruct__isset "py3::simple::ComplexStruct::__isset":
@@ -94,9 +98,9 @@ cdef extern from "<utility>" namespace "std" nogil:
     cdef shared_ptr[cComplexStruct] move(unique_ptr[cComplexStruct])
 
 # Forward Definition of the cython struct
-cdef class SimpleException(thrift.py3.types.Exception)
+cdef class SimpleException(__Error)
 
-cdef class SimpleException(thrift.py3.types.Exception):
+cdef class SimpleException(__Error):
     cdef object __hash
     cdef object __weakref__
     cdef shared_ptr[cSimpleException] c_SimpleException

@@ -16,12 +16,17 @@ from libcpp.map cimport map as cmap
 from cython.operator cimport dereference as deref
 from cpython.ref cimport PyObject
 from thrift.py3.exceptions cimport cTApplicationException
-from thrift.py3.server cimport ServiceInterface
-from thrift.py3.folly cimport (
+from thrift.py3.server cimport ServiceInterface, RequestContext, Cpp2RequestContext
+from thrift.py3.server import RequestContext
+from folly cimport (
   cFollyPromise,
   cFollyUnit,
   c_unit
 )
+
+cimport folly.futures
+from folly.executor cimport get_executor
+
 cimport my.namespacing.test.module.module.types
 import my.namespacing.test.module.module.types
 
@@ -47,28 +52,58 @@ cdef class Promise_i64:
         inst.cPromise = move(cPromise)
         return inst
 
+cdef class TestServiceInterface(
+    ServiceInterface
+):
+    def __cinit__(self):
+        self.interface_wrapper = cTestServiceInterface(
+            <PyObject *> self,
+            get_executor()
+        )
+
+    async def init(
+            self,
+            int1):
+        raise NotImplementedError("async def init is not implemented")
+
+
+
+
 cdef api void call_cy_TestService_init(
     object self,
+    Cpp2RequestContext* ctx,
     cFollyPromise[int64_t] cPromise,
     int64_t int1
-) with gil:
+):  
+    cdef TestServiceInterface iface
+    iface = self
     promise = Promise_i64.create(move(cPromise))
     arg_int1 = int1
-    asyncio.run_coroutine_threadsafe(
+    context = None
+    if iface._pass_context_init:
+        context = RequestContext.create(ctx)
+    asyncio.get_event_loop().create_task(
         TestService_init_coro(
             self,
+            context,
             promise,
-            arg_int1),
-        loop=self.loop)
+            arg_int1
+        )
+    )
 
 async def TestService_init_coro(
     object self,
+    object ctx,
     Promise_i64 promise,
     int1
 ):
     try:
-      result = await self.init(
-          int1)
+        if ctx is not None:
+            result = await self.init(ctx, 
+                      int1)
+        else:
+            result = await self.init(
+                      int1)
     except Exception as ex:
         print(
             "Unexpected error in service handler init:",
@@ -79,17 +114,4 @@ async def TestService_init_coro(
         ))
     else:
         promise.cPromise.setValue(<int64_t> result)
-
-
-cdef class TestServiceInterface(
-    ServiceInterface
-):
-    def __cinit__(self):
-        self.interface_wrapper = cTestServiceInterface(<PyObject *> self)
-
-    async def init(
-            self,
-            int1):
-        raise NotImplementedError("async def init is not implemented")
-
 

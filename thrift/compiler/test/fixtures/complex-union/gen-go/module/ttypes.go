@@ -17,18 +17,27 @@ var _ = bytes.Equal
 
 var GoUnusedProtection__ int;
 
+type ContainerTypedef map[int16]string
+
+func ContainerTypedefPtr(v ContainerTypedef) *ContainerTypedef { return &v }
+
 // Attributes:
 //  - IntValue
 //  - StringValue
 //  - IntListValue
 //  - StringListValue
+//  - TypedefValue
 //  - StringRef
 type ComplexUnion struct {
   IntValue *int64 `thrift:"intValue,1" db:"intValue" json:"intValue,omitempty"`
-  StringValue *string `thrift:"stringValue,2" db:"stringValue" json:"stringValue,omitempty"`
-  IntListValue []int64 `thrift:"intListValue,3" db:"intListValue" json:"intListValue,omitempty"`
-  StringListValue []string `thrift:"stringListValue,4" db:"stringListValue" json:"stringListValue,omitempty"`
-  StringRef *string `thrift:"stringRef,5" db:"stringRef" json:"stringRef,omitempty"`
+  IntListValue []int64 `thrift:"intListValue,2" db:"intListValue" json:"intListValue,omitempty"`
+  StringListValue []string `thrift:"stringListValue,3" db:"stringListValue" json:"stringListValue,omitempty"`
+  // unused field # 4
+  StringValue *string `thrift:"stringValue,5" db:"stringValue" json:"stringValue,omitempty"`
+  // unused fields # 6 to 8
+  TypedefValue ContainerTypedef `thrift:"typedefValue,9" db:"typedefValue" json:"typedefValue,omitempty"`
+  // unused fields # 10 to 13
+  StringRef *string `thrift:"stringRef,14" db:"stringRef" json:"stringRef,omitempty"`
 }
 
 func NewComplexUnion() *ComplexUnion {
@@ -58,6 +67,11 @@ var ComplexUnion_StringListValue_DEFAULT []string
 
 func (p *ComplexUnion) GetStringListValue() []string {
   return p.StringListValue
+}
+var ComplexUnion_TypedefValue_DEFAULT ContainerTypedef
+
+func (p *ComplexUnion) GetTypedefValue() ContainerTypedef {
+  return p.TypedefValue
 }
 var ComplexUnion_StringRef_DEFAULT string
 func (p *ComplexUnion) GetStringRef() string {
@@ -97,6 +111,10 @@ func (p *ComplexUnion) IsSetStringListValue() bool {
   return p.StringListValue != nil
 }
 
+func (p *ComplexUnion) IsSetTypedefValue() bool {
+  return p.TypedefValue != nil
+}
+
 func (p *ComplexUnion) IsSetStringRef() bool {
   return p.StringRef != nil
 }
@@ -118,6 +136,10 @@ func (p *ComplexUnion) Read(iprot thrift.TProtocol) error {
       if err := p.ReadField1(iprot); err != nil {
         return err
       }
+    case 5:
+      if err := p.ReadField5(iprot); err != nil {
+        return err
+      }
     case 2:
       if err := p.ReadField2(iprot); err != nil {
         return err
@@ -126,12 +148,12 @@ func (p *ComplexUnion) Read(iprot thrift.TProtocol) error {
       if err := p.ReadField3(iprot); err != nil {
         return err
       }
-    case 4:
-      if err := p.ReadField4(iprot); err != nil {
+    case 9:
+      if err := p.ReadField9(iprot); err != nil {
         return err
       }
-    case 5:
-      if err := p.ReadField5(iprot); err != nil {
+    case 14:
+      if err := p.ReadField14(iprot); err != nil {
         return err
       }
     default:
@@ -158,16 +180,16 @@ func (p *ComplexUnion)  ReadField1(iprot thrift.TProtocol) error {
   return nil
 }
 
-func (p *ComplexUnion)  ReadField2(iprot thrift.TProtocol) error {
+func (p *ComplexUnion)  ReadField5(iprot thrift.TProtocol) error {
   if v, err := iprot.ReadString(); err != nil {
-  return thrift.PrependError("error reading field 2: ", err)
+  return thrift.PrependError("error reading field 5: ", err)
 } else {
   p.StringValue = &v
 }
   return nil
 }
 
-func (p *ComplexUnion)  ReadField3(iprot thrift.TProtocol) error {
+func (p *ComplexUnion)  ReadField2(iprot thrift.TProtocol) error {
   _, size, err := iprot.ReadListBegin()
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -189,7 +211,7 @@ var _elem0 int64
   return nil
 }
 
-func (p *ComplexUnion)  ReadField4(iprot thrift.TProtocol) error {
+func (p *ComplexUnion)  ReadField3(iprot thrift.TProtocol) error {
   _, size, err := iprot.ReadListBegin()
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -211,9 +233,37 @@ var _elem1 string
   return nil
 }
 
-func (p *ComplexUnion)  ReadField5(iprot thrift.TProtocol) error {
+func (p *ComplexUnion)  ReadField9(iprot thrift.TProtocol) error {
+  _, _, size, err := iprot.ReadMapBegin()
+  if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+  }
+  tMap := make(ContainerTypedef, size)
+  p.TypedefValue =  tMap
+  for i := 0; i < size; i ++ {
+var _key2 int16
+    if v, err := iprot.ReadI16(); err != nil {
+    return thrift.PrependError("error reading field 0: ", err)
+} else {
+    _key2 = v
+}
+var _val3 string
+    if v, err := iprot.ReadString(); err != nil {
+    return thrift.PrependError("error reading field 0: ", err)
+} else {
+    _val3 = v
+}
+    p.TypedefValue[_key2] = _val3
+  }
+  if err := iprot.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+  }
+  return nil
+}
+
+func (p *ComplexUnion)  ReadField14(iprot thrift.TProtocol) error {
   if v, err := iprot.ReadString(); err != nil {
-  return thrift.PrependError("error reading field 5: ", err)
+  return thrift.PrependError("error reading field 14: ", err)
 } else {
   p.StringRef = &v
 }
@@ -229,8 +279,9 @@ func (p *ComplexUnion) Write(oprot thrift.TProtocol) error {
   if err := p.writeField1(oprot); err != nil { return err }
   if err := p.writeField2(oprot); err != nil { return err }
   if err := p.writeField3(oprot); err != nil { return err }
-  if err := p.writeField4(oprot); err != nil { return err }
   if err := p.writeField5(oprot); err != nil { return err }
+  if err := p.writeField9(oprot); err != nil { return err }
+  if err := p.writeField14(oprot); err != nil { return err }
   if err := oprot.WriteFieldStop(); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
   if err := oprot.WriteStructEnd(); err != nil {
@@ -251,21 +302,9 @@ func (p *ComplexUnion) writeField1(oprot thrift.TProtocol) (err error) {
 }
 
 func (p *ComplexUnion) writeField2(oprot thrift.TProtocol) (err error) {
-  if p.IsSetStringValue() {
-    if err := oprot.WriteFieldBegin("stringValue", thrift.STRING, 2); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:stringValue: ", p), err) }
-    if err := oprot.WriteString(string(*p.StringValue)); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T.stringValue (2) field write error: ", p), err) }
-    if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 2:stringValue: ", p), err) }
-  }
-  return err
-}
-
-func (p *ComplexUnion) writeField3(oprot thrift.TProtocol) (err error) {
   if p.IsSetIntListValue() {
-    if err := oprot.WriteFieldBegin("intListValue", thrift.LIST, 3); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:intListValue: ", p), err) }
+    if err := oprot.WriteFieldBegin("intListValue", thrift.LIST, 2); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:intListValue: ", p), err) }
     if err := oprot.WriteListBegin(thrift.I64, len(p.IntListValue)); err != nil {
       return thrift.PrependError("error writing list begin: ", err)
     }
@@ -277,15 +316,15 @@ func (p *ComplexUnion) writeField3(oprot thrift.TProtocol) (err error) {
       return thrift.PrependError("error writing list end: ", err)
     }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 3:intListValue: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 2:intListValue: ", p), err) }
   }
   return err
 }
 
-func (p *ComplexUnion) writeField4(oprot thrift.TProtocol) (err error) {
+func (p *ComplexUnion) writeField3(oprot thrift.TProtocol) (err error) {
   if p.IsSetStringListValue() {
-    if err := oprot.WriteFieldBegin("stringListValue", thrift.LIST, 4); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 4:stringListValue: ", p), err) }
+    if err := oprot.WriteFieldBegin("stringListValue", thrift.LIST, 3); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:stringListValue: ", p), err) }
     if err := oprot.WriteListBegin(thrift.STRING, len(p.StringListValue)); err != nil {
       return thrift.PrependError("error writing list begin: ", err)
     }
@@ -297,19 +336,53 @@ func (p *ComplexUnion) writeField4(oprot thrift.TProtocol) (err error) {
       return thrift.PrependError("error writing list end: ", err)
     }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 4:stringListValue: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 3:stringListValue: ", p), err) }
   }
   return err
 }
 
 func (p *ComplexUnion) writeField5(oprot thrift.TProtocol) (err error) {
-  if p.IsSetStringRef() {
-    if err := oprot.WriteFieldBegin("stringRef", thrift.STRING, 5); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 5:stringRef: ", p), err) }
-    if err := oprot.WriteString(string(*p.StringRef)); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T.stringRef (5) field write error: ", p), err) }
+  if p.IsSetStringValue() {
+    if err := oprot.WriteFieldBegin("stringValue", thrift.STRING, 5); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 5:stringValue: ", p), err) }
+    if err := oprot.WriteString(string(*p.StringValue)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.stringValue (5) field write error: ", p), err) }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 5:stringRef: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 5:stringValue: ", p), err) }
+  }
+  return err
+}
+
+func (p *ComplexUnion) writeField9(oprot thrift.TProtocol) (err error) {
+  if p.IsSetTypedefValue() {
+    if err := oprot.WriteFieldBegin("typedefValue", thrift.MAP, 9); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 9:typedefValue: ", p), err) }
+    if err := oprot.WriteMapBegin(thrift.I16, thrift.STRING, len(p.TypedefValue)); err != nil {
+      return thrift.PrependError("error writing map begin: ", err)
+    }
+    for k, v := range p.TypedefValue {
+      if err := oprot.WriteI16(int16(k)); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
+      if err := oprot.WriteString(string(v)); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
+    }
+    if err := oprot.WriteMapEnd(); err != nil {
+      return thrift.PrependError("error writing map end: ", err)
+    }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 9:typedefValue: ", p), err) }
+  }
+  return err
+}
+
+func (p *ComplexUnion) writeField14(oprot thrift.TProtocol) (err error) {
+  if p.IsSetStringRef() {
+    if err := oprot.WriteFieldBegin("stringRef", thrift.STRING, 14); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 14:stringRef: ", p), err) }
+    if err := oprot.WriteString(string(*p.StringRef)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.stringRef (14) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 14:stringRef: ", p), err) }
   }
   return err
 }
@@ -319,5 +392,151 @@ func (p *ComplexUnion) String() string {
     return "<nil>"
   }
   return fmt.Sprintf("ComplexUnion(%+v)", *p)
+}
+
+// Attributes:
+//  - ThingOne
+//  - ThingTwo
+type FinalComplexUnion struct {
+  ThingOne *string `thrift:"thingOne,1" db:"thingOne" json:"thingOne,omitempty"`
+  ThingTwo *string `thrift:"thingTwo,2" db:"thingTwo" json:"thingTwo,omitempty"`
+}
+
+func NewFinalComplexUnion() *FinalComplexUnion {
+  return &FinalComplexUnion{}
+}
+
+var FinalComplexUnion_ThingOne_DEFAULT string
+func (p *FinalComplexUnion) GetThingOne() string {
+  if !p.IsSetThingOne() {
+    return FinalComplexUnion_ThingOne_DEFAULT
+  }
+return *p.ThingOne
+}
+var FinalComplexUnion_ThingTwo_DEFAULT string
+func (p *FinalComplexUnion) GetThingTwo() string {
+  if !p.IsSetThingTwo() {
+    return FinalComplexUnion_ThingTwo_DEFAULT
+  }
+return *p.ThingTwo
+}
+func (p *FinalComplexUnion) CountSetFieldsFinalComplexUnion() int {
+  count := 0
+  if (p.IsSetThingOne()) {
+    count++
+  }
+  if (p.IsSetThingTwo()) {
+    count++
+  }
+  return count
+
+}
+
+func (p *FinalComplexUnion) IsSetThingOne() bool {
+  return p.ThingOne != nil
+}
+
+func (p *FinalComplexUnion) IsSetThingTwo() bool {
+  return p.ThingTwo != nil
+}
+
+func (p *FinalComplexUnion) Read(iprot thrift.TProtocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *FinalComplexUnion)  ReadField1(iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(); err != nil {
+  return thrift.PrependError("error reading field 1: ", err)
+} else {
+  p.ThingOne = &v
+}
+  return nil
+}
+
+func (p *FinalComplexUnion)  ReadField2(iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(); err != nil {
+  return thrift.PrependError("error reading field 2: ", err)
+} else {
+  p.ThingTwo = &v
+}
+  return nil
+}
+
+func (p *FinalComplexUnion) Write(oprot thrift.TProtocol) error {
+  if c := p.CountSetFieldsFinalComplexUnion(); c != 1 {
+    return fmt.Errorf("%T write union: exactly one field must be set (%d set).", p, c)
+  }
+  if err := oprot.WriteStructBegin("FinalComplexUnion"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *FinalComplexUnion) writeField1(oprot thrift.TProtocol) (err error) {
+  if p.IsSetThingOne() {
+    if err := oprot.WriteFieldBegin("thingOne", thrift.STRING, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:thingOne: ", p), err) }
+    if err := oprot.WriteString(string(*p.ThingOne)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.thingOne (1) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:thingOne: ", p), err) }
+  }
+  return err
+}
+
+func (p *FinalComplexUnion) writeField2(oprot thrift.TProtocol) (err error) {
+  if p.IsSetThingTwo() {
+    if err := oprot.WriteFieldBegin("thingTwo", thrift.STRING, 2); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:thingTwo: ", p), err) }
+    if err := oprot.WriteString(string(*p.ThingTwo)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.thingTwo (2) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 2:thingTwo: ", p), err) }
+  }
+  return err
+}
+
+func (p *FinalComplexUnion) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+  return fmt.Sprintf("FinalComplexUnion(%+v)", *p)
 }
 

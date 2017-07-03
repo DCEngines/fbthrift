@@ -16,12 +16,17 @@ from libcpp.map cimport map as cmap
 from cython.operator cimport dereference as deref
 from cpython.ref cimport PyObject
 from thrift.py3.exceptions cimport cTApplicationException
-from thrift.py3.server cimport ServiceInterface
-from thrift.py3.folly cimport (
+from thrift.py3.server cimport ServiceInterface, RequestContext, Cpp2RequestContext
+from thrift.py3.server import RequestContext
+from folly cimport (
   cFollyPromise,
   cFollyUnit,
   c_unit
 )
+
+cimport folly.futures
+from folly.executor cimport get_executor
+
 cimport module.types
 import module.types
 
@@ -49,23 +54,79 @@ cdef class Promise_void:
         inst.cPromise = move(cPromise)
         return inst
 
+cdef class MyRootInterface(
+    ServiceInterface
+):
+    def __cinit__(self):
+        self.interface_wrapper = cMyRootInterface(
+            <PyObject *> self,
+            get_executor()
+        )
+
+    async def do_root(
+            self):
+        raise NotImplementedError("async def do_root is not implemented")
+
+
+cdef class MyNodeInterface(
+    module.services.MyRootInterface
+):
+    def __cinit__(self):
+        self.interface_wrapper = cMyNodeInterface(
+            <PyObject *> self,
+            get_executor()
+        )
+
+    async def do_mid(
+            self):
+        raise NotImplementedError("async def do_mid is not implemented")
+
+
+cdef class MyLeafInterface(
+    module.services.MyNodeInterface
+):
+    def __cinit__(self):
+        self.interface_wrapper = cMyLeafInterface(
+            <PyObject *> self,
+            get_executor()
+        )
+
+    async def do_leaf(
+            self):
+        raise NotImplementedError("async def do_leaf is not implemented")
+
+
+
+
 cdef api void call_cy_MyRoot_do_root(
     object self,
+    Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-) with gil:
+):  
+    cdef MyRootInterface iface
+    iface = self
     promise = Promise_void.create(move(cPromise))
-    asyncio.run_coroutine_threadsafe(
+    context = None
+    if iface._pass_context_do_root:
+        context = RequestContext.create(ctx)
+    asyncio.get_event_loop().create_task(
         MyRoot_do_root_coro(
             self,
-            promise),
-        loop=self.loop)
+            context,
+            promise
+        )
+    )
 
 async def MyRoot_do_root_coro(
     object self,
+    object ctx,
     Promise_void promise
 ):
     try:
-      result = await self.do_root()
+        if ctx is not None:
+            result = await self.do_root(ctx, )
+        else:
+            result = await self.do_root()
     except Exception as ex:
         print(
             "Unexpected error in service handler do_root:",
@@ -79,21 +140,33 @@ async def MyRoot_do_root_coro(
 
 cdef api void call_cy_MyNode_do_mid(
     object self,
+    Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-) with gil:
+):  
+    cdef MyNodeInterface iface
+    iface = self
     promise = Promise_void.create(move(cPromise))
-    asyncio.run_coroutine_threadsafe(
+    context = None
+    if iface._pass_context_do_mid:
+        context = RequestContext.create(ctx)
+    asyncio.get_event_loop().create_task(
         MyNode_do_mid_coro(
             self,
-            promise),
-        loop=self.loop)
+            context,
+            promise
+        )
+    )
 
 async def MyNode_do_mid_coro(
     object self,
+    object ctx,
     Promise_void promise
 ):
     try:
-      result = await self.do_mid()
+        if ctx is not None:
+            result = await self.do_mid(ctx, )
+        else:
+            result = await self.do_mid()
     except Exception as ex:
         print(
             "Unexpected error in service handler do_mid:",
@@ -107,21 +180,33 @@ async def MyNode_do_mid_coro(
 
 cdef api void call_cy_MyLeaf_do_leaf(
     object self,
+    Cpp2RequestContext* ctx,
     cFollyPromise[cFollyUnit] cPromise
-) with gil:
+):  
+    cdef MyLeafInterface iface
+    iface = self
     promise = Promise_void.create(move(cPromise))
-    asyncio.run_coroutine_threadsafe(
+    context = None
+    if iface._pass_context_do_leaf:
+        context = RequestContext.create(ctx)
+    asyncio.get_event_loop().create_task(
         MyLeaf_do_leaf_coro(
             self,
-            promise),
-        loop=self.loop)
+            context,
+            promise
+        )
+    )
 
 async def MyLeaf_do_leaf_coro(
     object self,
+    object ctx,
     Promise_void promise
 ):
     try:
-      result = await self.do_leaf()
+        if ctx is not None:
+            result = await self.do_leaf(ctx, )
+        else:
+            result = await self.do_leaf()
     except Exception as ex:
         print(
             "Unexpected error in service handler do_leaf:",
@@ -132,38 +217,4 @@ async def MyLeaf_do_leaf_coro(
         ))
     else:
         promise.cPromise.setValue(c_unit)
-
-
-cdef class MyRootInterface(
-    ServiceInterface
-):
-    def __cinit__(self):
-        self.interface_wrapper = cMyRootInterface(<PyObject *> self)
-
-    async def do_root(
-            self):
-        raise NotImplementedError("async def do_root is not implemented")
-
-
-cdef class MyNodeInterface(
-    module.services.MyRootInterface
-):
-    def __cinit__(self):
-        self.interface_wrapper = cMyNodeInterface(<PyObject *> self)
-
-    async def do_mid(
-            self):
-        raise NotImplementedError("async def do_mid is not implemented")
-
-
-cdef class MyLeafInterface(
-    module.services.MyNodeInterface
-):
-    def __cinit__(self):
-        self.interface_wrapper = cMyLeafInterface(<PyObject *> self)
-
-    async def do_leaf(
-            self):
-        raise NotImplementedError("async def do_leaf is not implemented")
-
 

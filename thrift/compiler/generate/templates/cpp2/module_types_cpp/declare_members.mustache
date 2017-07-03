@@ -14,37 +14,41 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%><%!
-
-Form:
-void Struct::__clear() {
-  ....;
-  element = val;
-  __isset.__clear();
-}
 %>void <%struct:name%>::__clear() {
   // clear all fields
-<%#struct:base_fields%><%#field:type%><%!
-  %>  <%field:name%> = <%!
-  %><%#field:value%><%!
-    %><%type:cxx_value_prefix%><% > common/iterate_const_values%><%type:cxx_value_suffix%><%!
-  %><%/field:value%><%!
-  %><%^field:value%><%!
-    %><%#type:string?%><%!
-      %>apache::thrift::StringTraits< std::string>::fromStringLiteral("")<%!
-    %><%/type:string?%><%!
-    %><%^type:string?%><%!
-      %>0<%!
-    %><%/type:string?%><%!
-  %><%/field:value%><%!
-  %><% > common/semicolon_newline%><%!
-%><%/field:type%><%/struct:base_fields%><%!
-%><%#struct:container_fields%><%#field:type%><%!
-  %>  <%field:name%>.clear();
-<%/field:type%><%/struct:container_fields%><%!
-%><%#struct:fields?%><%!
-%>  __isset.__clear();
-<%/struct:fields?%><%!
-%>}
-<%!
-%>
+<%#struct:fields%><%#field:type%>
+<%#type:resolves_to_base_or_enum?%>
+<%#field:value%>
+  <%field:name%> = <% > common/cxx_value_prefix%><% > common/iterate_const_values%><% > common/cxx_value_suffix%>;
+<%/field:value%>
+<%^field:value%>
+  <%field:name%> = <% > module_types_cpp/unset_values%>;
+<%/field:value%>
+<%/type:resolves_to_base_or_enum?%>
+<%#type:resolves_to_container?%>
+<%#field:cpp_ref?%>
+  <%field:name%>.reset(new typename decltype(<%field:name%>)::element_type());
+<%/field:cpp_ref?%>
+<%^field:cpp_ref?%>
+  <%field:name%>.clear();
+<%/field:cpp_ref?%>
+<%/type:resolves_to_container?%>
+<%#type:struct?%>
+<%^field:cpp_ref?%>
+  ::apache::thrift::Cpp2Ops< <% > Type%>>::clear(&<%field:name%>);
+<%/field:cpp_ref?%>
+<%#field:cpp_ref_unique?%>
+  if (<%field:name%>) ::apache::thrift::Cpp2Ops< <% > Type%>>::clear(<%field:name%>.get());
+<%/field:cpp_ref_unique?%>
+<%#field:cpp_ref_shared?%>
+  if (<%field:name%>) ::apache::thrift::Cpp2Ops< <% > Type%>>::clear(<%field:name%>.get());
+<%/field:cpp_ref_shared?%>
+<%#field:cpp_ref_shared_const?%>
+  <%field:name%>.reset();
+<%/field:cpp_ref_shared_const?%>
+<%/type:struct?%>
+<%/field:type%><%/struct:fields%>
+<%#struct:fields?%>
+  __isset.__clear();
+<%/struct:fields?%>
+}

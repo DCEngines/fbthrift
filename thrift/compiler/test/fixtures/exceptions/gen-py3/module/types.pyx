@@ -10,12 +10,17 @@ from libcpp.string cimport string
 from libcpp cimport bool as cbool
 from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
-from libc.stdint cimport int8_t, int16_t, int32_t, int64_t
+from libc.stdint cimport int8_t, int16_t, int32_t, int64_t, uint32_t
 from cython.operator cimport dereference as deref, preincrement as inc
 import thrift.py3.types
 cimport thrift.py3.types
+cimport thrift.py3.exceptions
 from thrift.py3.types import NOTSET
 cimport thrift.py3.std_libcpp as std_libcpp
+from thrift.py3.serializer cimport IOBuf
+from thrift.py3.serializer import Protocol
+cimport thrift.py3.serializer as serializer
+from thrift.py3.serializer import deserialize, serialize
 
 import sys
 from collections.abc import Sequence, Set, Mapping, Iterable
@@ -24,7 +29,7 @@ from enum import Enum
 
 
 
-cdef class Banal(thrift.py3.types.Exception):
+cdef class Banal(thrift.py3.exceptions.Error):
 
     def __init__(
         Banal self
@@ -73,7 +78,7 @@ cdef class Banal(thrift.py3.types.Exception):
         return f'Banal()'
 
 
-cdef class Fiery(thrift.py3.types.Exception):
+cdef class Fiery(thrift.py3.exceptions.Error):
 
     def __init__(
         Fiery self,
@@ -84,15 +89,13 @@ cdef class Fiery(thrift.py3.types.Exception):
         inst = self
         if message is not None:
             deref(inst.c_Fiery).message = message.encode('UTF-8')
-            deref(inst.c_Fiery).__isset.message = True
-
 
 
     def __iter__(self):
         yield 'message', self.message
 
     def __bool__(self):
-        return deref(self.c_Fiery).__isset.message
+        return True
 
     @staticmethod
     cdef create(shared_ptr[cFiery] c_Fiery):
@@ -102,8 +105,6 @@ cdef class Fiery(thrift.py3.types.Exception):
 
     @property
     def message(self):
-        if not deref(self.c_Fiery).__isset.message:
-            return None
 
         return self.c_Fiery.get().message.decode('UTF-8')
 
@@ -132,6 +133,5 @@ cdef class Fiery(thrift.py3.types.Exception):
 
     def __repr__(Fiery self):
         return f'Fiery(message={repr(self.message)})'
-
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2014-present Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,6 +187,9 @@ class THeader {
   StringToStringMap&& releaseWriteHeaders() {
     return std::move(writeHeaders_);
   }
+  const StringToStringMap& getWriteHeaders() const {
+    return writeHeaders_;
+  }
 
   // these work with read headers
   void setReadHeaders(StringToStringMap&&);
@@ -201,6 +204,9 @@ class THeader {
 
   void setExtraWriteHeaders(StringToStringMap* extraWriteHeaders) {
     extraWriteHeaders_ = extraWriteHeaders;
+  }
+  StringToStringMap* getExtraWriteHeaders() const {
+    return extraWriteHeaders_;
   }
 
   std::string getPeerIdentity();

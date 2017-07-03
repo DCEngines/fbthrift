@@ -6,6 +6,10 @@
  *  @generated
  */
 
+/**
+ * Original thrift service:-
+ * Bar
+ */
 interface BarAsyncIf extends \IThriftAsyncIf {
   /**
    * Original thrift definition:-
@@ -16,6 +20,10 @@ interface BarAsyncIf extends \IThriftAsyncIf {
   public function baz(keyset<int> $a, \Indexish<int, \Indexish<int, keyset<string>>> $b): Awaitable<string>;
 }
 
+/**
+ * Original thrift service:-
+ * Bar
+ */
 interface BarIf extends \IThriftSyncIf {
   /**
    * Original thrift definition:-
@@ -26,6 +34,10 @@ interface BarIf extends \IThriftSyncIf {
   public function baz(keyset<int> $a, \Indexish<int, \Indexish<int, keyset<string>>> $b): string;
 }
 
+/**
+ * Original thrift service:-
+ * Bar
+ */
 trait BarClientBase {
   require extends ThriftClientBase;
 
@@ -148,17 +160,18 @@ class BarAsyncClient extends ThriftClientBase implements BarAsyncIf {
 class BarClient extends ThriftClientBase implements BarIf {
   use BarClientBase;
 
+  <<__Deprecated('use gen_baz()')>>
+  public function baz(keyset<int> $a, \Indexish<int, \Indexish<int, keyset<string>>> $b): string {
+    $currentseqid = $this->sendImpl_baz($a, $b);
+    return $this->recvImpl_baz($currentseqid);
+  }
+
   /**
    * Original thrift definition:-
    * string
    *   baz(1: set<i32> a,
    *       2: list<map<i32, set<string>>> b);
    */
-  public function baz(keyset<int> $a, \Indexish<int, \Indexish<int, keyset<string>>> $b): string {
-    $currentseqid = $this->sendImpl_baz($a, $b);
-    return $this->recvImpl_baz($currentseqid);
-  }
-
   public async function gen_baz(keyset<int> $a, \Indexish<int, \Indexish<int, keyset<string>>> $b): Awaitable<string> {
     $currentseqid = $this->sendImpl_baz($a, $b);
     await $this->asyncHandler_->genWait($currentseqid);

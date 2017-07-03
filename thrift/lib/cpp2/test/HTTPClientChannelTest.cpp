@@ -57,7 +57,7 @@ class TestServiceHandler : public TestServiceIf {
     _return = req + "ccccccccccccccccccccccccccccccccccccccccccccc";
   }
 
-  void serializationTest(string& _return, bool inEventBase) override {
+  void serializationTest(string& _return, bool /* inEventBase */) override {
     _return = string(4096, 'a');
   }
 
@@ -103,9 +103,9 @@ class ScopedPresetResponseServer {
     explicit Handler(folly::IOBuf* resp)
         : wangle::BytesToBytesHandler(), resp_(resp) {}
 
-    void read(Context* ctx, folly::IOBufQueue& msg) override {
+    void read(Context* ctx, folly::IOBufQueue& /* msg */) override {
       write(ctx, resp_->clone()).then([=] { close(ctx); });
-    };
+    }
 
    private:
     folly::IOBuf* resp_;
@@ -301,4 +301,23 @@ TEST(HTTPClientChannelTest, NoGoodChannel2) {
   channel->closeNow();
 
   EXPECT_FALSE(channel->good());
+}
+
+TEST(HTTPClientChannelTest, EarlyShutdown) {
+  std::unique_ptr<ScopedServerThread> serverThread = createHttpServer();
+
+  // send 2 requests on the channel, both will hang for a little while,
+  // then we destruct the client / channel object, we are expecting a
+  // smooth shutdown
+  {
+    folly::EventBase eb;
+    const folly::SocketAddress* addr = serverThread->getAddress();
+    TAsyncTransport::UniquePtr socket(new TAsyncSocket(&eb, *addr));
+    auto channel = HTTPClientChannel::newHTTP1xChannel(
+        std::move(socket), "127.0.0.1", "/foobar");
+    TestServiceAsyncClient client(std::move(channel));
+
+    auto f = client.future_noResponse(1000);
+    auto f2 = client.future_sendResponse(1000);
+  }
 }

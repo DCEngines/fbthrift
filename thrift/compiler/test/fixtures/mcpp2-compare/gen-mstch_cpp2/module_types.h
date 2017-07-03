@@ -12,19 +12,69 @@
 #include <folly/io/IOBuf.h>
 #include <folly/io/Cursor.h>
 
+#include "includes_types.h"
 #include <thrift/lib/cpp2/GeneratedHeaderHelper.h>
 
+#include <folly/small_vector.h>
 
 
 namespace some { namespace valid { namespace ns {
 
 class Empty;
 class MyStruct;
+class SimpleUnion;
+class ComplexUnion;
+class AnException;
+class AnotherException;
+class containerStruct;
+class MyIncludedStruct;
+class AnnotatatedStruct;
+
+enum class MyEnumA {
+  fieldA = 1,
+  fieldB = 2,
+  fieldC = 4
+};
+
+using _MyEnumA_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnumA, MyEnumA>;
+extern const _MyEnumA_EnumMapFactory::ValuesToNamesMapType _MyEnumA_VALUES_TO_NAMES;
+extern const _MyEnumA_EnumMapFactory::NamesToValuesMapType _MyEnumA_NAMES_TO_VALUES;
+
+}}} // some::valid::ns
+namespace std {
+
+template<> struct hash<typename  ::some::valid::ns::MyEnumA> : public apache::thrift::detail::enum_hash<typename  ::some::valid::ns::MyEnumA> {};
+template<> struct equal_to<typename  ::some::valid::ns::MyEnumA> : public apache::thrift::detail::enum_equal_to<typename  ::some::valid::ns::MyEnumA> {};
+
+} // std
+namespace apache { namespace thrift {
+
+template <> struct TEnumDataStorage< ::some::valid::ns::MyEnumA>;
+template <> const std::size_t TEnumTraits< ::some::valid::ns::MyEnumA>::size;
+template <> const folly::Range<const  ::some::valid::ns::MyEnumA*> TEnumTraits< ::some::valid::ns::MyEnumA>::values;
+template <> const folly::Range<const folly::StringPiece*> TEnumTraits< ::some::valid::ns::MyEnumA>::names;
+template <> const char* TEnumTraits< ::some::valid::ns::MyEnumA>::findName( ::some::valid::ns::MyEnumA value);
+template <> bool TEnumTraits< ::some::valid::ns::MyEnumA>::findValue(const char* name,  ::some::valid::ns::MyEnumA* outValue);
+
+template <> inline constexpr  ::some::valid::ns::MyEnumA TEnumTraits< ::some::valid::ns::MyEnumA>::min() {
+  return  ::some::valid::ns::MyEnumA::fieldA;
+}
+
+template <> inline constexpr  ::some::valid::ns::MyEnumA TEnumTraits< ::some::valid::ns::MyEnumA>::max() {
+  return  ::some::valid::ns::MyEnumA::fieldC;
+}
+
+}} // apache::thrift
+namespace some { namespace valid { namespace ns {
+
 typedef int32_t simpleTypeDef;
 
 typedef std::map<int16_t, std::string> containerTypeDef;
 
 typedef std::vector<std::map<int16_t, std::string>> complexContainerTypeDef;
+
+class SimpleUnion;
+typedef std::set< ::some::valid::ns::SimpleUnion> unionTypeDef;
 
 class MyStruct;
 typedef std::vector< ::some::valid::ns::MyStruct> structTypeDef;
@@ -34,6 +84,17 @@ class MyStruct;
 typedef std::vector<std::map< ::some::valid::ns::Empty,  ::some::valid::ns::MyStruct>> complexStructTypeDef;
 
 typedef std::vector< ::some::valid::ns::complexStructTypeDef> mostComplexTypeDef;
+
+typedef int32_t CppFakeI32;
+
+typedef std::vector<int64_t> FollySmallVectorI64;
+
+typedef std::set<std::string> SortedVectorSetString;
+
+typedef std::map<int64_t, double> FakeMap;
+
+class containerStruct;
+typedef std::map<std::string,  ::some::valid::ns::containerStruct> UnorderedMapStruct;
 
 class Empty : private apache::thrift::detail::st::ComparisonOperators<Empty> {
  public:
@@ -120,15 +181,22 @@ class MyStruct : private apache::thrift::detail::st::ComparisonOperators<MyStruc
       MyStringField(apache::thrift::StringTraits< std::string>::fromStringLiteral("test")) {}
   // FragileConstructor for use in initialization lists only
 
-  MyStruct(apache::thrift::FragileConstructor, bool MyBoolField__arg, int64_t MyIntField__arg, std::string MyStringField__arg, std::string MyStringField2__arg) :
+  MyStruct(apache::thrift::FragileConstructor, bool MyBoolField__arg, int64_t MyIntField__arg, std::string MyStringField__arg, std::string MyStringField2__arg, std::string MyBinaryField__arg, std::string MyBinaryField2__arg, std::string MyBinaryField3__arg, std::vector<std::string> MyBinaryListField4__arg) :
       MyBoolField(std::move(MyBoolField__arg)),
       MyIntField(std::move(MyIntField__arg)),
       MyStringField(std::move(MyStringField__arg)),
-      MyStringField2(std::move(MyStringField2__arg)) {
+      MyStringField2(std::move(MyStringField2__arg)),
+      MyBinaryField(std::move(MyBinaryField__arg)),
+      MyBinaryField2(std::move(MyBinaryField2__arg)),
+      MyBinaryField3(std::move(MyBinaryField3__arg)),
+      MyBinaryListField4(std::move(MyBinaryListField4__arg)) {
     __isset.MyBoolField = true;
     __isset.MyIntField = true;
     __isset.MyStringField = true;
     __isset.MyStringField2 = true;
+    __isset.MyBinaryField = true;
+    __isset.MyBinaryField2 = true;
+    __isset.MyBinaryListField4 = true;
   }
   template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
   MyStruct(::apache::thrift::detail::argument_wrapper<1, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
@@ -158,6 +226,33 @@ class MyStruct : private apache::thrift::detail::st::ComparisonOperators<MyStruc
     MyStringField2 = arg.move();
     __isset.MyStringField2 = true;
   }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  MyStruct(::apache::thrift::detail::argument_wrapper<5, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    MyStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    MyBinaryField = arg.move();
+    __isset.MyBinaryField = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  MyStruct(::apache::thrift::detail::argument_wrapper<6, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    MyStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    MyBinaryField2 = arg.move();
+    __isset.MyBinaryField2 = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  MyStruct(::apache::thrift::detail::argument_wrapper<7, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    MyStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    MyBinaryField3 = arg.move();
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  MyStruct(::apache::thrift::detail::argument_wrapper<8, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    MyStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    MyBinaryListField4 = arg.move();
+    __isset.MyBinaryListField4 = true;
+  }
 
   MyStruct(MyStruct&&) = default;
 
@@ -174,6 +269,10 @@ class MyStruct : private apache::thrift::detail::st::ComparisonOperators<MyStruc
   int64_t MyIntField;
   std::string MyStringField;
   std::string MyStringField2;
+  std::string MyBinaryField;
+  std::string MyBinaryField2;
+  std::string MyBinaryField3;
+  std::vector<std::string> MyBinaryListField4;
 
   struct __isset {
     void __clear() {
@@ -181,31 +280,21 @@ class MyStruct : private apache::thrift::detail::st::ComparisonOperators<MyStruc
       MyIntField = false;
       MyStringField = false;
       MyStringField2 = false;
+      MyBinaryField = false;
+      MyBinaryField2 = false;
+      MyBinaryListField4 = false;
     }
 
     bool MyBoolField = false;
     bool MyIntField = false;
     bool MyStringField = false;
     bool MyStringField2 = false;
+    bool MyBinaryField = false;
+    bool MyBinaryField2 = false;
+    bool MyBinaryListField4 = false;
   } __isset;
   bool operator==(const MyStruct& rhs) const;
-
-  bool operator < (const MyStruct& rhs) const {
-    if (!(MyBoolField == rhs.MyBoolField)) {
-      return MyBoolField < rhs.MyBoolField;
-    }
-    if (!(MyIntField == rhs.MyIntField)) {
-      return MyIntField < rhs.MyIntField;
-    }
-    if (!(MyStringField == rhs.MyStringField)) {
-      return MyStringField < rhs.MyStringField;
-    }
-    if (!(MyStringField2 == rhs.MyStringField2)) {
-      return MyStringField2 < rhs.MyStringField2;
-    }
-    (void)rhs;
-    return false;
-  }
+  bool operator < (const MyStruct& rhs) const;
 
   bool get_MyBoolField() const {
     return MyBoolField;
@@ -257,6 +346,55 @@ class MyStruct : private apache::thrift::detail::st::ComparisonOperators<MyStruc
     return MyStringField2;
   }
 
+  const std::string& get_MyBinaryField() const& {
+    return MyBinaryField;
+  }
+
+  std::string get_MyBinaryField() && {
+    return std::move(MyBinaryField);
+  }
+
+  template <typename T_MyStruct_MyBinaryField_struct_setter>
+  std::string& set_MyBinaryField(T_MyStruct_MyBinaryField_struct_setter&& MyBinaryField_) {
+    MyBinaryField = std::forward<T_MyStruct_MyBinaryField_struct_setter>(MyBinaryField_);
+    __isset.MyBinaryField = true;
+    return MyBinaryField;
+  }
+
+  const std::string* get_MyBinaryField2() const& {
+    return __isset.MyBinaryField2 ? std::addressof(MyBinaryField2) : nullptr;
+  }
+
+  std::string* get_MyBinaryField2() & {
+    return __isset.MyBinaryField2 ? std::addressof(MyBinaryField2) : nullptr;
+  }
+  std::string* get_MyBinaryField2() && = delete;
+
+  template <typename T_MyStruct_MyBinaryField2_struct_setter>
+  std::string& set_MyBinaryField2(T_MyStruct_MyBinaryField2_struct_setter&& MyBinaryField2_) {
+    MyBinaryField2 = std::forward<T_MyStruct_MyBinaryField2_struct_setter>(MyBinaryField2_);
+    __isset.MyBinaryField2 = true;
+    return MyBinaryField2;
+  }
+
+  const std::string& get_MyBinaryField3() const& {
+    return MyBinaryField3;
+  }
+
+  std::string get_MyBinaryField3() && {
+    return std::move(MyBinaryField3);
+  }
+
+  template <typename T_MyStruct_MyBinaryField3_struct_setter>
+  std::string& set_MyBinaryField3(T_MyStruct_MyBinaryField3_struct_setter&& MyBinaryField3_) {
+    MyBinaryField3 = std::forward<T_MyStruct_MyBinaryField3_struct_setter>(MyBinaryField3_);
+    return MyBinaryField3;
+  }
+  const std::vector<std::string>& get_MyBinaryListField4() const&;
+  std::vector<std::string> get_MyBinaryListField4() &&;
+  template <typename T_MyStruct_MyBinaryListField4_struct_setter>
+  std::vector<std::string>& set_MyBinaryListField4(T_MyStruct_MyBinaryListField4_struct_setter&& MyBinaryListField4_);
+
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
   template <class Protocol_>
@@ -301,6 +439,3977 @@ template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::MyStr
 }
 
 template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::MyStruct>::serializedSizeZC(Protocol const* proto,  ::some::valid::ns::MyStruct const* obj) {
+  return obj->serializedSizeZC(proto);
+}
+
+}} // apache::thrift
+namespace some { namespace valid { namespace ns {
+
+class SimpleUnion : private apache::thrift::detail::st::ComparisonOperators<SimpleUnion> {
+ public:
+  enum Type {
+    __EMPTY__ = 0,
+    intValue = 7,
+    stringValue = 2,
+  } ;
+
+  SimpleUnion() :
+      type_(Type::__EMPTY__) {}
+
+  SimpleUnion(SimpleUnion&& rhs) :
+      type_(Type::__EMPTY__) {
+    if (this == &rhs) {return; }
+    if (rhs.type_ == Type::__EMPTY__) { return; }
+    switch(rhs.type_) {
+      case Type::intValue:
+      {
+        set_intValue(std::move(rhs.value_.intValue));
+        break;
+      }
+      case Type::stringValue:
+      {
+        set_stringValue(std::move(rhs.value_.stringValue));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    rhs.__clear();
+  }
+
+  SimpleUnion(const SimpleUnion& rhs) :
+      type_(Type::__EMPTY__) {
+    if (this == &rhs) {return; }
+    if (rhs.type_ == Type::__EMPTY__) { return; }
+    switch(rhs.type_) {
+      case Type::intValue:
+      {
+        set_intValue(rhs.value_.intValue);
+        break;
+      }
+      case Type::stringValue:
+      {
+        set_stringValue(rhs.value_.stringValue);
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+  }
+
+  SimpleUnion& operator=(SimpleUnion&& rhs) {
+    if (this == &rhs) {return *this; }
+    __clear();
+    if (rhs.type_ == Type::__EMPTY__) { return *this; }
+    switch(rhs.type_) {
+      case Type::intValue:
+      {
+        set_intValue(std::move(rhs.value_.intValue));
+        break;
+      }
+      case Type::stringValue:
+      {
+        set_stringValue(std::move(rhs.value_.stringValue));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    rhs.__clear();
+    return *this;
+  }
+
+  SimpleUnion& operator=(const SimpleUnion& rhs) {
+    if (this == &rhs) {return *this; }
+    __clear();
+    if (rhs.type_ == Type::__EMPTY__) { return *this; }
+    switch(rhs.type_) {
+      case Type::intValue:
+      {
+        set_intValue(rhs.value_.intValue);
+        break;
+      }
+      case Type::stringValue:
+      {
+        set_stringValue(rhs.value_.stringValue);
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    return *this;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  SimpleUnion(::apache::thrift::detail::argument_wrapper<7, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_intValue(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  SimpleUnion(::apache::thrift::detail::argument_wrapper<2, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_stringValue(arg.move());
+  }
+  void __clear();
+
+  virtual ~SimpleUnion() throw() {
+    __clear();
+  }
+
+  union storage_type {
+    int64_t intValue;
+    std::string stringValue;
+
+    storage_type() {}
+    ~storage_type() {}
+  } ;
+  bool operator==(const SimpleUnion& rhs) const;
+
+  bool operator < (const SimpleUnion& rhs) const {
+    if (type_ != rhs.type_) { return type_ < rhs.type_; }
+    switch(type_) {
+      case Type::intValue:
+      {
+        return value_.intValue < rhs.value_.intValue;
+      }
+      case Type::stringValue:
+      {
+        return value_.stringValue < rhs.value_.stringValue;
+      }
+      default:
+      {
+        return false;
+      }
+    }
+  }
+
+  int64_t& set_intValue(int64_t t = int64_t()) {
+    __clear();
+    type_ = Type::intValue;
+    ::new (std::addressof(value_.intValue)) int64_t(t);
+    return value_.intValue;
+  }
+
+  std::string& set_stringValue(std::string const &t) {
+    __clear();
+    type_ = Type::stringValue;
+    ::new (std::addressof(value_.stringValue)) std::string(t);
+    return value_.stringValue;
+  }
+
+  std::string& set_stringValue(std::string&& t) {
+    __clear();
+    type_ = Type::stringValue;
+    ::new (std::addressof(value_.stringValue)) std::string(std::move(t));
+    return value_.stringValue;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::string, T...>> std::string& set_stringValue(T&&... t) {
+    __clear();
+    type_ = Type::stringValue;
+    ::new (std::addressof(value_.stringValue)) std::string(std::forward<T>(t)...);
+    return value_.stringValue;
+  }
+
+  int64_t const & get_intValue() const {
+    assert(type_ == Type::intValue);
+    return value_.intValue;
+  }
+
+  std::string const & get_stringValue() const {
+    assert(type_ == Type::stringValue);
+    return value_.stringValue;
+  }
+
+  int64_t & mutable_intValue() {
+    assert(type_ == Type::intValue);
+    return value_.intValue;
+  }
+
+  std::string & mutable_stringValue() {
+    assert(type_ == Type::stringValue);
+    return value_.stringValue;
+  }
+
+  int64_t move_intValue() {
+    assert(type_ == Type::intValue);
+    return std::move(value_.intValue);
+  }
+
+  std::string move_stringValue() {
+    assert(type_ == Type::stringValue);
+    return std::move(value_.stringValue);
+  }
+
+  Type getType() const { return type_; }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+ protected:
+  template <class T>
+  void destruct(T &val) {
+    (&val)->~T();
+  }
+
+  Type type_;
+  storage_type value_;
+};
+
+void swap(SimpleUnion& a, SimpleUnion& b);
+extern template uint32_t SimpleUnion::read<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t SimpleUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t SimpleUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t SimpleUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t SimpleUnion::read<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t SimpleUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t SimpleUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t SimpleUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // some::valid::ns
+namespace apache { namespace thrift {
+
+template <> inline void Cpp2Ops< ::some::valid::ns::SimpleUnion>::clear( ::some::valid::ns::SimpleUnion* obj) {
+  return obj->__clear();
+}
+
+template <> inline constexpr apache::thrift::protocol::TType Cpp2Ops< ::some::valid::ns::SimpleUnion>::thriftType() {
+  return apache::thrift::protocol::T_STRUCT;
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::SimpleUnion>::write(Protocol* proto,  ::some::valid::ns::SimpleUnion const* obj) {
+  return obj->write(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::SimpleUnion>::read(Protocol* proto,  ::some::valid::ns::SimpleUnion* obj) {
+  return obj->read(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::SimpleUnion>::serializedSize(Protocol const* proto,  ::some::valid::ns::SimpleUnion const* obj) {
+  return obj->serializedSize(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::SimpleUnion>::serializedSizeZC(Protocol const* proto,  ::some::valid::ns::SimpleUnion const* obj) {
+  return obj->serializedSizeZC(proto);
+}
+
+}} // apache::thrift
+namespace some { namespace valid { namespace ns {
+
+class ComplexUnion : private apache::thrift::detail::st::ComparisonOperators<ComplexUnion> {
+ public:
+  enum Type {
+    __EMPTY__ = 0,
+    intValue = 1,
+    req_intValue = 101,
+    opt_intValue = 201,
+    stringValue = 3,
+    req_stringValue = 103,
+    opt_stringValue = 203,
+    intValue2 = 4,
+    intValue3 = 6,
+    doubelValue = 7,
+    boolValue = 8,
+    union_list = 9,
+    union_set = 10,
+    union_map = 11,
+    req_union_map = 111,
+    opt_union_map = 211,
+    enum_field = 12,
+    enum_container = 13,
+    a_struct = 14,
+    a_set_struct = 15,
+    a_union = 16,
+    req_a_union = 116,
+    opt_a_union = 216,
+    a_union_list = 17,
+    a_union_typedef = 18,
+    a_union_typedef_list = 19,
+    MyBinaryField = 20,
+    MyBinaryField2 = 21,
+    MyBinaryField3 = 22,
+    MyBinaryListField4 = 23,
+  } ;
+
+  ComplexUnion() :
+      type_(Type::__EMPTY__) {}
+
+  ComplexUnion(ComplexUnion&& rhs) :
+      type_(Type::__EMPTY__) {
+    if (this == &rhs) {return; }
+    if (rhs.type_ == Type::__EMPTY__) { return; }
+    switch(rhs.type_) {
+      case Type::intValue:
+      {
+        set_intValue(std::move(rhs.value_.intValue));
+        break;
+      }
+      case Type::req_intValue:
+      {
+        set_req_intValue(std::move(rhs.value_.req_intValue));
+        break;
+      }
+      case Type::opt_intValue:
+      {
+        set_opt_intValue(std::move(rhs.value_.opt_intValue));
+        break;
+      }
+      case Type::stringValue:
+      {
+        set_stringValue(std::move(rhs.value_.stringValue));
+        break;
+      }
+      case Type::req_stringValue:
+      {
+        set_req_stringValue(std::move(rhs.value_.req_stringValue));
+        break;
+      }
+      case Type::opt_stringValue:
+      {
+        set_opt_stringValue(std::move(rhs.value_.opt_stringValue));
+        break;
+      }
+      case Type::intValue2:
+      {
+        set_intValue2(std::move(rhs.value_.intValue2));
+        break;
+      }
+      case Type::intValue3:
+      {
+        set_intValue3(std::move(rhs.value_.intValue3));
+        break;
+      }
+      case Type::doubelValue:
+      {
+        set_doubelValue(std::move(rhs.value_.doubelValue));
+        break;
+      }
+      case Type::boolValue:
+      {
+        set_boolValue(std::move(rhs.value_.boolValue));
+        break;
+      }
+      case Type::union_list:
+      {
+        set_union_list(std::move(rhs.value_.union_list));
+        break;
+      }
+      case Type::union_set:
+      {
+        set_union_set(std::move(rhs.value_.union_set));
+        break;
+      }
+      case Type::union_map:
+      {
+        set_union_map(std::move(rhs.value_.union_map));
+        break;
+      }
+      case Type::req_union_map:
+      {
+        set_req_union_map(std::move(rhs.value_.req_union_map));
+        break;
+      }
+      case Type::opt_union_map:
+      {
+        set_opt_union_map(std::move(rhs.value_.opt_union_map));
+        break;
+      }
+      case Type::enum_field:
+      {
+        set_enum_field(std::move(rhs.value_.enum_field));
+        break;
+      }
+      case Type::enum_container:
+      {
+        set_enum_container(std::move(rhs.value_.enum_container));
+        break;
+      }
+      case Type::a_struct:
+      {
+        set_a_struct(std::move(rhs.value_.a_struct));
+        break;
+      }
+      case Type::a_set_struct:
+      {
+        set_a_set_struct(std::move(rhs.value_.a_set_struct));
+        break;
+      }
+      case Type::a_union:
+      {
+        set_a_union(std::move(rhs.value_.a_union));
+        break;
+      }
+      case Type::req_a_union:
+      {
+        set_req_a_union(std::move(rhs.value_.req_a_union));
+        break;
+      }
+      case Type::opt_a_union:
+      {
+        set_opt_a_union(std::move(rhs.value_.opt_a_union));
+        break;
+      }
+      case Type::a_union_list:
+      {
+        set_a_union_list(std::move(rhs.value_.a_union_list));
+        break;
+      }
+      case Type::a_union_typedef:
+      {
+        set_a_union_typedef(std::move(rhs.value_.a_union_typedef));
+        break;
+      }
+      case Type::a_union_typedef_list:
+      {
+        set_a_union_typedef_list(std::move(rhs.value_.a_union_typedef_list));
+        break;
+      }
+      case Type::MyBinaryField:
+      {
+        set_MyBinaryField(std::move(rhs.value_.MyBinaryField));
+        break;
+      }
+      case Type::MyBinaryField2:
+      {
+        set_MyBinaryField2(std::move(rhs.value_.MyBinaryField2));
+        break;
+      }
+      case Type::MyBinaryField3:
+      {
+        set_MyBinaryField3(std::move(rhs.value_.MyBinaryField3));
+        break;
+      }
+      case Type::MyBinaryListField4:
+      {
+        set_MyBinaryListField4(std::move(rhs.value_.MyBinaryListField4));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    rhs.__clear();
+  }
+
+  ComplexUnion(const ComplexUnion& rhs) :
+      type_(Type::__EMPTY__) {
+    if (this == &rhs) {return; }
+    if (rhs.type_ == Type::__EMPTY__) { return; }
+    switch(rhs.type_) {
+      case Type::intValue:
+      {
+        set_intValue(rhs.value_.intValue);
+        break;
+      }
+      case Type::req_intValue:
+      {
+        set_req_intValue(rhs.value_.req_intValue);
+        break;
+      }
+      case Type::opt_intValue:
+      {
+        set_opt_intValue(rhs.value_.opt_intValue);
+        break;
+      }
+      case Type::stringValue:
+      {
+        set_stringValue(rhs.value_.stringValue);
+        break;
+      }
+      case Type::req_stringValue:
+      {
+        set_req_stringValue(rhs.value_.req_stringValue);
+        break;
+      }
+      case Type::opt_stringValue:
+      {
+        set_opt_stringValue(rhs.value_.opt_stringValue);
+        break;
+      }
+      case Type::intValue2:
+      {
+        set_intValue2(rhs.value_.intValue2);
+        break;
+      }
+      case Type::intValue3:
+      {
+        set_intValue3(rhs.value_.intValue3);
+        break;
+      }
+      case Type::doubelValue:
+      {
+        set_doubelValue(rhs.value_.doubelValue);
+        break;
+      }
+      case Type::boolValue:
+      {
+        set_boolValue(rhs.value_.boolValue);
+        break;
+      }
+      case Type::union_list:
+      {
+        set_union_list(rhs.value_.union_list);
+        break;
+      }
+      case Type::union_set:
+      {
+        set_union_set(rhs.value_.union_set);
+        break;
+      }
+      case Type::union_map:
+      {
+        set_union_map(rhs.value_.union_map);
+        break;
+      }
+      case Type::req_union_map:
+      {
+        set_req_union_map(rhs.value_.req_union_map);
+        break;
+      }
+      case Type::opt_union_map:
+      {
+        set_opt_union_map(rhs.value_.opt_union_map);
+        break;
+      }
+      case Type::enum_field:
+      {
+        set_enum_field(rhs.value_.enum_field);
+        break;
+      }
+      case Type::enum_container:
+      {
+        set_enum_container(rhs.value_.enum_container);
+        break;
+      }
+      case Type::a_struct:
+      {
+        set_a_struct(rhs.value_.a_struct);
+        break;
+      }
+      case Type::a_set_struct:
+      {
+        set_a_set_struct(rhs.value_.a_set_struct);
+        break;
+      }
+      case Type::a_union:
+      {
+        set_a_union(rhs.value_.a_union);
+        break;
+      }
+      case Type::req_a_union:
+      {
+        set_req_a_union(rhs.value_.req_a_union);
+        break;
+      }
+      case Type::opt_a_union:
+      {
+        set_opt_a_union(rhs.value_.opt_a_union);
+        break;
+      }
+      case Type::a_union_list:
+      {
+        set_a_union_list(rhs.value_.a_union_list);
+        break;
+      }
+      case Type::a_union_typedef:
+      {
+        set_a_union_typedef(rhs.value_.a_union_typedef);
+        break;
+      }
+      case Type::a_union_typedef_list:
+      {
+        set_a_union_typedef_list(rhs.value_.a_union_typedef_list);
+        break;
+      }
+      case Type::MyBinaryField:
+      {
+        set_MyBinaryField(rhs.value_.MyBinaryField);
+        break;
+      }
+      case Type::MyBinaryField2:
+      {
+        set_MyBinaryField2(rhs.value_.MyBinaryField2);
+        break;
+      }
+      case Type::MyBinaryField3:
+      {
+        set_MyBinaryField3(rhs.value_.MyBinaryField3);
+        break;
+      }
+      case Type::MyBinaryListField4:
+      {
+        set_MyBinaryListField4(rhs.value_.MyBinaryListField4);
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+  }
+
+  ComplexUnion& operator=(ComplexUnion&& rhs) {
+    if (this == &rhs) {return *this; }
+    __clear();
+    if (rhs.type_ == Type::__EMPTY__) { return *this; }
+    switch(rhs.type_) {
+      case Type::intValue:
+      {
+        set_intValue(std::move(rhs.value_.intValue));
+        break;
+      }
+      case Type::req_intValue:
+      {
+        set_req_intValue(std::move(rhs.value_.req_intValue));
+        break;
+      }
+      case Type::opt_intValue:
+      {
+        set_opt_intValue(std::move(rhs.value_.opt_intValue));
+        break;
+      }
+      case Type::stringValue:
+      {
+        set_stringValue(std::move(rhs.value_.stringValue));
+        break;
+      }
+      case Type::req_stringValue:
+      {
+        set_req_stringValue(std::move(rhs.value_.req_stringValue));
+        break;
+      }
+      case Type::opt_stringValue:
+      {
+        set_opt_stringValue(std::move(rhs.value_.opt_stringValue));
+        break;
+      }
+      case Type::intValue2:
+      {
+        set_intValue2(std::move(rhs.value_.intValue2));
+        break;
+      }
+      case Type::intValue3:
+      {
+        set_intValue3(std::move(rhs.value_.intValue3));
+        break;
+      }
+      case Type::doubelValue:
+      {
+        set_doubelValue(std::move(rhs.value_.doubelValue));
+        break;
+      }
+      case Type::boolValue:
+      {
+        set_boolValue(std::move(rhs.value_.boolValue));
+        break;
+      }
+      case Type::union_list:
+      {
+        set_union_list(std::move(rhs.value_.union_list));
+        break;
+      }
+      case Type::union_set:
+      {
+        set_union_set(std::move(rhs.value_.union_set));
+        break;
+      }
+      case Type::union_map:
+      {
+        set_union_map(std::move(rhs.value_.union_map));
+        break;
+      }
+      case Type::req_union_map:
+      {
+        set_req_union_map(std::move(rhs.value_.req_union_map));
+        break;
+      }
+      case Type::opt_union_map:
+      {
+        set_opt_union_map(std::move(rhs.value_.opt_union_map));
+        break;
+      }
+      case Type::enum_field:
+      {
+        set_enum_field(std::move(rhs.value_.enum_field));
+        break;
+      }
+      case Type::enum_container:
+      {
+        set_enum_container(std::move(rhs.value_.enum_container));
+        break;
+      }
+      case Type::a_struct:
+      {
+        set_a_struct(std::move(rhs.value_.a_struct));
+        break;
+      }
+      case Type::a_set_struct:
+      {
+        set_a_set_struct(std::move(rhs.value_.a_set_struct));
+        break;
+      }
+      case Type::a_union:
+      {
+        set_a_union(std::move(rhs.value_.a_union));
+        break;
+      }
+      case Type::req_a_union:
+      {
+        set_req_a_union(std::move(rhs.value_.req_a_union));
+        break;
+      }
+      case Type::opt_a_union:
+      {
+        set_opt_a_union(std::move(rhs.value_.opt_a_union));
+        break;
+      }
+      case Type::a_union_list:
+      {
+        set_a_union_list(std::move(rhs.value_.a_union_list));
+        break;
+      }
+      case Type::a_union_typedef:
+      {
+        set_a_union_typedef(std::move(rhs.value_.a_union_typedef));
+        break;
+      }
+      case Type::a_union_typedef_list:
+      {
+        set_a_union_typedef_list(std::move(rhs.value_.a_union_typedef_list));
+        break;
+      }
+      case Type::MyBinaryField:
+      {
+        set_MyBinaryField(std::move(rhs.value_.MyBinaryField));
+        break;
+      }
+      case Type::MyBinaryField2:
+      {
+        set_MyBinaryField2(std::move(rhs.value_.MyBinaryField2));
+        break;
+      }
+      case Type::MyBinaryField3:
+      {
+        set_MyBinaryField3(std::move(rhs.value_.MyBinaryField3));
+        break;
+      }
+      case Type::MyBinaryListField4:
+      {
+        set_MyBinaryListField4(std::move(rhs.value_.MyBinaryListField4));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    rhs.__clear();
+    return *this;
+  }
+
+  ComplexUnion& operator=(const ComplexUnion& rhs) {
+    if (this == &rhs) {return *this; }
+    __clear();
+    if (rhs.type_ == Type::__EMPTY__) { return *this; }
+    switch(rhs.type_) {
+      case Type::intValue:
+      {
+        set_intValue(rhs.value_.intValue);
+        break;
+      }
+      case Type::req_intValue:
+      {
+        set_req_intValue(rhs.value_.req_intValue);
+        break;
+      }
+      case Type::opt_intValue:
+      {
+        set_opt_intValue(rhs.value_.opt_intValue);
+        break;
+      }
+      case Type::stringValue:
+      {
+        set_stringValue(rhs.value_.stringValue);
+        break;
+      }
+      case Type::req_stringValue:
+      {
+        set_req_stringValue(rhs.value_.req_stringValue);
+        break;
+      }
+      case Type::opt_stringValue:
+      {
+        set_opt_stringValue(rhs.value_.opt_stringValue);
+        break;
+      }
+      case Type::intValue2:
+      {
+        set_intValue2(rhs.value_.intValue2);
+        break;
+      }
+      case Type::intValue3:
+      {
+        set_intValue3(rhs.value_.intValue3);
+        break;
+      }
+      case Type::doubelValue:
+      {
+        set_doubelValue(rhs.value_.doubelValue);
+        break;
+      }
+      case Type::boolValue:
+      {
+        set_boolValue(rhs.value_.boolValue);
+        break;
+      }
+      case Type::union_list:
+      {
+        set_union_list(rhs.value_.union_list);
+        break;
+      }
+      case Type::union_set:
+      {
+        set_union_set(rhs.value_.union_set);
+        break;
+      }
+      case Type::union_map:
+      {
+        set_union_map(rhs.value_.union_map);
+        break;
+      }
+      case Type::req_union_map:
+      {
+        set_req_union_map(rhs.value_.req_union_map);
+        break;
+      }
+      case Type::opt_union_map:
+      {
+        set_opt_union_map(rhs.value_.opt_union_map);
+        break;
+      }
+      case Type::enum_field:
+      {
+        set_enum_field(rhs.value_.enum_field);
+        break;
+      }
+      case Type::enum_container:
+      {
+        set_enum_container(rhs.value_.enum_container);
+        break;
+      }
+      case Type::a_struct:
+      {
+        set_a_struct(rhs.value_.a_struct);
+        break;
+      }
+      case Type::a_set_struct:
+      {
+        set_a_set_struct(rhs.value_.a_set_struct);
+        break;
+      }
+      case Type::a_union:
+      {
+        set_a_union(rhs.value_.a_union);
+        break;
+      }
+      case Type::req_a_union:
+      {
+        set_req_a_union(rhs.value_.req_a_union);
+        break;
+      }
+      case Type::opt_a_union:
+      {
+        set_opt_a_union(rhs.value_.opt_a_union);
+        break;
+      }
+      case Type::a_union_list:
+      {
+        set_a_union_list(rhs.value_.a_union_list);
+        break;
+      }
+      case Type::a_union_typedef:
+      {
+        set_a_union_typedef(rhs.value_.a_union_typedef);
+        break;
+      }
+      case Type::a_union_typedef_list:
+      {
+        set_a_union_typedef_list(rhs.value_.a_union_typedef_list);
+        break;
+      }
+      case Type::MyBinaryField:
+      {
+        set_MyBinaryField(rhs.value_.MyBinaryField);
+        break;
+      }
+      case Type::MyBinaryField2:
+      {
+        set_MyBinaryField2(rhs.value_.MyBinaryField2);
+        break;
+      }
+      case Type::MyBinaryField3:
+      {
+        set_MyBinaryField3(rhs.value_.MyBinaryField3);
+        break;
+      }
+      case Type::MyBinaryListField4:
+      {
+        set_MyBinaryListField4(rhs.value_.MyBinaryListField4);
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    return *this;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<1, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_intValue(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<101, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_req_intValue(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<201, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_opt_intValue(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<3, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_stringValue(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<103, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_req_stringValue(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<203, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_opt_stringValue(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<4, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_intValue2(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<6, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_intValue3(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<7, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_doubelValue(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<8, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_boolValue(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<9, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_union_list(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<10, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_union_set(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<11, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_union_map(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<111, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_req_union_map(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<211, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_opt_union_map(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<12, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_enum_field(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<13, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_enum_container(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<14, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_a_struct(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<15, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_a_set_struct(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<16, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_a_union(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<116, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_req_a_union(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<216, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_opt_a_union(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<17, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_a_union_list(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<18, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_a_union_typedef(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<19, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_a_union_typedef_list(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<20, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_MyBinaryField(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<21, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_MyBinaryField2(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<22, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_MyBinaryField3(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor>
+  ComplexUnion(::apache::thrift::detail::argument_wrapper<23, T__ThriftWrappedArgument__Ctor> arg):
+    type_(Type::__EMPTY__)
+  {
+    set_MyBinaryListField4(arg.move());
+  }
+  void __clear();
+
+  virtual ~ComplexUnion() throw() {
+    __clear();
+  }
+
+  union storage_type {
+    int64_t intValue;
+    int64_t req_intValue;
+    int64_t opt_intValue;
+    std::string stringValue;
+    std::string req_stringValue;
+    std::string opt_stringValue;
+    int16_t intValue2;
+    int32_t intValue3;
+    double doubelValue;
+    bool boolValue;
+    std::vector<int32_t> union_list;
+    std::set<int64_t> union_set;
+    std::map<std::string, int32_t> union_map;
+    std::map<std::string, int32_t> req_union_map;
+    std::map<std::string, int32_t> opt_union_map;
+     ::some::valid::ns::MyEnumA enum_field;
+    std::vector< ::some::valid::ns::MyEnumA> enum_container;
+     ::some::valid::ns::MyStruct a_struct;
+    std::set< ::some::valid::ns::MyStruct> a_set_struct;
+     ::some::valid::ns::SimpleUnion a_union;
+     ::some::valid::ns::SimpleUnion req_a_union;
+     ::some::valid::ns::SimpleUnion opt_a_union;
+    std::vector< ::some::valid::ns::SimpleUnion> a_union_list;
+     ::some::valid::ns::unionTypeDef a_union_typedef;
+    std::vector< ::some::valid::ns::unionTypeDef> a_union_typedef_list;
+    std::string MyBinaryField;
+    std::string MyBinaryField2;
+    std::string MyBinaryField3;
+    std::vector<std::string> MyBinaryListField4;
+
+    storage_type() {}
+    ~storage_type() {}
+  } ;
+  bool operator==(const ComplexUnion& rhs) const;
+  bool operator < (const ComplexUnion& rhs) const;
+
+  int64_t& set_intValue(int64_t t = int64_t()) {
+    __clear();
+    type_ = Type::intValue;
+    ::new (std::addressof(value_.intValue)) int64_t(t);
+    return value_.intValue;
+  }
+
+  int64_t& set_req_intValue(int64_t t = int64_t()) {
+    __clear();
+    type_ = Type::req_intValue;
+    ::new (std::addressof(value_.req_intValue)) int64_t(t);
+    return value_.req_intValue;
+  }
+
+  int64_t& set_opt_intValue(int64_t t = int64_t()) {
+    __clear();
+    type_ = Type::opt_intValue;
+    ::new (std::addressof(value_.opt_intValue)) int64_t(t);
+    return value_.opt_intValue;
+  }
+
+  std::string& set_stringValue(std::string const &t) {
+    __clear();
+    type_ = Type::stringValue;
+    ::new (std::addressof(value_.stringValue)) std::string(t);
+    return value_.stringValue;
+  }
+
+  std::string& set_stringValue(std::string&& t) {
+    __clear();
+    type_ = Type::stringValue;
+    ::new (std::addressof(value_.stringValue)) std::string(std::move(t));
+    return value_.stringValue;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::string, T...>> std::string& set_stringValue(T&&... t) {
+    __clear();
+    type_ = Type::stringValue;
+    ::new (std::addressof(value_.stringValue)) std::string(std::forward<T>(t)...);
+    return value_.stringValue;
+  }
+
+  std::string& set_req_stringValue(std::string const &t) {
+    __clear();
+    type_ = Type::req_stringValue;
+    ::new (std::addressof(value_.req_stringValue)) std::string(t);
+    return value_.req_stringValue;
+  }
+
+  std::string& set_req_stringValue(std::string&& t) {
+    __clear();
+    type_ = Type::req_stringValue;
+    ::new (std::addressof(value_.req_stringValue)) std::string(std::move(t));
+    return value_.req_stringValue;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::string, T...>> std::string& set_req_stringValue(T&&... t) {
+    __clear();
+    type_ = Type::req_stringValue;
+    ::new (std::addressof(value_.req_stringValue)) std::string(std::forward<T>(t)...);
+    return value_.req_stringValue;
+  }
+
+  std::string& set_opt_stringValue(std::string const &t) {
+    __clear();
+    type_ = Type::opt_stringValue;
+    ::new (std::addressof(value_.opt_stringValue)) std::string(t);
+    return value_.opt_stringValue;
+  }
+
+  std::string& set_opt_stringValue(std::string&& t) {
+    __clear();
+    type_ = Type::opt_stringValue;
+    ::new (std::addressof(value_.opt_stringValue)) std::string(std::move(t));
+    return value_.opt_stringValue;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::string, T...>> std::string& set_opt_stringValue(T&&... t) {
+    __clear();
+    type_ = Type::opt_stringValue;
+    ::new (std::addressof(value_.opt_stringValue)) std::string(std::forward<T>(t)...);
+    return value_.opt_stringValue;
+  }
+
+  int16_t& set_intValue2(int16_t t = int16_t()) {
+    __clear();
+    type_ = Type::intValue2;
+    ::new (std::addressof(value_.intValue2)) int16_t(t);
+    return value_.intValue2;
+  }
+
+  int32_t& set_intValue3(int32_t t = int32_t()) {
+    __clear();
+    type_ = Type::intValue3;
+    ::new (std::addressof(value_.intValue3)) int32_t(t);
+    return value_.intValue3;
+  }
+
+  double& set_doubelValue(double t = double()) {
+    __clear();
+    type_ = Type::doubelValue;
+    ::new (std::addressof(value_.doubelValue)) double(t);
+    return value_.doubelValue;
+  }
+
+  bool& set_boolValue(bool t = bool()) {
+    __clear();
+    type_ = Type::boolValue;
+    ::new (std::addressof(value_.boolValue)) bool(t);
+    return value_.boolValue;
+  }
+
+  std::vector<int32_t>& set_union_list(std::vector<int32_t> const &t) {
+    __clear();
+    type_ = Type::union_list;
+    ::new (std::addressof(value_.union_list)) std::vector<int32_t>(t);
+    return value_.union_list;
+  }
+
+  std::vector<int32_t>& set_union_list(std::vector<int32_t>&& t) {
+    __clear();
+    type_ = Type::union_list;
+    ::new (std::addressof(value_.union_list)) std::vector<int32_t>(std::move(t));
+    return value_.union_list;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::vector<int32_t>, T...>> std::vector<int32_t>& set_union_list(T&&... t) {
+    __clear();
+    type_ = Type::union_list;
+    ::new (std::addressof(value_.union_list)) std::vector<int32_t>(std::forward<T>(t)...);
+    return value_.union_list;
+  }
+
+  std::set<int64_t>& set_union_set(std::set<int64_t> const &t) {
+    __clear();
+    type_ = Type::union_set;
+    ::new (std::addressof(value_.union_set)) std::set<int64_t>(t);
+    return value_.union_set;
+  }
+
+  std::set<int64_t>& set_union_set(std::set<int64_t>&& t) {
+    __clear();
+    type_ = Type::union_set;
+    ::new (std::addressof(value_.union_set)) std::set<int64_t>(std::move(t));
+    return value_.union_set;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::set<int64_t>, T...>> std::set<int64_t>& set_union_set(T&&... t) {
+    __clear();
+    type_ = Type::union_set;
+    ::new (std::addressof(value_.union_set)) std::set<int64_t>(std::forward<T>(t)...);
+    return value_.union_set;
+  }
+
+  std::map<std::string, int32_t>& set_union_map(std::map<std::string, int32_t> const &t) {
+    __clear();
+    type_ = Type::union_map;
+    ::new (std::addressof(value_.union_map)) std::map<std::string, int32_t>(t);
+    return value_.union_map;
+  }
+
+  std::map<std::string, int32_t>& set_union_map(std::map<std::string, int32_t>&& t) {
+    __clear();
+    type_ = Type::union_map;
+    ::new (std::addressof(value_.union_map)) std::map<std::string, int32_t>(std::move(t));
+    return value_.union_map;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::map<std::string, int32_t>, T...>> std::map<std::string, int32_t>& set_union_map(T&&... t) {
+    __clear();
+    type_ = Type::union_map;
+    ::new (std::addressof(value_.union_map)) std::map<std::string, int32_t>(std::forward<T>(t)...);
+    return value_.union_map;
+  }
+
+  std::map<std::string, int32_t>& set_req_union_map(std::map<std::string, int32_t> const &t) {
+    __clear();
+    type_ = Type::req_union_map;
+    ::new (std::addressof(value_.req_union_map)) std::map<std::string, int32_t>(t);
+    return value_.req_union_map;
+  }
+
+  std::map<std::string, int32_t>& set_req_union_map(std::map<std::string, int32_t>&& t) {
+    __clear();
+    type_ = Type::req_union_map;
+    ::new (std::addressof(value_.req_union_map)) std::map<std::string, int32_t>(std::move(t));
+    return value_.req_union_map;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::map<std::string, int32_t>, T...>> std::map<std::string, int32_t>& set_req_union_map(T&&... t) {
+    __clear();
+    type_ = Type::req_union_map;
+    ::new (std::addressof(value_.req_union_map)) std::map<std::string, int32_t>(std::forward<T>(t)...);
+    return value_.req_union_map;
+  }
+
+  std::map<std::string, int32_t>& set_opt_union_map(std::map<std::string, int32_t> const &t) {
+    __clear();
+    type_ = Type::opt_union_map;
+    ::new (std::addressof(value_.opt_union_map)) std::map<std::string, int32_t>(t);
+    return value_.opt_union_map;
+  }
+
+  std::map<std::string, int32_t>& set_opt_union_map(std::map<std::string, int32_t>&& t) {
+    __clear();
+    type_ = Type::opt_union_map;
+    ::new (std::addressof(value_.opt_union_map)) std::map<std::string, int32_t>(std::move(t));
+    return value_.opt_union_map;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::map<std::string, int32_t>, T...>> std::map<std::string, int32_t>& set_opt_union_map(T&&... t) {
+    __clear();
+    type_ = Type::opt_union_map;
+    ::new (std::addressof(value_.opt_union_map)) std::map<std::string, int32_t>(std::forward<T>(t)...);
+    return value_.opt_union_map;
+  }
+
+   ::some::valid::ns::MyEnumA& set_enum_field( ::some::valid::ns::MyEnumA t =  ::some::valid::ns::MyEnumA()) {
+    __clear();
+    type_ = Type::enum_field;
+    ::new (std::addressof(value_.enum_field))  ::some::valid::ns::MyEnumA(t);
+    return value_.enum_field;
+  }
+
+  std::vector< ::some::valid::ns::MyEnumA>& set_enum_container(std::vector< ::some::valid::ns::MyEnumA> const &t) {
+    __clear();
+    type_ = Type::enum_container;
+    ::new (std::addressof(value_.enum_container)) std::vector< ::some::valid::ns::MyEnumA>(t);
+    return value_.enum_container;
+  }
+
+  std::vector< ::some::valid::ns::MyEnumA>& set_enum_container(std::vector< ::some::valid::ns::MyEnumA>&& t) {
+    __clear();
+    type_ = Type::enum_container;
+    ::new (std::addressof(value_.enum_container)) std::vector< ::some::valid::ns::MyEnumA>(std::move(t));
+    return value_.enum_container;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::vector< ::some::valid::ns::MyEnumA>, T...>> std::vector< ::some::valid::ns::MyEnumA>& set_enum_container(T&&... t) {
+    __clear();
+    type_ = Type::enum_container;
+    ::new (std::addressof(value_.enum_container)) std::vector< ::some::valid::ns::MyEnumA>(std::forward<T>(t)...);
+    return value_.enum_container;
+  }
+
+   ::some::valid::ns::MyStruct& set_a_struct( ::some::valid::ns::MyStruct const &t) {
+    __clear();
+    type_ = Type::a_struct;
+    ::new (std::addressof(value_.a_struct))  ::some::valid::ns::MyStruct(t);
+    return value_.a_struct;
+  }
+
+   ::some::valid::ns::MyStruct& set_a_struct( ::some::valid::ns::MyStruct&& t) {
+    __clear();
+    type_ = Type::a_struct;
+    ::new (std::addressof(value_.a_struct))  ::some::valid::ns::MyStruct(std::move(t));
+    return value_.a_struct;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t< ::some::valid::ns::MyStruct, T...>>  ::some::valid::ns::MyStruct& set_a_struct(T&&... t) {
+    __clear();
+    type_ = Type::a_struct;
+    ::new (std::addressof(value_.a_struct))  ::some::valid::ns::MyStruct(std::forward<T>(t)...);
+    return value_.a_struct;
+  }
+
+  std::set< ::some::valid::ns::MyStruct>& set_a_set_struct(std::set< ::some::valid::ns::MyStruct> const &t) {
+    __clear();
+    type_ = Type::a_set_struct;
+    ::new (std::addressof(value_.a_set_struct)) std::set< ::some::valid::ns::MyStruct>(t);
+    return value_.a_set_struct;
+  }
+
+  std::set< ::some::valid::ns::MyStruct>& set_a_set_struct(std::set< ::some::valid::ns::MyStruct>&& t) {
+    __clear();
+    type_ = Type::a_set_struct;
+    ::new (std::addressof(value_.a_set_struct)) std::set< ::some::valid::ns::MyStruct>(std::move(t));
+    return value_.a_set_struct;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::set< ::some::valid::ns::MyStruct>, T...>> std::set< ::some::valid::ns::MyStruct>& set_a_set_struct(T&&... t) {
+    __clear();
+    type_ = Type::a_set_struct;
+    ::new (std::addressof(value_.a_set_struct)) std::set< ::some::valid::ns::MyStruct>(std::forward<T>(t)...);
+    return value_.a_set_struct;
+  }
+
+   ::some::valid::ns::SimpleUnion& set_a_union( ::some::valid::ns::SimpleUnion const &t) {
+    __clear();
+    type_ = Type::a_union;
+    ::new (std::addressof(value_.a_union))  ::some::valid::ns::SimpleUnion(t);
+    return value_.a_union;
+  }
+
+   ::some::valid::ns::SimpleUnion& set_a_union( ::some::valid::ns::SimpleUnion&& t) {
+    __clear();
+    type_ = Type::a_union;
+    ::new (std::addressof(value_.a_union))  ::some::valid::ns::SimpleUnion(std::move(t));
+    return value_.a_union;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t< ::some::valid::ns::SimpleUnion, T...>>  ::some::valid::ns::SimpleUnion& set_a_union(T&&... t) {
+    __clear();
+    type_ = Type::a_union;
+    ::new (std::addressof(value_.a_union))  ::some::valid::ns::SimpleUnion(std::forward<T>(t)...);
+    return value_.a_union;
+  }
+
+   ::some::valid::ns::SimpleUnion& set_req_a_union( ::some::valid::ns::SimpleUnion const &t) {
+    __clear();
+    type_ = Type::req_a_union;
+    ::new (std::addressof(value_.req_a_union))  ::some::valid::ns::SimpleUnion(t);
+    return value_.req_a_union;
+  }
+
+   ::some::valid::ns::SimpleUnion& set_req_a_union( ::some::valid::ns::SimpleUnion&& t) {
+    __clear();
+    type_ = Type::req_a_union;
+    ::new (std::addressof(value_.req_a_union))  ::some::valid::ns::SimpleUnion(std::move(t));
+    return value_.req_a_union;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t< ::some::valid::ns::SimpleUnion, T...>>  ::some::valid::ns::SimpleUnion& set_req_a_union(T&&... t) {
+    __clear();
+    type_ = Type::req_a_union;
+    ::new (std::addressof(value_.req_a_union))  ::some::valid::ns::SimpleUnion(std::forward<T>(t)...);
+    return value_.req_a_union;
+  }
+
+   ::some::valid::ns::SimpleUnion& set_opt_a_union( ::some::valid::ns::SimpleUnion const &t) {
+    __clear();
+    type_ = Type::opt_a_union;
+    ::new (std::addressof(value_.opt_a_union))  ::some::valid::ns::SimpleUnion(t);
+    return value_.opt_a_union;
+  }
+
+   ::some::valid::ns::SimpleUnion& set_opt_a_union( ::some::valid::ns::SimpleUnion&& t) {
+    __clear();
+    type_ = Type::opt_a_union;
+    ::new (std::addressof(value_.opt_a_union))  ::some::valid::ns::SimpleUnion(std::move(t));
+    return value_.opt_a_union;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t< ::some::valid::ns::SimpleUnion, T...>>  ::some::valid::ns::SimpleUnion& set_opt_a_union(T&&... t) {
+    __clear();
+    type_ = Type::opt_a_union;
+    ::new (std::addressof(value_.opt_a_union))  ::some::valid::ns::SimpleUnion(std::forward<T>(t)...);
+    return value_.opt_a_union;
+  }
+
+  std::vector< ::some::valid::ns::SimpleUnion>& set_a_union_list(std::vector< ::some::valid::ns::SimpleUnion> const &t) {
+    __clear();
+    type_ = Type::a_union_list;
+    ::new (std::addressof(value_.a_union_list)) std::vector< ::some::valid::ns::SimpleUnion>(t);
+    return value_.a_union_list;
+  }
+
+  std::vector< ::some::valid::ns::SimpleUnion>& set_a_union_list(std::vector< ::some::valid::ns::SimpleUnion>&& t) {
+    __clear();
+    type_ = Type::a_union_list;
+    ::new (std::addressof(value_.a_union_list)) std::vector< ::some::valid::ns::SimpleUnion>(std::move(t));
+    return value_.a_union_list;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::vector< ::some::valid::ns::SimpleUnion>, T...>> std::vector< ::some::valid::ns::SimpleUnion>& set_a_union_list(T&&... t) {
+    __clear();
+    type_ = Type::a_union_list;
+    ::new (std::addressof(value_.a_union_list)) std::vector< ::some::valid::ns::SimpleUnion>(std::forward<T>(t)...);
+    return value_.a_union_list;
+  }
+
+   ::some::valid::ns::unionTypeDef& set_a_union_typedef( ::some::valid::ns::unionTypeDef const &t) {
+    __clear();
+    type_ = Type::a_union_typedef;
+    ::new (std::addressof(value_.a_union_typedef))  ::some::valid::ns::unionTypeDef(t);
+    return value_.a_union_typedef;
+  }
+
+   ::some::valid::ns::unionTypeDef& set_a_union_typedef( ::some::valid::ns::unionTypeDef&& t) {
+    __clear();
+    type_ = Type::a_union_typedef;
+    ::new (std::addressof(value_.a_union_typedef))  ::some::valid::ns::unionTypeDef(std::move(t));
+    return value_.a_union_typedef;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t< ::some::valid::ns::unionTypeDef, T...>>  ::some::valid::ns::unionTypeDef& set_a_union_typedef(T&&... t) {
+    __clear();
+    type_ = Type::a_union_typedef;
+    ::new (std::addressof(value_.a_union_typedef))  ::some::valid::ns::unionTypeDef(std::forward<T>(t)...);
+    return value_.a_union_typedef;
+  }
+
+  std::vector< ::some::valid::ns::unionTypeDef>& set_a_union_typedef_list(std::vector< ::some::valid::ns::unionTypeDef> const &t) {
+    __clear();
+    type_ = Type::a_union_typedef_list;
+    ::new (std::addressof(value_.a_union_typedef_list)) std::vector< ::some::valid::ns::unionTypeDef>(t);
+    return value_.a_union_typedef_list;
+  }
+
+  std::vector< ::some::valid::ns::unionTypeDef>& set_a_union_typedef_list(std::vector< ::some::valid::ns::unionTypeDef>&& t) {
+    __clear();
+    type_ = Type::a_union_typedef_list;
+    ::new (std::addressof(value_.a_union_typedef_list)) std::vector< ::some::valid::ns::unionTypeDef>(std::move(t));
+    return value_.a_union_typedef_list;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::vector< ::some::valid::ns::unionTypeDef>, T...>> std::vector< ::some::valid::ns::unionTypeDef>& set_a_union_typedef_list(T&&... t) {
+    __clear();
+    type_ = Type::a_union_typedef_list;
+    ::new (std::addressof(value_.a_union_typedef_list)) std::vector< ::some::valid::ns::unionTypeDef>(std::forward<T>(t)...);
+    return value_.a_union_typedef_list;
+  }
+
+  std::string& set_MyBinaryField(std::string const &t) {
+    __clear();
+    type_ = Type::MyBinaryField;
+    ::new (std::addressof(value_.MyBinaryField)) std::string(t);
+    return value_.MyBinaryField;
+  }
+
+  std::string& set_MyBinaryField(std::string&& t) {
+    __clear();
+    type_ = Type::MyBinaryField;
+    ::new (std::addressof(value_.MyBinaryField)) std::string(std::move(t));
+    return value_.MyBinaryField;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::string, T...>> std::string& set_MyBinaryField(T&&... t) {
+    __clear();
+    type_ = Type::MyBinaryField;
+    ::new (std::addressof(value_.MyBinaryField)) std::string(std::forward<T>(t)...);
+    return value_.MyBinaryField;
+  }
+
+  std::string& set_MyBinaryField2(std::string const &t) {
+    __clear();
+    type_ = Type::MyBinaryField2;
+    ::new (std::addressof(value_.MyBinaryField2)) std::string(t);
+    return value_.MyBinaryField2;
+  }
+
+  std::string& set_MyBinaryField2(std::string&& t) {
+    __clear();
+    type_ = Type::MyBinaryField2;
+    ::new (std::addressof(value_.MyBinaryField2)) std::string(std::move(t));
+    return value_.MyBinaryField2;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::string, T...>> std::string& set_MyBinaryField2(T&&... t) {
+    __clear();
+    type_ = Type::MyBinaryField2;
+    ::new (std::addressof(value_.MyBinaryField2)) std::string(std::forward<T>(t)...);
+    return value_.MyBinaryField2;
+  }
+
+  std::string& set_MyBinaryField3(std::string const &t) {
+    __clear();
+    type_ = Type::MyBinaryField3;
+    ::new (std::addressof(value_.MyBinaryField3)) std::string(t);
+    return value_.MyBinaryField3;
+  }
+
+  std::string& set_MyBinaryField3(std::string&& t) {
+    __clear();
+    type_ = Type::MyBinaryField3;
+    ::new (std::addressof(value_.MyBinaryField3)) std::string(std::move(t));
+    return value_.MyBinaryField3;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::string, T...>> std::string& set_MyBinaryField3(T&&... t) {
+    __clear();
+    type_ = Type::MyBinaryField3;
+    ::new (std::addressof(value_.MyBinaryField3)) std::string(std::forward<T>(t)...);
+    return value_.MyBinaryField3;
+  }
+
+  std::vector<std::string>& set_MyBinaryListField4(std::vector<std::string> const &t) {
+    __clear();
+    type_ = Type::MyBinaryListField4;
+    ::new (std::addressof(value_.MyBinaryListField4)) std::vector<std::string>(t);
+    return value_.MyBinaryListField4;
+  }
+
+  std::vector<std::string>& set_MyBinaryListField4(std::vector<std::string>&& t) {
+    __clear();
+    type_ = Type::MyBinaryListField4;
+    ::new (std::addressof(value_.MyBinaryListField4)) std::vector<std::string>(std::move(t));
+    return value_.MyBinaryListField4;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<std::vector<std::string>, T...>> std::vector<std::string>& set_MyBinaryListField4(T&&... t) {
+    __clear();
+    type_ = Type::MyBinaryListField4;
+    ::new (std::addressof(value_.MyBinaryListField4)) std::vector<std::string>(std::forward<T>(t)...);
+    return value_.MyBinaryListField4;
+  }
+
+  int64_t const & get_intValue() const {
+    assert(type_ == Type::intValue);
+    return value_.intValue;
+  }
+
+  int64_t const & get_req_intValue() const {
+    assert(type_ == Type::req_intValue);
+    return value_.req_intValue;
+  }
+
+  int64_t const & get_opt_intValue() const {
+    assert(type_ == Type::opt_intValue);
+    return value_.opt_intValue;
+  }
+
+  std::string const & get_stringValue() const {
+    assert(type_ == Type::stringValue);
+    return value_.stringValue;
+  }
+
+  std::string const & get_req_stringValue() const {
+    assert(type_ == Type::req_stringValue);
+    return value_.req_stringValue;
+  }
+
+  std::string const & get_opt_stringValue() const {
+    assert(type_ == Type::opt_stringValue);
+    return value_.opt_stringValue;
+  }
+
+  int16_t const & get_intValue2() const {
+    assert(type_ == Type::intValue2);
+    return value_.intValue2;
+  }
+
+  int32_t const & get_intValue3() const {
+    assert(type_ == Type::intValue3);
+    return value_.intValue3;
+  }
+
+  double const & get_doubelValue() const {
+    assert(type_ == Type::doubelValue);
+    return value_.doubelValue;
+  }
+
+  bool const & get_boolValue() const {
+    assert(type_ == Type::boolValue);
+    return value_.boolValue;
+  }
+
+  std::vector<int32_t> const & get_union_list() const {
+    assert(type_ == Type::union_list);
+    return value_.union_list;
+  }
+
+  std::set<int64_t> const & get_union_set() const {
+    assert(type_ == Type::union_set);
+    return value_.union_set;
+  }
+
+  std::map<std::string, int32_t> const & get_union_map() const {
+    assert(type_ == Type::union_map);
+    return value_.union_map;
+  }
+
+  std::map<std::string, int32_t> const & get_req_union_map() const {
+    assert(type_ == Type::req_union_map);
+    return value_.req_union_map;
+  }
+
+  std::map<std::string, int32_t> const & get_opt_union_map() const {
+    assert(type_ == Type::opt_union_map);
+    return value_.opt_union_map;
+  }
+
+   ::some::valid::ns::MyEnumA const & get_enum_field() const {
+    assert(type_ == Type::enum_field);
+    return value_.enum_field;
+  }
+
+  std::vector< ::some::valid::ns::MyEnumA> const & get_enum_container() const {
+    assert(type_ == Type::enum_container);
+    return value_.enum_container;
+  }
+
+   ::some::valid::ns::MyStruct const & get_a_struct() const {
+    assert(type_ == Type::a_struct);
+    return value_.a_struct;
+  }
+
+  std::set< ::some::valid::ns::MyStruct> const & get_a_set_struct() const {
+    assert(type_ == Type::a_set_struct);
+    return value_.a_set_struct;
+  }
+
+   ::some::valid::ns::SimpleUnion const & get_a_union() const {
+    assert(type_ == Type::a_union);
+    return value_.a_union;
+  }
+
+   ::some::valid::ns::SimpleUnion const & get_req_a_union() const {
+    assert(type_ == Type::req_a_union);
+    return value_.req_a_union;
+  }
+
+   ::some::valid::ns::SimpleUnion const & get_opt_a_union() const {
+    assert(type_ == Type::opt_a_union);
+    return value_.opt_a_union;
+  }
+
+  std::vector< ::some::valid::ns::SimpleUnion> const & get_a_union_list() const {
+    assert(type_ == Type::a_union_list);
+    return value_.a_union_list;
+  }
+
+   ::some::valid::ns::unionTypeDef const & get_a_union_typedef() const {
+    assert(type_ == Type::a_union_typedef);
+    return value_.a_union_typedef;
+  }
+
+  std::vector< ::some::valid::ns::unionTypeDef> const & get_a_union_typedef_list() const {
+    assert(type_ == Type::a_union_typedef_list);
+    return value_.a_union_typedef_list;
+  }
+
+  std::string const & get_MyBinaryField() const {
+    assert(type_ == Type::MyBinaryField);
+    return value_.MyBinaryField;
+  }
+
+  std::string const & get_MyBinaryField2() const {
+    assert(type_ == Type::MyBinaryField2);
+    return value_.MyBinaryField2;
+  }
+
+  std::string const & get_MyBinaryField3() const {
+    assert(type_ == Type::MyBinaryField3);
+    return value_.MyBinaryField3;
+  }
+
+  std::vector<std::string> const & get_MyBinaryListField4() const {
+    assert(type_ == Type::MyBinaryListField4);
+    return value_.MyBinaryListField4;
+  }
+
+  int64_t & mutable_intValue() {
+    assert(type_ == Type::intValue);
+    return value_.intValue;
+  }
+
+  int64_t & mutable_req_intValue() {
+    assert(type_ == Type::req_intValue);
+    return value_.req_intValue;
+  }
+
+  int64_t & mutable_opt_intValue() {
+    assert(type_ == Type::opt_intValue);
+    return value_.opt_intValue;
+  }
+
+  std::string & mutable_stringValue() {
+    assert(type_ == Type::stringValue);
+    return value_.stringValue;
+  }
+
+  std::string & mutable_req_stringValue() {
+    assert(type_ == Type::req_stringValue);
+    return value_.req_stringValue;
+  }
+
+  std::string & mutable_opt_stringValue() {
+    assert(type_ == Type::opt_stringValue);
+    return value_.opt_stringValue;
+  }
+
+  int16_t & mutable_intValue2() {
+    assert(type_ == Type::intValue2);
+    return value_.intValue2;
+  }
+
+  int32_t & mutable_intValue3() {
+    assert(type_ == Type::intValue3);
+    return value_.intValue3;
+  }
+
+  double & mutable_doubelValue() {
+    assert(type_ == Type::doubelValue);
+    return value_.doubelValue;
+  }
+
+  bool & mutable_boolValue() {
+    assert(type_ == Type::boolValue);
+    return value_.boolValue;
+  }
+
+  std::vector<int32_t> & mutable_union_list() {
+    assert(type_ == Type::union_list);
+    return value_.union_list;
+  }
+
+  std::set<int64_t> & mutable_union_set() {
+    assert(type_ == Type::union_set);
+    return value_.union_set;
+  }
+
+  std::map<std::string, int32_t> & mutable_union_map() {
+    assert(type_ == Type::union_map);
+    return value_.union_map;
+  }
+
+  std::map<std::string, int32_t> & mutable_req_union_map() {
+    assert(type_ == Type::req_union_map);
+    return value_.req_union_map;
+  }
+
+  std::map<std::string, int32_t> & mutable_opt_union_map() {
+    assert(type_ == Type::opt_union_map);
+    return value_.opt_union_map;
+  }
+
+   ::some::valid::ns::MyEnumA & mutable_enum_field() {
+    assert(type_ == Type::enum_field);
+    return value_.enum_field;
+  }
+
+  std::vector< ::some::valid::ns::MyEnumA> & mutable_enum_container() {
+    assert(type_ == Type::enum_container);
+    return value_.enum_container;
+  }
+
+   ::some::valid::ns::MyStruct & mutable_a_struct() {
+    assert(type_ == Type::a_struct);
+    return value_.a_struct;
+  }
+
+  std::set< ::some::valid::ns::MyStruct> & mutable_a_set_struct() {
+    assert(type_ == Type::a_set_struct);
+    return value_.a_set_struct;
+  }
+
+   ::some::valid::ns::SimpleUnion & mutable_a_union() {
+    assert(type_ == Type::a_union);
+    return value_.a_union;
+  }
+
+   ::some::valid::ns::SimpleUnion & mutable_req_a_union() {
+    assert(type_ == Type::req_a_union);
+    return value_.req_a_union;
+  }
+
+   ::some::valid::ns::SimpleUnion & mutable_opt_a_union() {
+    assert(type_ == Type::opt_a_union);
+    return value_.opt_a_union;
+  }
+
+  std::vector< ::some::valid::ns::SimpleUnion> & mutable_a_union_list() {
+    assert(type_ == Type::a_union_list);
+    return value_.a_union_list;
+  }
+
+   ::some::valid::ns::unionTypeDef & mutable_a_union_typedef() {
+    assert(type_ == Type::a_union_typedef);
+    return value_.a_union_typedef;
+  }
+
+  std::vector< ::some::valid::ns::unionTypeDef> & mutable_a_union_typedef_list() {
+    assert(type_ == Type::a_union_typedef_list);
+    return value_.a_union_typedef_list;
+  }
+
+  std::string & mutable_MyBinaryField() {
+    assert(type_ == Type::MyBinaryField);
+    return value_.MyBinaryField;
+  }
+
+  std::string & mutable_MyBinaryField2() {
+    assert(type_ == Type::MyBinaryField2);
+    return value_.MyBinaryField2;
+  }
+
+  std::string & mutable_MyBinaryField3() {
+    assert(type_ == Type::MyBinaryField3);
+    return value_.MyBinaryField3;
+  }
+
+  std::vector<std::string> & mutable_MyBinaryListField4() {
+    assert(type_ == Type::MyBinaryListField4);
+    return value_.MyBinaryListField4;
+  }
+
+  int64_t move_intValue() {
+    assert(type_ == Type::intValue);
+    return std::move(value_.intValue);
+  }
+
+  int64_t move_req_intValue() {
+    assert(type_ == Type::req_intValue);
+    return std::move(value_.req_intValue);
+  }
+
+  int64_t move_opt_intValue() {
+    assert(type_ == Type::opt_intValue);
+    return std::move(value_.opt_intValue);
+  }
+
+  std::string move_stringValue() {
+    assert(type_ == Type::stringValue);
+    return std::move(value_.stringValue);
+  }
+
+  std::string move_req_stringValue() {
+    assert(type_ == Type::req_stringValue);
+    return std::move(value_.req_stringValue);
+  }
+
+  std::string move_opt_stringValue() {
+    assert(type_ == Type::opt_stringValue);
+    return std::move(value_.opt_stringValue);
+  }
+
+  int16_t move_intValue2() {
+    assert(type_ == Type::intValue2);
+    return std::move(value_.intValue2);
+  }
+
+  int32_t move_intValue3() {
+    assert(type_ == Type::intValue3);
+    return std::move(value_.intValue3);
+  }
+
+  double move_doubelValue() {
+    assert(type_ == Type::doubelValue);
+    return std::move(value_.doubelValue);
+  }
+
+  bool move_boolValue() {
+    assert(type_ == Type::boolValue);
+    return std::move(value_.boolValue);
+  }
+
+  std::vector<int32_t> move_union_list() {
+    assert(type_ == Type::union_list);
+    return std::move(value_.union_list);
+  }
+
+  std::set<int64_t> move_union_set() {
+    assert(type_ == Type::union_set);
+    return std::move(value_.union_set);
+  }
+
+  std::map<std::string, int32_t> move_union_map() {
+    assert(type_ == Type::union_map);
+    return std::move(value_.union_map);
+  }
+
+  std::map<std::string, int32_t> move_req_union_map() {
+    assert(type_ == Type::req_union_map);
+    return std::move(value_.req_union_map);
+  }
+
+  std::map<std::string, int32_t> move_opt_union_map() {
+    assert(type_ == Type::opt_union_map);
+    return std::move(value_.opt_union_map);
+  }
+
+   ::some::valid::ns::MyEnumA move_enum_field() {
+    assert(type_ == Type::enum_field);
+    return std::move(value_.enum_field);
+  }
+
+  std::vector< ::some::valid::ns::MyEnumA> move_enum_container() {
+    assert(type_ == Type::enum_container);
+    return std::move(value_.enum_container);
+  }
+
+   ::some::valid::ns::MyStruct move_a_struct() {
+    assert(type_ == Type::a_struct);
+    return std::move(value_.a_struct);
+  }
+
+  std::set< ::some::valid::ns::MyStruct> move_a_set_struct() {
+    assert(type_ == Type::a_set_struct);
+    return std::move(value_.a_set_struct);
+  }
+
+   ::some::valid::ns::SimpleUnion move_a_union() {
+    assert(type_ == Type::a_union);
+    return std::move(value_.a_union);
+  }
+
+   ::some::valid::ns::SimpleUnion move_req_a_union() {
+    assert(type_ == Type::req_a_union);
+    return std::move(value_.req_a_union);
+  }
+
+   ::some::valid::ns::SimpleUnion move_opt_a_union() {
+    assert(type_ == Type::opt_a_union);
+    return std::move(value_.opt_a_union);
+  }
+
+  std::vector< ::some::valid::ns::SimpleUnion> move_a_union_list() {
+    assert(type_ == Type::a_union_list);
+    return std::move(value_.a_union_list);
+  }
+
+   ::some::valid::ns::unionTypeDef move_a_union_typedef() {
+    assert(type_ == Type::a_union_typedef);
+    return std::move(value_.a_union_typedef);
+  }
+
+  std::vector< ::some::valid::ns::unionTypeDef> move_a_union_typedef_list() {
+    assert(type_ == Type::a_union_typedef_list);
+    return std::move(value_.a_union_typedef_list);
+  }
+
+  std::string move_MyBinaryField() {
+    assert(type_ == Type::MyBinaryField);
+    return std::move(value_.MyBinaryField);
+  }
+
+  std::string move_MyBinaryField2() {
+    assert(type_ == Type::MyBinaryField2);
+    return std::move(value_.MyBinaryField2);
+  }
+
+  std::string move_MyBinaryField3() {
+    assert(type_ == Type::MyBinaryField3);
+    return std::move(value_.MyBinaryField3);
+  }
+
+  std::vector<std::string> move_MyBinaryListField4() {
+    assert(type_ == Type::MyBinaryListField4);
+    return std::move(value_.MyBinaryListField4);
+  }
+
+  Type getType() const { return type_; }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+ protected:
+  template <class T>
+  void destruct(T &val) {
+    (&val)->~T();
+  }
+
+  Type type_;
+  storage_type value_;
+};
+
+void swap(ComplexUnion& a, ComplexUnion& b);
+extern template uint32_t ComplexUnion::read<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t ComplexUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t ComplexUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t ComplexUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t ComplexUnion::read<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t ComplexUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t ComplexUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t ComplexUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // some::valid::ns
+namespace apache { namespace thrift {
+
+template <> inline void Cpp2Ops< ::some::valid::ns::ComplexUnion>::clear( ::some::valid::ns::ComplexUnion* obj) {
+  return obj->__clear();
+}
+
+template <> inline constexpr apache::thrift::protocol::TType Cpp2Ops< ::some::valid::ns::ComplexUnion>::thriftType() {
+  return apache::thrift::protocol::T_STRUCT;
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::ComplexUnion>::write(Protocol* proto,  ::some::valid::ns::ComplexUnion const* obj) {
+  return obj->write(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::ComplexUnion>::read(Protocol* proto,  ::some::valid::ns::ComplexUnion* obj) {
+  return obj->read(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::ComplexUnion>::serializedSize(Protocol const* proto,  ::some::valid::ns::ComplexUnion const* obj) {
+  return obj->serializedSize(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::ComplexUnion>::serializedSizeZC(Protocol const* proto,  ::some::valid::ns::ComplexUnion const* obj) {
+  return obj->serializedSizeZC(proto);
+}
+
+}} // apache::thrift
+namespace some { namespace valid { namespace ns {
+
+class AnException : private apache::thrift::detail::st::ComparisonOperators<AnException>, public apache::thrift::TException {
+ public:
+
+  AnException() :
+      code(0),
+      req_code(0),
+      exception_list(std::initializer_list<int32_t>{1,
+  2,
+  3}),
+      enum_field(static_cast< ::some::valid::ns::MyEnumA>(0)) {}
+  // FragileConstructor for use in initialization lists only
+
+  AnException(apache::thrift::FragileConstructor, int32_t code__arg, int32_t req_code__arg, std::string message__arg, std::string req_message__arg, std::vector<int32_t> exception_list__arg, std::set<int64_t> exception_set__arg, std::map<std::string, int32_t> exception_map__arg, std::map<std::string, int32_t> req_exception_map__arg,  ::some::valid::ns::MyEnumA enum_field__arg, std::vector< ::some::valid::ns::MyEnumA> enum_container__arg,  ::some::valid::ns::MyStruct a_struct__arg, std::set< ::some::valid::ns::MyStruct> a_set_struct__arg, std::vector< ::some::valid::ns::SimpleUnion> a_union_list__arg,  ::some::valid::ns::unionTypeDef union_typedef__arg, std::vector< ::some::valid::ns::unionTypeDef> a_union_typedef_list__arg) :
+      code(std::move(code__arg)),
+      req_code(std::move(req_code__arg)),
+      message(std::move(message__arg)),
+      req_message(std::move(req_message__arg)),
+      exception_list(std::move(exception_list__arg)),
+      exception_set(std::move(exception_set__arg)),
+      exception_map(std::move(exception_map__arg)),
+      req_exception_map(std::move(req_exception_map__arg)),
+      enum_field(std::move(enum_field__arg)),
+      enum_container(std::move(enum_container__arg)),
+      a_struct(std::move(a_struct__arg)),
+      a_set_struct(std::move(a_set_struct__arg)),
+      a_union_list(std::move(a_union_list__arg)),
+      union_typedef(std::move(union_typedef__arg)),
+      a_union_typedef_list(std::move(a_union_typedef_list__arg)) {
+    __isset.code = true;
+    __isset.message = true;
+    __isset.exception_list = true;
+    __isset.exception_set = true;
+    __isset.exception_map = true;
+    __isset.enum_field = true;
+    __isset.enum_container = true;
+    __isset.a_struct = true;
+    __isset.a_set_struct = true;
+    __isset.a_union_list = true;
+    __isset.union_typedef = true;
+    __isset.a_union_typedef_list = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnException(::apache::thrift::detail::argument_wrapper<1, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    code = arg.move();
+    __isset.code = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnException(::apache::thrift::detail::argument_wrapper<101, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_code = arg.move();
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnException(::apache::thrift::detail::argument_wrapper<2, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    message = arg.move();
+    __isset.message = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnException(::apache::thrift::detail::argument_wrapper<102, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_message = arg.move();
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnException(::apache::thrift::detail::argument_wrapper<3, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    exception_list = arg.move();
+    __isset.exception_list = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnException(::apache::thrift::detail::argument_wrapper<4, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    exception_set = arg.move();
+    __isset.exception_set = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnException(::apache::thrift::detail::argument_wrapper<5, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    exception_map = arg.move();
+    __isset.exception_map = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnException(::apache::thrift::detail::argument_wrapper<105, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_exception_map = arg.move();
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnException(::apache::thrift::detail::argument_wrapper<6, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    enum_field = arg.move();
+    __isset.enum_field = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnException(::apache::thrift::detail::argument_wrapper<7, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    enum_container = arg.move();
+    __isset.enum_container = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnException(::apache::thrift::detail::argument_wrapper<8, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    a_struct = arg.move();
+    __isset.a_struct = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnException(::apache::thrift::detail::argument_wrapper<9, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    a_set_struct = arg.move();
+    __isset.a_set_struct = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnException(::apache::thrift::detail::argument_wrapper<10, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    a_union_list = arg.move();
+    __isset.a_union_list = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnException(::apache::thrift::detail::argument_wrapper<11, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    union_typedef = arg.move();
+    __isset.union_typedef = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnException(::apache::thrift::detail::argument_wrapper<19, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    a_union_typedef_list = arg.move();
+    __isset.a_union_typedef_list = true;
+  }
+
+  AnException(AnException&&) = default;
+
+  AnException(const AnException&) = default;
+
+  AnException& operator=(AnException&&) = default;
+
+  AnException& operator=(const AnException&) = default;
+  void __clear();
+
+  virtual ~AnException() throw() {}
+
+  int32_t code;
+  int32_t req_code;
+  std::string message;
+  std::string req_message;
+  std::vector<int32_t> exception_list;
+  std::set<int64_t> exception_set;
+  std::map<std::string, int32_t> exception_map;
+  std::map<std::string, int32_t> req_exception_map;
+   ::some::valid::ns::MyEnumA enum_field;
+  std::vector< ::some::valid::ns::MyEnumA> enum_container;
+   ::some::valid::ns::MyStruct a_struct;
+  std::set< ::some::valid::ns::MyStruct> a_set_struct;
+  std::vector< ::some::valid::ns::SimpleUnion> a_union_list;
+   ::some::valid::ns::unionTypeDef union_typedef;
+  std::vector< ::some::valid::ns::unionTypeDef> a_union_typedef_list;
+
+  struct __isset {
+    void __clear() {
+      code = false;
+      message = false;
+      exception_list = false;
+      exception_set = false;
+      exception_map = false;
+      enum_field = false;
+      enum_container = false;
+      a_struct = false;
+      a_set_struct = false;
+      a_union_list = false;
+      union_typedef = false;
+      a_union_typedef_list = false;
+    }
+
+    bool code = false;
+    bool message = false;
+    bool exception_list = false;
+    bool exception_set = false;
+    bool exception_map = false;
+    bool enum_field = false;
+    bool enum_container = false;
+    bool a_struct = false;
+    bool a_set_struct = false;
+    bool a_union_list = false;
+    bool union_typedef = false;
+    bool a_union_typedef_list = false;
+  } __isset;
+  bool operator==(const AnException& rhs) const;
+  bool operator < (const AnException& rhs) const;
+
+  int32_t get_code() const {
+    return code;
+  }
+
+  int32_t& set_code(int32_t code_) {
+    code = code_;
+    __isset.code = true;
+    return code;
+  }
+
+  int32_t get_req_code() const {
+    return req_code;
+  }
+
+  int32_t& set_req_code(int32_t req_code_) {
+    req_code = req_code_;
+    return req_code;
+  }
+
+  const std::string& get_message() const& {
+    return message;
+  }
+
+  std::string get_message() && {
+    return std::move(message);
+  }
+
+  template <typename T_AnException_message_struct_setter>
+  std::string& set_message(T_AnException_message_struct_setter&& message_) {
+    message = std::forward<T_AnException_message_struct_setter>(message_);
+    __isset.message = true;
+    return message;
+  }
+
+  const std::string& get_req_message() const& {
+    return req_message;
+  }
+
+  std::string get_req_message() && {
+    return std::move(req_message);
+  }
+
+  template <typename T_AnException_req_message_struct_setter>
+  std::string& set_req_message(T_AnException_req_message_struct_setter&& req_message_) {
+    req_message = std::forward<T_AnException_req_message_struct_setter>(req_message_);
+    return req_message;
+  }
+  const std::vector<int32_t>& get_exception_list() const&;
+  std::vector<int32_t> get_exception_list() &&;
+  template <typename T_AnException_exception_list_struct_setter>
+  std::vector<int32_t>& set_exception_list(T_AnException_exception_list_struct_setter&& exception_list_);
+  const std::set<int64_t>& get_exception_set() const&;
+  std::set<int64_t> get_exception_set() &&;
+  template <typename T_AnException_exception_set_struct_setter>
+  std::set<int64_t>& set_exception_set(T_AnException_exception_set_struct_setter&& exception_set_);
+  const std::map<std::string, int32_t>& get_exception_map() const&;
+  std::map<std::string, int32_t> get_exception_map() &&;
+  template <typename T_AnException_exception_map_struct_setter>
+  std::map<std::string, int32_t>& set_exception_map(T_AnException_exception_map_struct_setter&& exception_map_);
+  const std::map<std::string, int32_t>& get_req_exception_map() const&;
+  std::map<std::string, int32_t> get_req_exception_map() &&;
+  template <typename T_AnException_req_exception_map_struct_setter>
+  std::map<std::string, int32_t>& set_req_exception_map(T_AnException_req_exception_map_struct_setter&& req_exception_map_);
+
+   ::some::valid::ns::MyEnumA get_enum_field() const {
+    return enum_field;
+  }
+
+   ::some::valid::ns::MyEnumA& set_enum_field( ::some::valid::ns::MyEnumA enum_field_) {
+    enum_field = enum_field_;
+    __isset.enum_field = true;
+    return enum_field;
+  }
+  const std::vector< ::some::valid::ns::MyEnumA>& get_enum_container() const&;
+  std::vector< ::some::valid::ns::MyEnumA> get_enum_container() &&;
+  template <typename T_AnException_enum_container_struct_setter>
+  std::vector< ::some::valid::ns::MyEnumA>& set_enum_container(T_AnException_enum_container_struct_setter&& enum_container_);
+  const  ::some::valid::ns::MyStruct& get_a_struct() const&;
+   ::some::valid::ns::MyStruct get_a_struct() &&;
+  template <typename T_AnException_a_struct_struct_setter>
+   ::some::valid::ns::MyStruct& set_a_struct(T_AnException_a_struct_struct_setter&& a_struct_);
+  const std::set< ::some::valid::ns::MyStruct>& get_a_set_struct() const&;
+  std::set< ::some::valid::ns::MyStruct> get_a_set_struct() &&;
+  template <typename T_AnException_a_set_struct_struct_setter>
+  std::set< ::some::valid::ns::MyStruct>& set_a_set_struct(T_AnException_a_set_struct_struct_setter&& a_set_struct_);
+  const std::vector< ::some::valid::ns::SimpleUnion>& get_a_union_list() const&;
+  std::vector< ::some::valid::ns::SimpleUnion> get_a_union_list() &&;
+  template <typename T_AnException_a_union_list_struct_setter>
+  std::vector< ::some::valid::ns::SimpleUnion>& set_a_union_list(T_AnException_a_union_list_struct_setter&& a_union_list_);
+  const  ::some::valid::ns::unionTypeDef& get_union_typedef() const&;
+   ::some::valid::ns::unionTypeDef get_union_typedef() &&;
+  template <typename T_AnException_union_typedef_struct_setter>
+   ::some::valid::ns::unionTypeDef& set_union_typedef(T_AnException_union_typedef_struct_setter&& union_typedef_);
+  const std::vector< ::some::valid::ns::unionTypeDef>& get_a_union_typedef_list() const&;
+  std::vector< ::some::valid::ns::unionTypeDef> get_a_union_typedef_list() &&;
+  template <typename T_AnException_a_union_typedef_list_struct_setter>
+  std::vector< ::some::valid::ns::unionTypeDef>& set_a_union_typedef_list(T_AnException_a_union_typedef_list_struct_setter&& a_union_typedef_list_);
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+  virtual const char* what() const throw() {
+    return " ::some::valid::ns::AnException";
+  }
+};
+
+void swap(AnException& a, AnException& b);
+extern template uint32_t AnException::read<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t AnException::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t AnException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t AnException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t AnException::read<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t AnException::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t AnException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t AnException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // some::valid::ns
+namespace apache { namespace thrift {
+
+template <> inline void Cpp2Ops< ::some::valid::ns::AnException>::clear( ::some::valid::ns::AnException* obj) {
+  return obj->__clear();
+}
+
+template <> inline constexpr apache::thrift::protocol::TType Cpp2Ops< ::some::valid::ns::AnException>::thriftType() {
+  return apache::thrift::protocol::T_STRUCT;
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::AnException>::write(Protocol* proto,  ::some::valid::ns::AnException const* obj) {
+  return obj->write(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::AnException>::read(Protocol* proto,  ::some::valid::ns::AnException* obj) {
+  return obj->read(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::AnException>::serializedSize(Protocol const* proto,  ::some::valid::ns::AnException const* obj) {
+  return obj->serializedSize(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::AnException>::serializedSizeZC(Protocol const* proto,  ::some::valid::ns::AnException const* obj) {
+  return obj->serializedSizeZC(proto);
+}
+
+}} // apache::thrift
+namespace some { namespace valid { namespace ns {
+
+class AnotherException : private apache::thrift::detail::st::ComparisonOperators<AnotherException>, public apache::thrift::TException {
+ public:
+
+  AnotherException() :
+      code(0),
+      req_code(0) {}
+  // FragileConstructor for use in initialization lists only
+
+  AnotherException(apache::thrift::FragileConstructor, int32_t code__arg, int32_t req_code__arg, std::string message__arg) :
+      code(std::move(code__arg)),
+      req_code(std::move(req_code__arg)),
+      message(std::move(message__arg)) {
+    __isset.code = true;
+    __isset.message = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnotherException(::apache::thrift::detail::argument_wrapper<1, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnotherException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    code = arg.move();
+    __isset.code = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnotherException(::apache::thrift::detail::argument_wrapper<101, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnotherException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_code = arg.move();
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnotherException(::apache::thrift::detail::argument_wrapper<2, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnotherException(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    message = arg.move();
+    __isset.message = true;
+  }
+
+  AnotherException(AnotherException&&) = default;
+
+  AnotherException(const AnotherException&) = default;
+
+  AnotherException& operator=(AnotherException&&) = default;
+
+  AnotherException& operator=(const AnotherException&) = default;
+  void __clear();
+
+  virtual ~AnotherException() throw() {}
+
+  int32_t code;
+  int32_t req_code;
+  std::string message;
+
+  struct __isset {
+    void __clear() {
+      code = false;
+      message = false;
+    }
+
+    bool code = false;
+    bool message = false;
+  } __isset;
+  bool operator==(const AnotherException& rhs) const;
+
+  bool operator < (const AnotherException& rhs) const {
+    if (!(code == rhs.code)) {
+      return code < rhs.code;
+    }
+    if (!(req_code == rhs.req_code)) {
+      return req_code < rhs.req_code;
+    }
+    if (!(message == rhs.message)) {
+      return message < rhs.message;
+    }
+    (void)rhs;
+    return false;
+  }
+
+  int32_t get_code() const {
+    return code;
+  }
+
+  int32_t& set_code(int32_t code_) {
+    code = code_;
+    __isset.code = true;
+    return code;
+  }
+
+  int32_t get_req_code() const {
+    return req_code;
+  }
+
+  int32_t& set_req_code(int32_t req_code_) {
+    req_code = req_code_;
+    return req_code;
+  }
+
+  const std::string& get_message() const& {
+    return message;
+  }
+
+  std::string get_message() && {
+    return std::move(message);
+  }
+
+  template <typename T_AnotherException_message_struct_setter>
+  std::string& set_message(T_AnotherException_message_struct_setter&& message_) {
+    message = std::forward<T_AnotherException_message_struct_setter>(message_);
+    __isset.message = true;
+    return message;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+  virtual const char* what() const throw() {
+    return " ::some::valid::ns::AnotherException";
+  }
+};
+
+void swap(AnotherException& a, AnotherException& b);
+extern template uint32_t AnotherException::read<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t AnotherException::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t AnotherException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t AnotherException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t AnotherException::read<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t AnotherException::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t AnotherException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t AnotherException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // some::valid::ns
+namespace apache { namespace thrift {
+
+template <> inline void Cpp2Ops< ::some::valid::ns::AnotherException>::clear( ::some::valid::ns::AnotherException* obj) {
+  return obj->__clear();
+}
+
+template <> inline constexpr apache::thrift::protocol::TType Cpp2Ops< ::some::valid::ns::AnotherException>::thriftType() {
+  return apache::thrift::protocol::T_STRUCT;
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::AnotherException>::write(Protocol* proto,  ::some::valid::ns::AnotherException const* obj) {
+  return obj->write(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::AnotherException>::read(Protocol* proto,  ::some::valid::ns::AnotherException* obj) {
+  return obj->read(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::AnotherException>::serializedSize(Protocol const* proto,  ::some::valid::ns::AnotherException const* obj) {
+  return obj->serializedSize(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::AnotherException>::serializedSizeZC(Protocol const* proto,  ::some::valid::ns::AnotherException const* obj) {
+  return obj->serializedSizeZC(proto);
+}
+
+}} // apache::thrift
+namespace some { namespace valid { namespace ns {
+
+class containerStruct : private apache::thrift::detail::st::ComparisonOperators<containerStruct> {
+ public:
+
+  containerStruct() :
+      fieldA(0),
+      req_fieldA(0),
+      opt_fieldA(0),
+      fieldC(std::initializer_list<int32_t>{1,
+  2,
+  3,
+  4}),
+      req_fieldC(std::initializer_list<int32_t>{1,
+  2,
+  3,
+  4}),
+      opt_fieldC(std::initializer_list<int32_t>{1,
+  2,
+  3,
+  4}),
+      fieldE(apache::thrift::StringTraits< std::string>::fromStringLiteral("somestring")),
+      req_fieldE(apache::thrift::StringTraits< std::string>::fromStringLiteral("somestring")),
+      opt_fieldE(apache::thrift::StringTraits< std::string>::fromStringLiteral("somestring")),
+      fieldF(std::initializer_list<std::vector<int32_t>>{std::initializer_list<int32_t>{1,
+  3,
+  5,
+  7,
+  9},
+  std::initializer_list<int32_t>{2,
+  4,
+  8,
+  10,
+  12}}),
+      fieldI(true),
+      fieldJ(std::initializer_list<std::pair<const std::string, std::vector<int32_t>>>{{apache::thrift::StringTraits< std::string>::fromStringLiteral("subfieldA"), std::initializer_list<int32_t>{1,
+  4,
+  8,
+  12}},
+  {apache::thrift::StringTraits< std::string>::fromStringLiteral("subfieldB"), std::initializer_list<int32_t>{2,
+  5,
+  9,
+  13}}}),
+      fieldN(0),
+      fieldQ(static_cast< ::some::valid::ns::MyEnumA>(0)),
+      fieldR( ::some::valid::ns::MyEnumA::fieldB),
+      req_fieldR( ::some::valid::ns::MyEnumA::fieldB),
+      opt_fieldR( ::some::valid::ns::MyEnumA::fieldB),
+      fieldS( ::some::valid::ns::MyEnumA::fieldB),
+      fieldU(std::initializer_list< ::some::valid::ns::MyEnumA>{ ::some::valid::ns::MyEnumA::fieldC,
+   ::some::valid::ns::MyEnumA::fieldB,
+   ::some::valid::ns::MyEnumA::fieldA}) {}
+  // FragileConstructor for use in initialization lists only
+
+  containerStruct(apache::thrift::FragileConstructor, bool fieldA__arg, bool req_fieldA__arg, bool opt_fieldA__arg, std::map<std::string, bool> fieldB__arg, std::map<std::string, bool> req_fieldB__arg, std::map<std::string, bool> opt_fieldB__arg, std::set<int32_t> fieldC__arg, std::set<int32_t> req_fieldC__arg, std::set<int32_t> opt_fieldC__arg, std::string fieldD__arg, std::string fieldE__arg, std::string req_fieldE__arg, std::string opt_fieldE__arg, std::vector<std::vector<int32_t>> fieldF__arg, std::map<std::string, std::map<std::string, std::map<std::string, int32_t>>> fieldG__arg, std::vector<std::set<int32_t>> fieldH__arg, bool fieldI__arg, std::map<std::string, std::vector<int32_t>> fieldJ__arg, std::vector<std::vector<std::vector<std::vector<int32_t>>>> fieldK__arg, std::set<std::set<std::set<bool>>> fieldL__arg, std::map<std::set<std::vector<int32_t>>, std::map<std::vector<std::set<std::string>>, std::string>> fieldM__arg,  ::some::valid::ns::simpleTypeDef fieldN__arg,  ::some::valid::ns::complexStructTypeDef fieldO__arg, std::vector< ::some::valid::ns::mostComplexTypeDef> fieldP__arg,  ::some::valid::ns::MyEnumA fieldQ__arg,  ::some::valid::ns::MyEnumA fieldR__arg,  ::some::valid::ns::MyEnumA req_fieldR__arg,  ::some::valid::ns::MyEnumA opt_fieldR__arg,  ::some::valid::ns::MyEnumA fieldS__arg, std::vector< ::some::valid::ns::MyEnumA> fieldT__arg, std::vector< ::some::valid::ns::MyEnumA> fieldU__arg,  ::some::valid::ns::MyStruct fieldV__arg,  ::some::valid::ns::MyStruct req_fieldV__arg,  ::some::valid::ns::MyStruct opt_fieldV__arg, std::set< ::some::valid::ns::MyStruct> fieldW__arg,  ::some::valid::ns::ComplexUnion fieldX__arg,  ::some::valid::ns::ComplexUnion req_fieldX__arg,  ::some::valid::ns::ComplexUnion opt_fieldX__arg, std::vector< ::some::valid::ns::ComplexUnion> fieldY__arg,  ::some::valid::ns::unionTypeDef fieldZ__arg, std::vector< ::some::valid::ns::unionTypeDef> fieldAA__arg) :
+      fieldA(std::move(fieldA__arg)),
+      req_fieldA(std::move(req_fieldA__arg)),
+      opt_fieldA(std::move(opt_fieldA__arg)),
+      fieldB(std::move(fieldB__arg)),
+      req_fieldB(std::move(req_fieldB__arg)),
+      opt_fieldB(std::move(opt_fieldB__arg)),
+      fieldC(std::move(fieldC__arg)),
+      req_fieldC(std::move(req_fieldC__arg)),
+      opt_fieldC(std::move(opt_fieldC__arg)),
+      fieldD(std::move(fieldD__arg)),
+      fieldE(std::move(fieldE__arg)),
+      req_fieldE(std::move(req_fieldE__arg)),
+      opt_fieldE(std::move(opt_fieldE__arg)),
+      fieldF(std::move(fieldF__arg)),
+      fieldG(std::move(fieldG__arg)),
+      fieldH(std::move(fieldH__arg)),
+      fieldI(std::move(fieldI__arg)),
+      fieldJ(std::move(fieldJ__arg)),
+      fieldK(std::move(fieldK__arg)),
+      fieldL(std::move(fieldL__arg)),
+      fieldM(std::move(fieldM__arg)),
+      fieldN(std::move(fieldN__arg)),
+      fieldO(std::move(fieldO__arg)),
+      fieldP(std::move(fieldP__arg)),
+      fieldQ(std::move(fieldQ__arg)),
+      fieldR(std::move(fieldR__arg)),
+      req_fieldR(std::move(req_fieldR__arg)),
+      opt_fieldR(std::move(opt_fieldR__arg)),
+      fieldS(std::move(fieldS__arg)),
+      fieldT(std::move(fieldT__arg)),
+      fieldU(std::move(fieldU__arg)),
+      fieldV(std::move(fieldV__arg)),
+      req_fieldV(std::move(req_fieldV__arg)),
+      opt_fieldV(std::move(opt_fieldV__arg)),
+      fieldW(std::move(fieldW__arg)),
+      fieldX(std::move(fieldX__arg)),
+      req_fieldX(std::move(req_fieldX__arg)),
+      opt_fieldX(std::move(opt_fieldX__arg)),
+      fieldY(std::move(fieldY__arg)),
+      fieldZ(std::move(fieldZ__arg)),
+      fieldAA(std::move(fieldAA__arg)) {
+    __isset.fieldA = true;
+    __isset.opt_fieldA = true;
+    __isset.fieldB = true;
+    __isset.opt_fieldB = true;
+    __isset.fieldC = true;
+    __isset.opt_fieldC = true;
+    __isset.fieldD = true;
+    __isset.fieldE = true;
+    __isset.opt_fieldE = true;
+    __isset.fieldF = true;
+    __isset.fieldG = true;
+    __isset.fieldH = true;
+    __isset.fieldI = true;
+    __isset.fieldJ = true;
+    __isset.fieldK = true;
+    __isset.fieldL = true;
+    __isset.fieldM = true;
+    __isset.fieldN = true;
+    __isset.fieldO = true;
+    __isset.fieldP = true;
+    __isset.fieldQ = true;
+    __isset.fieldR = true;
+    __isset.opt_fieldR = true;
+    __isset.fieldS = true;
+    __isset.fieldT = true;
+    __isset.fieldU = true;
+    __isset.fieldV = true;
+    __isset.opt_fieldV = true;
+    __isset.fieldW = true;
+    __isset.fieldX = true;
+    __isset.opt_fieldX = true;
+    __isset.fieldY = true;
+    __isset.fieldZ = true;
+    __isset.fieldAA = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<1, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldA = arg.move();
+    __isset.fieldA = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<101, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_fieldA = arg.move();
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<201, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    opt_fieldA = arg.move();
+    __isset.opt_fieldA = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<2, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldB = arg.move();
+    __isset.fieldB = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<102, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_fieldB = arg.move();
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<202, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    opt_fieldB = arg.move();
+    __isset.opt_fieldB = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<3, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldC = arg.move();
+    __isset.fieldC = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<103, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_fieldC = arg.move();
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<203, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    opt_fieldC = arg.move();
+    __isset.opt_fieldC = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<4, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldD = arg.move();
+    __isset.fieldD = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<5, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldE = arg.move();
+    __isset.fieldE = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<105, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_fieldE = arg.move();
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<205, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    opt_fieldE = arg.move();
+    __isset.opt_fieldE = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<6, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldF = arg.move();
+    __isset.fieldF = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<7, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldG = arg.move();
+    __isset.fieldG = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<8, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldH = arg.move();
+    __isset.fieldH = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<9, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldI = arg.move();
+    __isset.fieldI = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<10, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldJ = arg.move();
+    __isset.fieldJ = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<11, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldK = arg.move();
+    __isset.fieldK = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<12, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldL = arg.move();
+    __isset.fieldL = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<13, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldM = arg.move();
+    __isset.fieldM = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<14, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldN = arg.move();
+    __isset.fieldN = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<15, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldO = arg.move();
+    __isset.fieldO = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<16, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldP = arg.move();
+    __isset.fieldP = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<17, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldQ = arg.move();
+    __isset.fieldQ = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<18, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldR = arg.move();
+    __isset.fieldR = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<118, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_fieldR = arg.move();
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<218, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    opt_fieldR = arg.move();
+    __isset.opt_fieldR = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<19, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldS = arg.move();
+    __isset.fieldS = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<21, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldT = arg.move();
+    __isset.fieldT = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<22, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldU = arg.move();
+    __isset.fieldU = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<23, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldV = arg.move();
+    __isset.fieldV = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<123, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_fieldV = arg.move();
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<223, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    opt_fieldV = arg.move();
+    __isset.opt_fieldV = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<24, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldW = arg.move();
+    __isset.fieldW = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<25, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldX = arg.move();
+    __isset.fieldX = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<125, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_fieldX = arg.move();
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<225, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    opt_fieldX = arg.move();
+    __isset.opt_fieldX = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<26, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldY = arg.move();
+    __isset.fieldY = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<27, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldZ = arg.move();
+    __isset.fieldZ = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<28, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldAA = arg.move();
+    __isset.fieldAA = true;
+  }
+
+  containerStruct(containerStruct&&) = default;
+
+  containerStruct(const containerStruct&) = default;
+
+  containerStruct& operator=(containerStruct&&) = default;
+
+  containerStruct& operator=(const containerStruct&) = default;
+  void __clear();
+
+  virtual ~containerStruct() throw() {}
+
+  bool fieldA;
+  bool req_fieldA;
+  bool opt_fieldA;
+  std::map<std::string, bool> fieldB;
+  std::map<std::string, bool> req_fieldB;
+  std::map<std::string, bool> opt_fieldB;
+  std::set<int32_t> fieldC;
+  std::set<int32_t> req_fieldC;
+  std::set<int32_t> opt_fieldC;
+  std::string fieldD;
+  std::string fieldE;
+  std::string req_fieldE;
+  std::string opt_fieldE;
+  std::vector<std::vector<int32_t>> fieldF;
+  std::map<std::string, std::map<std::string, std::map<std::string, int32_t>>> fieldG;
+  std::vector<std::set<int32_t>> fieldH;
+  bool fieldI;
+  std::map<std::string, std::vector<int32_t>> fieldJ;
+  std::vector<std::vector<std::vector<std::vector<int32_t>>>> fieldK;
+  std::set<std::set<std::set<bool>>> fieldL;
+  std::map<std::set<std::vector<int32_t>>, std::map<std::vector<std::set<std::string>>, std::string>> fieldM;
+   ::some::valid::ns::simpleTypeDef fieldN;
+   ::some::valid::ns::complexStructTypeDef fieldO;
+  std::vector< ::some::valid::ns::mostComplexTypeDef> fieldP;
+   ::some::valid::ns::MyEnumA fieldQ;
+   ::some::valid::ns::MyEnumA fieldR;
+   ::some::valid::ns::MyEnumA req_fieldR;
+   ::some::valid::ns::MyEnumA opt_fieldR;
+   ::some::valid::ns::MyEnumA fieldS;
+  std::vector< ::some::valid::ns::MyEnumA> fieldT;
+  std::vector< ::some::valid::ns::MyEnumA> fieldU;
+   ::some::valid::ns::MyStruct fieldV;
+   ::some::valid::ns::MyStruct req_fieldV;
+   ::some::valid::ns::MyStruct opt_fieldV;
+  std::set< ::some::valid::ns::MyStruct> fieldW;
+   ::some::valid::ns::ComplexUnion fieldX;
+   ::some::valid::ns::ComplexUnion req_fieldX;
+   ::some::valid::ns::ComplexUnion opt_fieldX;
+  std::vector< ::some::valid::ns::ComplexUnion> fieldY;
+   ::some::valid::ns::unionTypeDef fieldZ;
+  std::vector< ::some::valid::ns::unionTypeDef> fieldAA;
+
+  struct __isset {
+    void __clear() {
+      fieldA = false;
+      opt_fieldA = false;
+      fieldB = false;
+      opt_fieldB = false;
+      fieldC = false;
+      opt_fieldC = false;
+      fieldD = false;
+      fieldE = false;
+      opt_fieldE = false;
+      fieldF = false;
+      fieldG = false;
+      fieldH = false;
+      fieldI = false;
+      fieldJ = false;
+      fieldK = false;
+      fieldL = false;
+      fieldM = false;
+      fieldN = false;
+      fieldO = false;
+      fieldP = false;
+      fieldQ = false;
+      fieldR = false;
+      opt_fieldR = false;
+      fieldS = false;
+      fieldT = false;
+      fieldU = false;
+      fieldV = false;
+      opt_fieldV = false;
+      fieldW = false;
+      fieldX = false;
+      opt_fieldX = false;
+      fieldY = false;
+      fieldZ = false;
+      fieldAA = false;
+    }
+
+    bool fieldA = false;
+    bool opt_fieldA = false;
+    bool fieldB = false;
+    bool opt_fieldB = false;
+    bool fieldC = false;
+    bool opt_fieldC = false;
+    bool fieldD = false;
+    bool fieldE = false;
+    bool opt_fieldE = false;
+    bool fieldF = false;
+    bool fieldG = false;
+    bool fieldH = false;
+    bool fieldI = false;
+    bool fieldJ = false;
+    bool fieldK = false;
+    bool fieldL = false;
+    bool fieldM = false;
+    bool fieldN = false;
+    bool fieldO = false;
+    bool fieldP = false;
+    bool fieldQ = false;
+    bool fieldR = false;
+    bool opt_fieldR = false;
+    bool fieldS = false;
+    bool fieldT = false;
+    bool fieldU = false;
+    bool fieldV = false;
+    bool opt_fieldV = false;
+    bool fieldW = false;
+    bool fieldX = false;
+    bool opt_fieldX = false;
+    bool fieldY = false;
+    bool fieldZ = false;
+    bool fieldAA = false;
+  } __isset;
+  bool operator==(const containerStruct& rhs) const;
+  bool operator < (const containerStruct& rhs) const;
+
+  bool get_fieldA() const {
+    return fieldA;
+  }
+
+  bool& set_fieldA(bool fieldA_) {
+    fieldA = fieldA_;
+    __isset.fieldA = true;
+    return fieldA;
+  }
+
+  bool get_req_fieldA() const {
+    return req_fieldA;
+  }
+
+  bool& set_req_fieldA(bool req_fieldA_) {
+    req_fieldA = req_fieldA_;
+    return req_fieldA;
+  }
+
+  const bool* get_opt_fieldA() const& {
+    return __isset.opt_fieldA ? std::addressof(opt_fieldA) : nullptr;
+  }
+
+  bool* get_opt_fieldA() & {
+    return __isset.opt_fieldA ? std::addressof(opt_fieldA) : nullptr;
+  }
+  bool* get_opt_fieldA() && = delete;
+
+  bool& set_opt_fieldA(bool opt_fieldA_) {
+    opt_fieldA = opt_fieldA_;
+    __isset.opt_fieldA = true;
+    return opt_fieldA;
+  }
+  const std::map<std::string, bool>& get_fieldB() const&;
+  std::map<std::string, bool> get_fieldB() &&;
+  template <typename T_containerStruct_fieldB_struct_setter>
+  std::map<std::string, bool>& set_fieldB(T_containerStruct_fieldB_struct_setter&& fieldB_);
+  const std::map<std::string, bool>& get_req_fieldB() const&;
+  std::map<std::string, bool> get_req_fieldB() &&;
+  template <typename T_containerStruct_req_fieldB_struct_setter>
+  std::map<std::string, bool>& set_req_fieldB(T_containerStruct_req_fieldB_struct_setter&& req_fieldB_);
+  const std::map<std::string, bool>* get_opt_fieldB() const&;
+  std::map<std::string, bool>* get_opt_fieldB() &;
+  std::map<std::string, bool>* get_opt_fieldB() && = delete;
+  template <typename T_containerStruct_opt_fieldB_struct_setter>
+  std::map<std::string, bool>& set_opt_fieldB(T_containerStruct_opt_fieldB_struct_setter&& opt_fieldB_);
+  const std::set<int32_t>& get_fieldC() const&;
+  std::set<int32_t> get_fieldC() &&;
+  template <typename T_containerStruct_fieldC_struct_setter>
+  std::set<int32_t>& set_fieldC(T_containerStruct_fieldC_struct_setter&& fieldC_);
+  const std::set<int32_t>& get_req_fieldC() const&;
+  std::set<int32_t> get_req_fieldC() &&;
+  template <typename T_containerStruct_req_fieldC_struct_setter>
+  std::set<int32_t>& set_req_fieldC(T_containerStruct_req_fieldC_struct_setter&& req_fieldC_);
+  const std::set<int32_t>* get_opt_fieldC() const&;
+  std::set<int32_t>* get_opt_fieldC() &;
+  std::set<int32_t>* get_opt_fieldC() && = delete;
+  template <typename T_containerStruct_opt_fieldC_struct_setter>
+  std::set<int32_t>& set_opt_fieldC(T_containerStruct_opt_fieldC_struct_setter&& opt_fieldC_);
+
+  const std::string& get_fieldD() const& {
+    return fieldD;
+  }
+
+  std::string get_fieldD() && {
+    return std::move(fieldD);
+  }
+
+  template <typename T_containerStruct_fieldD_struct_setter>
+  std::string& set_fieldD(T_containerStruct_fieldD_struct_setter&& fieldD_) {
+    fieldD = std::forward<T_containerStruct_fieldD_struct_setter>(fieldD_);
+    __isset.fieldD = true;
+    return fieldD;
+  }
+
+  const std::string& get_fieldE() const& {
+    return fieldE;
+  }
+
+  std::string get_fieldE() && {
+    return std::move(fieldE);
+  }
+
+  template <typename T_containerStruct_fieldE_struct_setter>
+  std::string& set_fieldE(T_containerStruct_fieldE_struct_setter&& fieldE_) {
+    fieldE = std::forward<T_containerStruct_fieldE_struct_setter>(fieldE_);
+    __isset.fieldE = true;
+    return fieldE;
+  }
+
+  const std::string& get_req_fieldE() const& {
+    return req_fieldE;
+  }
+
+  std::string get_req_fieldE() && {
+    return std::move(req_fieldE);
+  }
+
+  template <typename T_containerStruct_req_fieldE_struct_setter>
+  std::string& set_req_fieldE(T_containerStruct_req_fieldE_struct_setter&& req_fieldE_) {
+    req_fieldE = std::forward<T_containerStruct_req_fieldE_struct_setter>(req_fieldE_);
+    return req_fieldE;
+  }
+
+  const std::string* get_opt_fieldE() const& {
+    return __isset.opt_fieldE ? std::addressof(opt_fieldE) : nullptr;
+  }
+
+  std::string* get_opt_fieldE() & {
+    return __isset.opt_fieldE ? std::addressof(opt_fieldE) : nullptr;
+  }
+  std::string* get_opt_fieldE() && = delete;
+
+  template <typename T_containerStruct_opt_fieldE_struct_setter>
+  std::string& set_opt_fieldE(T_containerStruct_opt_fieldE_struct_setter&& opt_fieldE_) {
+    opt_fieldE = std::forward<T_containerStruct_opt_fieldE_struct_setter>(opt_fieldE_);
+    __isset.opt_fieldE = true;
+    return opt_fieldE;
+  }
+  const std::vector<std::vector<int32_t>>& get_fieldF() const&;
+  std::vector<std::vector<int32_t>> get_fieldF() &&;
+  template <typename T_containerStruct_fieldF_struct_setter>
+  std::vector<std::vector<int32_t>>& set_fieldF(T_containerStruct_fieldF_struct_setter&& fieldF_);
+  const std::map<std::string, std::map<std::string, std::map<std::string, int32_t>>>& get_fieldG() const&;
+  std::map<std::string, std::map<std::string, std::map<std::string, int32_t>>> get_fieldG() &&;
+  template <typename T_containerStruct_fieldG_struct_setter>
+  std::map<std::string, std::map<std::string, std::map<std::string, int32_t>>>& set_fieldG(T_containerStruct_fieldG_struct_setter&& fieldG_);
+  const std::vector<std::set<int32_t>>& get_fieldH() const&;
+  std::vector<std::set<int32_t>> get_fieldH() &&;
+  template <typename T_containerStruct_fieldH_struct_setter>
+  std::vector<std::set<int32_t>>& set_fieldH(T_containerStruct_fieldH_struct_setter&& fieldH_);
+
+  bool get_fieldI() const {
+    return fieldI;
+  }
+
+  bool& set_fieldI(bool fieldI_) {
+    fieldI = fieldI_;
+    __isset.fieldI = true;
+    return fieldI;
+  }
+  const std::map<std::string, std::vector<int32_t>>& get_fieldJ() const&;
+  std::map<std::string, std::vector<int32_t>> get_fieldJ() &&;
+  template <typename T_containerStruct_fieldJ_struct_setter>
+  std::map<std::string, std::vector<int32_t>>& set_fieldJ(T_containerStruct_fieldJ_struct_setter&& fieldJ_);
+  const std::vector<std::vector<std::vector<std::vector<int32_t>>>>& get_fieldK() const&;
+  std::vector<std::vector<std::vector<std::vector<int32_t>>>> get_fieldK() &&;
+  template <typename T_containerStruct_fieldK_struct_setter>
+  std::vector<std::vector<std::vector<std::vector<int32_t>>>>& set_fieldK(T_containerStruct_fieldK_struct_setter&& fieldK_);
+  const std::set<std::set<std::set<bool>>>& get_fieldL() const&;
+  std::set<std::set<std::set<bool>>> get_fieldL() &&;
+  template <typename T_containerStruct_fieldL_struct_setter>
+  std::set<std::set<std::set<bool>>>& set_fieldL(T_containerStruct_fieldL_struct_setter&& fieldL_);
+  const std::map<std::set<std::vector<int32_t>>, std::map<std::vector<std::set<std::string>>, std::string>>& get_fieldM() const&;
+  std::map<std::set<std::vector<int32_t>>, std::map<std::vector<std::set<std::string>>, std::string>> get_fieldM() &&;
+  template <typename T_containerStruct_fieldM_struct_setter>
+  std::map<std::set<std::vector<int32_t>>, std::map<std::vector<std::set<std::string>>, std::string>>& set_fieldM(T_containerStruct_fieldM_struct_setter&& fieldM_);
+
+   ::some::valid::ns::simpleTypeDef get_fieldN() const {
+    return fieldN;
+  }
+
+   ::some::valid::ns::simpleTypeDef& set_fieldN( ::some::valid::ns::simpleTypeDef fieldN_) {
+    fieldN = fieldN_;
+    __isset.fieldN = true;
+    return fieldN;
+  }
+  const  ::some::valid::ns::complexStructTypeDef& get_fieldO() const&;
+   ::some::valid::ns::complexStructTypeDef get_fieldO() &&;
+  template <typename T_containerStruct_fieldO_struct_setter>
+   ::some::valid::ns::complexStructTypeDef& set_fieldO(T_containerStruct_fieldO_struct_setter&& fieldO_);
+  const std::vector< ::some::valid::ns::mostComplexTypeDef>& get_fieldP() const&;
+  std::vector< ::some::valid::ns::mostComplexTypeDef> get_fieldP() &&;
+  template <typename T_containerStruct_fieldP_struct_setter>
+  std::vector< ::some::valid::ns::mostComplexTypeDef>& set_fieldP(T_containerStruct_fieldP_struct_setter&& fieldP_);
+
+   ::some::valid::ns::MyEnumA get_fieldQ() const {
+    return fieldQ;
+  }
+
+   ::some::valid::ns::MyEnumA& set_fieldQ( ::some::valid::ns::MyEnumA fieldQ_) {
+    fieldQ = fieldQ_;
+    __isset.fieldQ = true;
+    return fieldQ;
+  }
+
+   ::some::valid::ns::MyEnumA get_fieldR() const {
+    return fieldR;
+  }
+
+   ::some::valid::ns::MyEnumA& set_fieldR( ::some::valid::ns::MyEnumA fieldR_) {
+    fieldR = fieldR_;
+    __isset.fieldR = true;
+    return fieldR;
+  }
+
+   ::some::valid::ns::MyEnumA get_req_fieldR() const {
+    return req_fieldR;
+  }
+
+   ::some::valid::ns::MyEnumA& set_req_fieldR( ::some::valid::ns::MyEnumA req_fieldR_) {
+    req_fieldR = req_fieldR_;
+    return req_fieldR;
+  }
+
+  const  ::some::valid::ns::MyEnumA* get_opt_fieldR() const& {
+    return __isset.opt_fieldR ? std::addressof(opt_fieldR) : nullptr;
+  }
+
+   ::some::valid::ns::MyEnumA* get_opt_fieldR() & {
+    return __isset.opt_fieldR ? std::addressof(opt_fieldR) : nullptr;
+  }
+   ::some::valid::ns::MyEnumA* get_opt_fieldR() && = delete;
+
+   ::some::valid::ns::MyEnumA& set_opt_fieldR( ::some::valid::ns::MyEnumA opt_fieldR_) {
+    opt_fieldR = opt_fieldR_;
+    __isset.opt_fieldR = true;
+    return opt_fieldR;
+  }
+
+   ::some::valid::ns::MyEnumA get_fieldS() const {
+    return fieldS;
+  }
+
+   ::some::valid::ns::MyEnumA& set_fieldS( ::some::valid::ns::MyEnumA fieldS_) {
+    fieldS = fieldS_;
+    __isset.fieldS = true;
+    return fieldS;
+  }
+  const std::vector< ::some::valid::ns::MyEnumA>& get_fieldT() const&;
+  std::vector< ::some::valid::ns::MyEnumA> get_fieldT() &&;
+  template <typename T_containerStruct_fieldT_struct_setter>
+  std::vector< ::some::valid::ns::MyEnumA>& set_fieldT(T_containerStruct_fieldT_struct_setter&& fieldT_);
+  const std::vector< ::some::valid::ns::MyEnumA>& get_fieldU() const&;
+  std::vector< ::some::valid::ns::MyEnumA> get_fieldU() &&;
+  template <typename T_containerStruct_fieldU_struct_setter>
+  std::vector< ::some::valid::ns::MyEnumA>& set_fieldU(T_containerStruct_fieldU_struct_setter&& fieldU_);
+  const  ::some::valid::ns::MyStruct& get_fieldV() const&;
+   ::some::valid::ns::MyStruct get_fieldV() &&;
+  template <typename T_containerStruct_fieldV_struct_setter>
+   ::some::valid::ns::MyStruct& set_fieldV(T_containerStruct_fieldV_struct_setter&& fieldV_);
+  const  ::some::valid::ns::MyStruct& get_req_fieldV() const&;
+   ::some::valid::ns::MyStruct get_req_fieldV() &&;
+  template <typename T_containerStruct_req_fieldV_struct_setter>
+   ::some::valid::ns::MyStruct& set_req_fieldV(T_containerStruct_req_fieldV_struct_setter&& req_fieldV_);
+  const  ::some::valid::ns::MyStruct* get_opt_fieldV() const&;
+   ::some::valid::ns::MyStruct* get_opt_fieldV() &;
+   ::some::valid::ns::MyStruct* get_opt_fieldV() && = delete;
+  template <typename T_containerStruct_opt_fieldV_struct_setter>
+   ::some::valid::ns::MyStruct& set_opt_fieldV(T_containerStruct_opt_fieldV_struct_setter&& opt_fieldV_);
+  const std::set< ::some::valid::ns::MyStruct>& get_fieldW() const&;
+  std::set< ::some::valid::ns::MyStruct> get_fieldW() &&;
+  template <typename T_containerStruct_fieldW_struct_setter>
+  std::set< ::some::valid::ns::MyStruct>& set_fieldW(T_containerStruct_fieldW_struct_setter&& fieldW_);
+  const  ::some::valid::ns::ComplexUnion& get_fieldX() const&;
+   ::some::valid::ns::ComplexUnion get_fieldX() &&;
+  template <typename T_containerStruct_fieldX_struct_setter>
+   ::some::valid::ns::ComplexUnion& set_fieldX(T_containerStruct_fieldX_struct_setter&& fieldX_);
+  const  ::some::valid::ns::ComplexUnion& get_req_fieldX() const&;
+   ::some::valid::ns::ComplexUnion get_req_fieldX() &&;
+  template <typename T_containerStruct_req_fieldX_struct_setter>
+   ::some::valid::ns::ComplexUnion& set_req_fieldX(T_containerStruct_req_fieldX_struct_setter&& req_fieldX_);
+  const  ::some::valid::ns::ComplexUnion* get_opt_fieldX() const&;
+   ::some::valid::ns::ComplexUnion* get_opt_fieldX() &;
+   ::some::valid::ns::ComplexUnion* get_opt_fieldX() && = delete;
+  template <typename T_containerStruct_opt_fieldX_struct_setter>
+   ::some::valid::ns::ComplexUnion& set_opt_fieldX(T_containerStruct_opt_fieldX_struct_setter&& opt_fieldX_);
+  const std::vector< ::some::valid::ns::ComplexUnion>& get_fieldY() const&;
+  std::vector< ::some::valid::ns::ComplexUnion> get_fieldY() &&;
+  template <typename T_containerStruct_fieldY_struct_setter>
+  std::vector< ::some::valid::ns::ComplexUnion>& set_fieldY(T_containerStruct_fieldY_struct_setter&& fieldY_);
+  const  ::some::valid::ns::unionTypeDef& get_fieldZ() const&;
+   ::some::valid::ns::unionTypeDef get_fieldZ() &&;
+  template <typename T_containerStruct_fieldZ_struct_setter>
+   ::some::valid::ns::unionTypeDef& set_fieldZ(T_containerStruct_fieldZ_struct_setter&& fieldZ_);
+  const std::vector< ::some::valid::ns::unionTypeDef>& get_fieldAA() const&;
+  std::vector< ::some::valid::ns::unionTypeDef> get_fieldAA() &&;
+  template <typename T_containerStruct_fieldAA_struct_setter>
+  std::vector< ::some::valid::ns::unionTypeDef>& set_fieldAA(T_containerStruct_fieldAA_struct_setter&& fieldAA_);
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+};
+
+void swap(containerStruct& a, containerStruct& b);
+extern template uint32_t containerStruct::read<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t containerStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t containerStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t containerStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t containerStruct::read<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t containerStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t containerStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t containerStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // some::valid::ns
+namespace apache { namespace thrift {
+
+template <> inline void Cpp2Ops< ::some::valid::ns::containerStruct>::clear( ::some::valid::ns::containerStruct* obj) {
+  return obj->__clear();
+}
+
+template <> inline constexpr apache::thrift::protocol::TType Cpp2Ops< ::some::valid::ns::containerStruct>::thriftType() {
+  return apache::thrift::protocol::T_STRUCT;
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::containerStruct>::write(Protocol* proto,  ::some::valid::ns::containerStruct const* obj) {
+  return obj->write(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::containerStruct>::read(Protocol* proto,  ::some::valid::ns::containerStruct* obj) {
+  return obj->read(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::containerStruct>::serializedSize(Protocol const* proto,  ::some::valid::ns::containerStruct const* obj) {
+  return obj->serializedSize(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::containerStruct>::serializedSizeZC(Protocol const* proto,  ::some::valid::ns::containerStruct const* obj) {
+  return obj->serializedSizeZC(proto);
+}
+
+}} // apache::thrift
+namespace some { namespace valid { namespace ns {
+
+class MyIncludedStruct : private apache::thrift::detail::st::ComparisonOperators<MyIncludedStruct> {
+ public:
+
+  MyIncludedStruct() :
+      MyIncludedInt(42LL) {}
+  // FragileConstructor for use in initialization lists only
+
+  MyIncludedStruct(apache::thrift::FragileConstructor,  ::some::valid::ns::IncludedInt64 MyIncludedInt__arg) :
+      MyIncludedInt(std::move(MyIncludedInt__arg)) {
+    __isset.MyIncludedInt = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  MyIncludedStruct(::apache::thrift::detail::argument_wrapper<1, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    MyIncludedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    MyIncludedInt = arg.move();
+    __isset.MyIncludedInt = true;
+  }
+
+  MyIncludedStruct(MyIncludedStruct&&) = default;
+
+  MyIncludedStruct(const MyIncludedStruct&) = default;
+
+  MyIncludedStruct& operator=(MyIncludedStruct&&) = default;
+
+  MyIncludedStruct& operator=(const MyIncludedStruct&) = default;
+  void __clear();
+
+  virtual ~MyIncludedStruct() throw() {}
+
+   ::some::valid::ns::IncludedInt64 MyIncludedInt;
+
+  struct __isset {
+    void __clear() {
+      MyIncludedInt = false;
+    }
+
+    bool MyIncludedInt = false;
+  } __isset;
+  bool operator==(const MyIncludedStruct& rhs) const;
+  bool operator < (const MyIncludedStruct& rhs) const;
+
+   ::some::valid::ns::IncludedInt64 get_MyIncludedInt() const {
+    return MyIncludedInt;
+  }
+
+   ::some::valid::ns::IncludedInt64& set_MyIncludedInt( ::some::valid::ns::IncludedInt64 MyIncludedInt_) {
+    MyIncludedInt = MyIncludedInt_;
+    __isset.MyIncludedInt = true;
+    return MyIncludedInt;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+};
+
+void swap(MyIncludedStruct& a, MyIncludedStruct& b);
+extern template uint32_t MyIncludedStruct::read<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t MyIncludedStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t MyIncludedStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t MyIncludedStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t MyIncludedStruct::read<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t MyIncludedStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t MyIncludedStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t MyIncludedStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // some::valid::ns
+namespace apache { namespace thrift {
+
+template <> inline void Cpp2Ops< ::some::valid::ns::MyIncludedStruct>::clear( ::some::valid::ns::MyIncludedStruct* obj) {
+  return obj->__clear();
+}
+
+template <> inline constexpr apache::thrift::protocol::TType Cpp2Ops< ::some::valid::ns::MyIncludedStruct>::thriftType() {
+  return apache::thrift::protocol::T_STRUCT;
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::MyIncludedStruct>::write(Protocol* proto,  ::some::valid::ns::MyIncludedStruct const* obj) {
+  return obj->write(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::MyIncludedStruct>::read(Protocol* proto,  ::some::valid::ns::MyIncludedStruct* obj) {
+  return obj->read(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::MyIncludedStruct>::serializedSize(Protocol const* proto,  ::some::valid::ns::MyIncludedStruct const* obj) {
+  return obj->serializedSize(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::MyIncludedStruct>::serializedSizeZC(Protocol const* proto,  ::some::valid::ns::MyIncludedStruct const* obj) {
+  return obj->serializedSizeZC(proto);
+}
+
+}} // apache::thrift
+namespace some { namespace valid { namespace ns {
+
+class AnnotatatedStruct : private apache::thrift::detail::st::ComparisonOperators<AnnotatatedStruct> {
+ public:
+
+  AnnotatatedStruct() :
+      container_with_ref(std::make_unique<std::map<int32_t, std::vector<std::string>>>()),
+      req_container_with_ref(std::make_unique<std::vector<std::string>>()),
+      opt_container_with_ref(std::make_unique<std::set<int32_t>>()),
+      ref_type_const(std::make_shared<std::map<int32_t, std::vector<std::string>>>()),
+      req_ref_type_unique(std::make_unique<std::vector<std::string>>()),
+      opt_ref_type_shared(std::make_shared<std::set<int32_t>>()),
+      base_type(0) {}
+  // FragileConstructor for use in initialization lists only
+
+  AnnotatatedStruct(apache::thrift::FragileConstructor,  ::some::valid::ns::containerStruct no_annotation__arg, std::unique_ptr< ::some::valid::ns::containerStruct> cpp_unique_ref__arg, std::unique_ptr< ::some::valid::ns::containerStruct> cpp2_unique_ref__arg, std::unique_ptr<std::map<int32_t, std::vector<std::string>>> container_with_ref__arg, std::unique_ptr< ::some::valid::ns::containerStruct> req_cpp_unique_ref__arg, std::unique_ptr< ::some::valid::ns::containerStruct> req_cpp2_unique_ref__arg, std::unique_ptr<std::vector<std::string>> req_container_with_ref__arg, std::unique_ptr< ::some::valid::ns::containerStruct> opt_cpp_unique_ref__arg, std::unique_ptr< ::some::valid::ns::containerStruct> opt_cpp2_unique_ref__arg, std::unique_ptr<std::set<int32_t>> opt_container_with_ref__arg, std::unique_ptr< ::some::valid::ns::containerStruct> ref_type_unique__arg, std::shared_ptr< ::some::valid::ns::containerStruct> ref_type_shared__arg, std::shared_ptr<const std::map<int32_t, std::vector<std::string>>> ref_type_const__arg, std::shared_ptr< ::some::valid::ns::containerStruct> req_ref_type_shared__arg, std::shared_ptr<const  ::some::valid::ns::containerStruct> req_ref_type_const__arg, std::unique_ptr<std::vector<std::string>> req_ref_type_unique__arg, std::shared_ptr<const  ::some::valid::ns::containerStruct> opt_ref_type_const__arg, std::unique_ptr< ::some::valid::ns::containerStruct> opt_ref_type_unique__arg, std::shared_ptr<std::set<int32_t>> opt_ref_type_shared__arg, CppFakeI32 base_type__arg, folly::small_vector<int64_t, 8 /* maxInline */> list_type__arg, folly::sorted_vector_set<std::string> set_type__arg, FakeMap map_type__arg, std::unordered_map<std::string, containerStruct> map_struct_type__arg) :
+      no_annotation(std::move(no_annotation__arg)),
+      cpp_unique_ref(std::move(cpp_unique_ref__arg)),
+      cpp2_unique_ref(std::move(cpp2_unique_ref__arg)),
+      container_with_ref(std::move(container_with_ref__arg)),
+      req_cpp_unique_ref(std::move(req_cpp_unique_ref__arg)),
+      req_cpp2_unique_ref(std::move(req_cpp2_unique_ref__arg)),
+      req_container_with_ref(std::move(req_container_with_ref__arg)),
+      opt_cpp_unique_ref(std::move(opt_cpp_unique_ref__arg)),
+      opt_cpp2_unique_ref(std::move(opt_cpp2_unique_ref__arg)),
+      opt_container_with_ref(std::move(opt_container_with_ref__arg)),
+      ref_type_unique(std::move(ref_type_unique__arg)),
+      ref_type_shared(std::move(ref_type_shared__arg)),
+      ref_type_const(std::move(ref_type_const__arg)),
+      req_ref_type_shared(std::move(req_ref_type_shared__arg)),
+      req_ref_type_const(std::move(req_ref_type_const__arg)),
+      req_ref_type_unique(std::move(req_ref_type_unique__arg)),
+      opt_ref_type_const(std::move(opt_ref_type_const__arg)),
+      opt_ref_type_unique(std::move(opt_ref_type_unique__arg)),
+      opt_ref_type_shared(std::move(opt_ref_type_shared__arg)),
+      base_type(std::move(base_type__arg)),
+      list_type(std::move(list_type__arg)),
+      set_type(std::move(set_type__arg)),
+      map_type(std::move(map_type__arg)),
+      map_struct_type(std::move(map_struct_type__arg)) {
+    __isset.no_annotation = true;
+    __isset.base_type = true;
+    __isset.list_type = true;
+    __isset.set_type = true;
+    __isset.map_type = true;
+    __isset.map_struct_type = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<1, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    no_annotation = arg.move();
+    __isset.no_annotation = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<2, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    cpp_unique_ref = std::make_unique<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<3, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    cpp2_unique_ref = std::make_unique<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<4, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    container_with_ref = std::make_unique<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<5, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_cpp_unique_ref = std::make_unique<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<6, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_cpp2_unique_ref = std::make_unique<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<7, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_container_with_ref = std::make_unique<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<8, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    opt_cpp_unique_ref = std::make_unique<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<9, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    opt_cpp2_unique_ref = std::make_unique<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<10, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    opt_container_with_ref = std::make_unique<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<11, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    ref_type_unique = std::make_unique<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<12, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    ref_type_shared = std::make_shared<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<13, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    ref_type_const = std::make_shared<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<14, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_ref_type_shared = std::make_shared<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<15, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_ref_type_const = std::make_shared<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<16, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    req_ref_type_unique = std::make_unique<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<17, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    opt_ref_type_const = std::make_shared<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<18, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    opt_ref_type_unique = std::make_unique<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<19, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    opt_ref_type_shared = std::make_shared<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<20, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    base_type = arg.move();
+    __isset.base_type = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<21, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    list_type = arg.move();
+    __isset.list_type = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<22, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    set_type = arg.move();
+    __isset.set_type = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<23, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    map_type = arg.move();
+    __isset.map_type = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  AnnotatatedStruct(::apache::thrift::detail::argument_wrapper<24, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    AnnotatatedStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    map_struct_type = arg.move();
+    __isset.map_struct_type = true;
+  }
+
+  AnnotatatedStruct(AnnotatatedStruct&&) = default;
+  AnnotatatedStruct(const AnnotatatedStruct& src);
+
+  AnnotatatedStruct& operator=(AnnotatatedStruct&&) = default;
+  AnnotatatedStruct& operator=(const AnnotatatedStruct& src);
+  void __clear();
+
+  virtual ~AnnotatatedStruct() throw() {}
+
+   ::some::valid::ns::containerStruct no_annotation;
+  std::unique_ptr< ::some::valid::ns::containerStruct> cpp_unique_ref;
+  std::unique_ptr< ::some::valid::ns::containerStruct> cpp2_unique_ref;
+  std::unique_ptr<std::map<int32_t, std::vector<std::string>>> container_with_ref;
+  std::unique_ptr< ::some::valid::ns::containerStruct> req_cpp_unique_ref;
+  std::unique_ptr< ::some::valid::ns::containerStruct> req_cpp2_unique_ref;
+  std::unique_ptr<std::vector<std::string>> req_container_with_ref;
+  std::unique_ptr< ::some::valid::ns::containerStruct> opt_cpp_unique_ref;
+  std::unique_ptr< ::some::valid::ns::containerStruct> opt_cpp2_unique_ref;
+  std::unique_ptr<std::set<int32_t>> opt_container_with_ref;
+  std::unique_ptr< ::some::valid::ns::containerStruct> ref_type_unique;
+  std::shared_ptr< ::some::valid::ns::containerStruct> ref_type_shared;
+  std::shared_ptr<const std::map<int32_t, std::vector<std::string>>> ref_type_const;
+  std::shared_ptr< ::some::valid::ns::containerStruct> req_ref_type_shared;
+  std::shared_ptr<const  ::some::valid::ns::containerStruct> req_ref_type_const;
+  std::unique_ptr<std::vector<std::string>> req_ref_type_unique;
+  std::shared_ptr<const  ::some::valid::ns::containerStruct> opt_ref_type_const;
+  std::unique_ptr< ::some::valid::ns::containerStruct> opt_ref_type_unique;
+  std::shared_ptr<std::set<int32_t>> opt_ref_type_shared;
+  CppFakeI32 base_type;
+  folly::small_vector<int64_t, 8 /* maxInline */> list_type;
+  folly::sorted_vector_set<std::string> set_type;
+  FakeMap map_type;
+  std::unordered_map<std::string, containerStruct> map_struct_type;
+
+  struct __isset {
+    void __clear() {
+      no_annotation = false;
+      base_type = false;
+      list_type = false;
+      set_type = false;
+      map_type = false;
+      map_struct_type = false;
+    }
+
+    bool no_annotation = false;
+    bool base_type = false;
+    bool list_type = false;
+    bool set_type = false;
+    bool map_type = false;
+    bool map_struct_type = false;
+  } __isset;
+  bool operator==(const AnnotatatedStruct& rhs) const;
+  bool operator < (const AnnotatatedStruct& rhs) const;
+  const  ::some::valid::ns::containerStruct& get_no_annotation() const&;
+   ::some::valid::ns::containerStruct get_no_annotation() &&;
+  template <typename T_AnnotatatedStruct_no_annotation_struct_setter>
+   ::some::valid::ns::containerStruct& set_no_annotation(T_AnnotatatedStruct_no_annotation_struct_setter&& no_annotation_);
+
+  CppFakeI32 get_base_type() const {
+    return base_type;
+  }
+
+  CppFakeI32& set_base_type(CppFakeI32 base_type_) {
+    base_type = base_type_;
+    __isset.base_type = true;
+    return base_type;
+  }
+  const folly::small_vector<int64_t, 8 /* maxInline */>& get_list_type() const&;
+  folly::small_vector<int64_t, 8 /* maxInline */> get_list_type() &&;
+  template <typename T_AnnotatatedStruct_list_type_struct_setter>
+  folly::small_vector<int64_t, 8 /* maxInline */>& set_list_type(T_AnnotatatedStruct_list_type_struct_setter&& list_type_);
+  const folly::sorted_vector_set<std::string>& get_set_type() const&;
+  folly::sorted_vector_set<std::string> get_set_type() &&;
+  template <typename T_AnnotatatedStruct_set_type_struct_setter>
+  folly::sorted_vector_set<std::string>& set_set_type(T_AnnotatatedStruct_set_type_struct_setter&& set_type_);
+  const FakeMap& get_map_type() const&;
+  FakeMap get_map_type() &&;
+  template <typename T_AnnotatatedStruct_map_type_struct_setter>
+  FakeMap& set_map_type(T_AnnotatatedStruct_map_type_struct_setter&& map_type_);
+  const std::unordered_map<std::string, containerStruct>& get_map_struct_type() const&;
+  std::unordered_map<std::string, containerStruct> get_map_struct_type() &&;
+  template <typename T_AnnotatatedStruct_map_struct_type_struct_setter>
+  std::unordered_map<std::string, containerStruct>& set_map_struct_type(T_AnnotatatedStruct_map_struct_type_struct_setter&& map_struct_type_);
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+};
+
+void swap(AnnotatatedStruct& a, AnnotatatedStruct& b);
+extern template uint32_t AnnotatatedStruct::read<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t AnnotatatedStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t AnnotatatedStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t AnnotatatedStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t AnnotatatedStruct::read<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t AnnotatatedStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t AnnotatatedStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t AnnotatatedStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}}} // some::valid::ns
+namespace apache { namespace thrift {
+
+template <> inline void Cpp2Ops< ::some::valid::ns::AnnotatatedStruct>::clear( ::some::valid::ns::AnnotatatedStruct* obj) {
+  return obj->__clear();
+}
+
+template <> inline constexpr apache::thrift::protocol::TType Cpp2Ops< ::some::valid::ns::AnnotatatedStruct>::thriftType() {
+  return apache::thrift::protocol::T_STRUCT;
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::AnnotatatedStruct>::write(Protocol* proto,  ::some::valid::ns::AnnotatatedStruct const* obj) {
+  return obj->write(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::AnnotatatedStruct>::read(Protocol* proto,  ::some::valid::ns::AnnotatatedStruct* obj) {
+  return obj->read(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::AnnotatatedStruct>::serializedSize(Protocol const* proto,  ::some::valid::ns::AnnotatatedStruct const* obj) {
+  return obj->serializedSize(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::some::valid::ns::AnnotatatedStruct>::serializedSizeZC(Protocol const* proto,  ::some::valid::ns::AnnotatatedStruct const* obj) {
   return obj->serializedSizeZC(proto);
 }
 

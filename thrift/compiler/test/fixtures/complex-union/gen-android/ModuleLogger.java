@@ -52,14 +52,14 @@ public class ModuleLogger {
           break;
         }
       
-        case 2: {
+        case 5: {
           writeFieldBegin(oprot, Module.ComplexUnion_stringValue);
           oprot.writeString((String) mMap.get(Module.ComplexUnion_stringValue));
           oprot.writeFieldEnd();
           break;
         }
       
-        case 3: {
+        case 2: {
           writeFieldBegin(oprot, Module.ComplexUnion_intListValue);
           List<Long> var0 = (List<Long>) mMap.get(Module.ComplexUnion_intListValue);
           oprot.writeListBegin(new TList(TType.I64, var0.size()));
@@ -71,7 +71,7 @@ public class ModuleLogger {
           break;
         }
       
-        case 4: {
+        case 3: {
           writeFieldBegin(oprot, Module.ComplexUnion_stringListValue);
           List<String> var0 = (List<String>) mMap.get(Module.ComplexUnion_stringListValue);
           oprot.writeListBegin(new TList(TType.STRING, var0.size()));
@@ -83,9 +83,50 @@ public class ModuleLogger {
           break;
         }
       
-        case 5: {
+        case 9: {
+          writeFieldBegin(oprot, Module.ComplexUnion_typedefValue);
+          Map<Short,String> var0 = (Map<Short,String>) mMap.get(Module.ComplexUnion_typedefValue);
+          oprot.writeMapBegin(new TMap(TType.I16, TType.STRING, var0.size()));
+          for (Map.Entry<Short, String> iter0 : var0.entrySet()) {
+            oprot.writeI16(iter0.getKey());
+            oprot.writeString(iter0.getValue());
+          }
+          oprot.writeMapEnd();
+          oprot.writeFieldEnd();
+          break;
+        }
+      
+        case 14: {
           writeFieldBegin(oprot, Module.ComplexUnion_stringRef);
           oprot.writeString((String) mMap.get(Module.ComplexUnion_stringRef));
+          oprot.writeFieldEnd();
+          break;
+        }
+      
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+        break;
+      }
+      
+      case FinalComplexUnion: {
+        if (this.mMap.size() < 1) {
+          throw new TProtocolException(TProtocolException.MISSING_REQUIRED_FIELD, "Cannot write a union with no set value!");
+        } else if (this.mMap.size() > 1) {
+          throw new TProtocolException(TProtocolException.INVALID_DATA, "Cannot write a union with more than one set value!");
+        }
+        oprot.writeStructBegin(new TStruct("FinalComplexUnion"));
+        switch (mMap.keySet().iterator().next().id) {
+        case 1: {
+          writeFieldBegin(oprot, Module.FinalComplexUnion_thingOne);
+          oprot.writeString((String) mMap.get(Module.FinalComplexUnion_thingOne));
+          oprot.writeFieldEnd();
+          break;
+        }
+      
+        case 2: {
+          writeFieldBegin(oprot, Module.FinalComplexUnion_thingTwo);
+          oprot.writeString((String) mMap.get(Module.FinalComplexUnion_thingTwo));
           oprot.writeFieldEnd();
           break;
         }

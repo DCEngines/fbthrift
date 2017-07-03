@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2004-present Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -318,7 +318,7 @@ class ChunkSender : private TAsyncTransport::WriteCallback,
       len = info.bytes;
       if (len + bufOffset_ > message_->getLength()) {
         // bug in the test code: ChunkSchedule lists more data than available
-        FAIL() << "bad ChunkSchedule";
+        ADD_FAILURE() << "bad ChunkSchedule";
 
         len = message_->getLength() - bufOffset_;
         if (len == 0) {
@@ -345,8 +345,9 @@ class ChunkSender : private TAsyncTransport::WriteCallback,
     }
   }
 
-  void writeError(size_t bytesWritten,
-                  const TTransportException& ex) noexcept override {
+  void writeError(
+      size_t /* bytesWritten */,
+      const TTransportException&) noexcept override {
     error_ = true;
   }
 
@@ -477,8 +478,9 @@ class MultiMessageSenderReceiver : private TAsyncTransport::WriteCallback,
       }
     }
 
-    void writeError(size_t bytesWritten,
-                    const TTransportException& ex) noexcept override {
+    void writeError(
+        size_t /* bytesWritten */,
+        const TTransportException&) noexcept override {
       writeError_ = true;
     }
 
@@ -526,7 +528,7 @@ class EventBaseAborter : public AsyncTimeout {
   }
 
   void timeoutExpired() noexcept override {
-    FAIL() << "test timed out";
+    ADD_FAILURE() << "test timed out";
     eventBase_->terminateLoopSoon();
   }
 
@@ -672,7 +674,7 @@ class MultiSendRecvTest : public SocketPairTest<ChannelT> {
     vector<Message>& writeMessages
                       = multiMessageSenderReceiver_.getWriteMessages();
     CHECK_EQ(readBuffers.size(), writeMessages.size());
-    for (int i = 0; i < writeMessages.size(); i++) {
+    for (size_t i = 0; i < writeMessages.size(); i++) {
       writeMessages[i].checkEqual(readBuffers[i].get());
     }
   }
@@ -829,7 +831,7 @@ template<typename ChannelT>
 class TimeoutQueuedTest : public SocketPairTest<ChannelT> {
  public:
 
-  explicit TimeoutQueuedTest(int n_msgs = 3)
+  explicit TimeoutQueuedTest(uint32_t n_msgs = 3)
       : n_msgs_(n_msgs)
       , start_(false)
       , msg_(911) {
@@ -839,7 +841,7 @@ class TimeoutQueuedTest : public SocketPairTest<ChannelT> {
 
     this->channel1_->setRecvTimeout(kRecvDelay * n_msgs_ + kTimeout);
 
-    for (int i = 0; i < n_msgs_; i++ ) {
+    for (size_t i = 0; i < n_msgs_; i++) {
       // queue some reads 200ms apart
       this->eventBase_.tryRunAfterDelay(
         std::bind(&TimeoutQueuedTest<ChannelT>::recvMe, this),

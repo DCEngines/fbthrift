@@ -18,7 +18,216 @@
 
 namespace cpp2 {
 
+struct apache_thrift_indirection_module_IndirectionA {
+  template <typename T> static auto&& get(T&& x) {
+    return std::forward<T>(x).value;
+  }
+
+  template <typename T> static auto&& get(T const&& x) {
+    return std::forward<T>(x).value;
+  }
+};
+
+struct apache_thrift_indirection_module_IndirectionC {
+  template <typename T> static auto&& get(T&& x) {
+    return std::forward<T>(x).__value();
+  }
+
+  template <typename T> static auto&& get(T const&& x) {
+    return std::forward<T>(x).__value();
+  }
+};
+
+struct apache_thrift_indirection_module_IndirectionB {
+  template <typename T> static auto&& get(T&& x) {
+    return std::forward<T>(x).value;
+  }
+
+  template <typename T> static auto&& get(T const&& x) {
+    return std::forward<T>(x).value;
+  }
+};
+
+class SmallStruct;
 class containerStruct;
+
+enum class MyEnumA {
+  fieldA = 1,
+  fieldB = 2,
+  fieldC = 4
+};
+
+using _MyEnumA_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<MyEnumA, MyEnumA>;
+extern const _MyEnumA_EnumMapFactory::ValuesToNamesMapType _MyEnumA_VALUES_TO_NAMES;
+extern const _MyEnumA_EnumMapFactory::NamesToValuesMapType _MyEnumA_NAMES_TO_VALUES;
+
+} // cpp2
+namespace std {
+
+template<> struct hash<typename  ::cpp2::MyEnumA> : public apache::thrift::detail::enum_hash<typename  ::cpp2::MyEnumA> {};
+template<> struct equal_to<typename  ::cpp2::MyEnumA> : public apache::thrift::detail::enum_equal_to<typename  ::cpp2::MyEnumA> {};
+
+} // std
+namespace apache { namespace thrift {
+
+template <> struct TEnumDataStorage< ::cpp2::MyEnumA>;
+template <> const std::size_t TEnumTraits< ::cpp2::MyEnumA>::size;
+template <> const folly::Range<const  ::cpp2::MyEnumA*> TEnumTraits< ::cpp2::MyEnumA>::values;
+template <> const folly::Range<const folly::StringPiece*> TEnumTraits< ::cpp2::MyEnumA>::names;
+template <> const char* TEnumTraits< ::cpp2::MyEnumA>::findName( ::cpp2::MyEnumA value);
+template <> bool TEnumTraits< ::cpp2::MyEnumA>::findValue(const char* name,  ::cpp2::MyEnumA* outValue);
+
+template <> inline constexpr  ::cpp2::MyEnumA TEnumTraits< ::cpp2::MyEnumA>::min() {
+  return  ::cpp2::MyEnumA::fieldA;
+}
+
+template <> inline constexpr  ::cpp2::MyEnumA TEnumTraits< ::cpp2::MyEnumA>::max() {
+  return  ::cpp2::MyEnumA::fieldC;
+}
+
+}} // apache::thrift
+namespace cpp2 {
+
+typedef Foo IndirectionA;
+
+typedef Bar IndirectionB;
+
+typedef Baz IndirectionC;
+
+class SmallStruct : private apache::thrift::detail::st::ComparisonOperators<SmallStruct> {
+ public:
+
+  SmallStruct() :
+      small_A(0),
+      small_B(0) {}
+  // FragileConstructor for use in initialization lists only
+
+  SmallStruct(apache::thrift::FragileConstructor, bool small_A__arg, int32_t small_B__arg) :
+      small_A(std::move(small_A__arg)),
+      small_B(std::move(small_B__arg)) {
+    __isset.small_A = true;
+    __isset.small_B = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  SmallStruct(::apache::thrift::detail::argument_wrapper<1, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    SmallStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    small_A = arg.move();
+    __isset.small_A = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  SmallStruct(::apache::thrift::detail::argument_wrapper<2, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    SmallStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    small_B = arg.move();
+    __isset.small_B = true;
+  }
+
+  SmallStruct(SmallStruct&&) = default;
+
+  SmallStruct(const SmallStruct&) = default;
+
+  SmallStruct& operator=(SmallStruct&&) = default;
+
+  SmallStruct& operator=(const SmallStruct&) = default;
+  void __clear();
+
+  virtual ~SmallStruct() throw() {}
+
+  bool small_A;
+  int32_t small_B;
+
+  struct __isset {
+    void __clear() {
+      small_A = false;
+      small_B = false;
+    }
+
+    bool small_A = false;
+    bool small_B = false;
+  } __isset;
+  bool operator==(const SmallStruct& rhs) const;
+
+  bool operator < (const SmallStruct& rhs) const {
+    if (!(small_A == rhs.small_A)) {
+      return small_A < rhs.small_A;
+    }
+    if (!(small_B == rhs.small_B)) {
+      return small_B < rhs.small_B;
+    }
+    (void)rhs;
+    return false;
+  }
+
+  bool get_small_A() const {
+    return small_A;
+  }
+
+  bool& set_small_A(bool small_A_) {
+    small_A = small_A_;
+    __isset.small_A = true;
+    return small_A;
+  }
+
+  int32_t get_small_B() const {
+    return small_B;
+  }
+
+  int32_t& set_small_B(int32_t small_B_) {
+    small_B = small_B_;
+    __isset.small_B = true;
+    return small_B;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+};
+
+void swap(SmallStruct& a, SmallStruct& b);
+extern template uint32_t SmallStruct::read<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t SmallStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t SmallStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t SmallStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t SmallStruct::read<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t SmallStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t SmallStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t SmallStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+} // cpp2
+namespace apache { namespace thrift {
+
+template <> inline void Cpp2Ops< ::cpp2::SmallStruct>::clear( ::cpp2::SmallStruct* obj) {
+  return obj->__clear();
+}
+
+template <> inline constexpr apache::thrift::protocol::TType Cpp2Ops< ::cpp2::SmallStruct>::thriftType() {
+  return apache::thrift::protocol::T_STRUCT;
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::cpp2::SmallStruct>::write(Protocol* proto,  ::cpp2::SmallStruct const* obj) {
+  return obj->write(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::cpp2::SmallStruct>::read(Protocol* proto,  ::cpp2::SmallStruct* obj) {
+  return obj->read(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::cpp2::SmallStruct>::serializedSize(Protocol const* proto,  ::cpp2::SmallStruct const* obj) {
+  return obj->serializedSize(proto);
+}
+
+template <> template <class Protocol> uint32_t Cpp2Ops< ::cpp2::SmallStruct>::serializedSizeZC(Protocol const* proto,  ::cpp2::SmallStruct const* obj) {
+  return obj->serializedSizeZC(proto);
+}
+
+}} // apache::thrift
+namespace cpp2 {
 
 class containerStruct : private apache::thrift::detail::st::ComparisonOperators<containerStruct> {
  public:
@@ -38,10 +247,12 @@ class containerStruct : private apache::thrift::detail::st::ComparisonOperators<
   {apache::thrift::StringTraits< std::string>::fromStringLiteral("subfieldB"), std::initializer_list<int32_t>{2,
   5,
   9,
-  13}}}) {}
+  13}}}),
+      fieldQ(static_cast< ::cpp2::MyEnumA>(0)),
+      fieldR(std::make_unique<std::map<std::string, bool>>()) {}
   // FragileConstructor for use in initialization lists only
 
-  containerStruct(apache::thrift::FragileConstructor, bool fieldA__arg, std::map<std::string, bool> fieldB__arg, std::set<int32_t> fieldC__arg, std::string fieldD__arg, std::string fieldE__arg, std::vector<std::vector<std::vector<int32_t>>> fieldF__arg, std::map<std::string, std::map<std::string, std::map<std::string, int32_t>>> fieldG__arg, std::vector<std::set<int32_t>> fieldH__arg, bool fieldI__arg, std::map<std::string, std::vector<int32_t>> fieldJ__arg, std::vector<std::vector<std::vector<std::vector<int32_t>>>> fieldK__arg, std::set<std::set<std::set<bool>>> fieldL__arg, std::map<std::set<std::vector<int32_t>>, std::map<std::vector<std::set<std::string>>, std::string>> fieldM__arg) :
+  containerStruct(apache::thrift::FragileConstructor, bool fieldA__arg, std::map<std::string, bool> fieldB__arg, std::set<int32_t> fieldC__arg, std::string fieldD__arg, std::string fieldE__arg, std::vector<std::vector<std::vector<int32_t>>> fieldF__arg, std::map<std::string, std::map<std::string, std::map<std::string, int32_t>>> fieldG__arg, std::vector<std::set<int32_t>> fieldH__arg, bool fieldI__arg, std::map<std::string, std::vector<int32_t>> fieldJ__arg, std::vector<std::vector<std::vector<std::vector<int32_t>>>> fieldK__arg, std::set<std::set<std::set<bool>>> fieldL__arg, std::map<std::set<std::vector<int32_t>>, std::map<std::vector<std::set<std::string>>, std::string>> fieldM__arg, std::vector< ::cpp2::IndirectionA> fieldN__arg, std::vector< ::cpp2::IndirectionB> fieldO__arg, std::vector< ::cpp2::IndirectionC> fieldP__arg,  ::cpp2::MyEnumA fieldQ__arg, std::unique_ptr<std::map<std::string, bool>> fieldR__arg, std::unique_ptr< ::cpp2::SmallStruct> fieldS__arg, std::shared_ptr< ::cpp2::SmallStruct> fieldT__arg, std::shared_ptr<const  ::cpp2::SmallStruct> fieldU__arg, std::unique_ptr< ::cpp2::SmallStruct> fieldX__arg) :
       fieldA(std::move(fieldA__arg)),
       fieldB(std::move(fieldB__arg)),
       fieldC(std::move(fieldC__arg)),
@@ -54,7 +265,16 @@ class containerStruct : private apache::thrift::detail::st::ComparisonOperators<
       fieldJ(std::move(fieldJ__arg)),
       fieldK(std::move(fieldK__arg)),
       fieldL(std::move(fieldL__arg)),
-      fieldM(std::move(fieldM__arg)) {
+      fieldM(std::move(fieldM__arg)),
+      fieldN(std::move(fieldN__arg)),
+      fieldO(std::move(fieldO__arg)),
+      fieldP(std::move(fieldP__arg)),
+      fieldQ(std::move(fieldQ__arg)),
+      fieldR(std::move(fieldR__arg)),
+      fieldS(std::move(fieldS__arg)),
+      fieldT(std::move(fieldT__arg)),
+      fieldU(std::move(fieldU__arg)),
+      fieldX(std::move(fieldX__arg)) {
     __isset.fieldA = true;
     __isset.fieldB = true;
     __isset.fieldC = true;
@@ -68,6 +288,10 @@ class containerStruct : private apache::thrift::detail::st::ComparisonOperators<
     __isset.fieldK = true;
     __isset.fieldL = true;
     __isset.fieldM = true;
+    __isset.fieldN = true;
+    __isset.fieldO = true;
+    __isset.fieldP = true;
+    __isset.fieldQ = true;
   }
   template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
   containerStruct(::apache::thrift::detail::argument_wrapper<1, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
@@ -160,14 +384,70 @@ class containerStruct : private apache::thrift::detail::st::ComparisonOperators<
     fieldM = arg.move();
     __isset.fieldM = true;
   }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<14, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldN = arg.move();
+    __isset.fieldN = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<15, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldO = arg.move();
+    __isset.fieldO = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<16, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldP = arg.move();
+    __isset.fieldP = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<17, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldQ = arg.move();
+    __isset.fieldQ = true;
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<18, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldR = std::make_unique<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<19, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldS = std::make_unique<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<20, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldT = std::make_shared<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<21, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldU = std::make_shared<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
+  template <typename T__ThriftWrappedArgument__Ctor, typename... Args__ThriftWrappedArgument__Ctor>
+  containerStruct(::apache::thrift::detail::argument_wrapper<23, T__ThriftWrappedArgument__Ctor> arg, Args__ThriftWrappedArgument__Ctor&&... args):
+    containerStruct(std::forward<Args__ThriftWrappedArgument__Ctor>(args)...)
+  {
+    fieldX = std::make_unique<folly::_t<std::decay<T__ThriftWrappedArgument__Ctor>>>(arg.move());
+  }
 
   containerStruct(containerStruct&&) = default;
-
-  containerStruct(const containerStruct&) = default;
+  containerStruct(const containerStruct& src);
 
   containerStruct& operator=(containerStruct&&) = default;
-
-  containerStruct& operator=(const containerStruct&) = default;
+  containerStruct& operator=(const containerStruct& src);
   void __clear();
 
   virtual ~containerStruct() throw() {}
@@ -185,6 +465,15 @@ class containerStruct : private apache::thrift::detail::st::ComparisonOperators<
   std::vector<std::vector<std::vector<std::vector<int32_t>>>> fieldK;
   std::set<std::set<std::set<bool>>> fieldL;
   std::map<std::set<std::vector<int32_t>>, std::map<std::vector<std::set<std::string>>, std::string>> fieldM;
+  std::vector< ::cpp2::IndirectionA> fieldN;
+  std::vector< ::cpp2::IndirectionB> fieldO;
+  std::vector< ::cpp2::IndirectionC> fieldP;
+   ::cpp2::MyEnumA fieldQ;
+  std::unique_ptr<std::map<std::string, bool>> fieldR;
+  std::unique_ptr< ::cpp2::SmallStruct> fieldS;
+  std::shared_ptr< ::cpp2::SmallStruct> fieldT;
+  std::shared_ptr<const  ::cpp2::SmallStruct> fieldU;
+  std::unique_ptr< ::cpp2::SmallStruct> fieldX;
 
   struct __isset {
     void __clear() {
@@ -201,6 +490,10 @@ class containerStruct : private apache::thrift::detail::st::ComparisonOperators<
       fieldK = false;
       fieldL = false;
       fieldM = false;
+      fieldN = false;
+      fieldO = false;
+      fieldP = false;
+      fieldQ = false;
     }
 
     bool fieldA = false;
@@ -216,52 +509,13 @@ class containerStruct : private apache::thrift::detail::st::ComparisonOperators<
     bool fieldK = false;
     bool fieldL = false;
     bool fieldM = false;
+    bool fieldN = false;
+    bool fieldO = false;
+    bool fieldP = false;
+    bool fieldQ = false;
   } __isset;
   bool operator==(const containerStruct& rhs) const;
-
-  bool operator < (const containerStruct& rhs) const {
-    if (!(fieldA == rhs.fieldA)) {
-      return fieldA < rhs.fieldA;
-    }
-    if (!(fieldB == rhs.fieldB)) {
-      return fieldB < rhs.fieldB;
-    }
-    if (!(fieldC == rhs.fieldC)) {
-      return fieldC < rhs.fieldC;
-    }
-    if (!(fieldD == rhs.fieldD)) {
-      return fieldD < rhs.fieldD;
-    }
-    if (!(fieldE == rhs.fieldE)) {
-      return fieldE < rhs.fieldE;
-    }
-    if (!(fieldF == rhs.fieldF)) {
-      return fieldF < rhs.fieldF;
-    }
-    if (!(fieldG == rhs.fieldG)) {
-      return fieldG < rhs.fieldG;
-    }
-    if (!(fieldH == rhs.fieldH)) {
-      return fieldH < rhs.fieldH;
-    }
-    if (!(fieldI == rhs.fieldI)) {
-      return fieldI < rhs.fieldI;
-    }
-    if (!(fieldJ == rhs.fieldJ)) {
-      return fieldJ < rhs.fieldJ;
-    }
-    if (!(fieldK == rhs.fieldK)) {
-      return fieldK < rhs.fieldK;
-    }
-    if (!(fieldL == rhs.fieldL)) {
-      return fieldL < rhs.fieldL;
-    }
-    if (!(fieldM == rhs.fieldM)) {
-      return fieldM < rhs.fieldM;
-    }
-    (void)rhs;
-    return false;
-  }
+  bool operator < (const containerStruct& rhs) const;
 
   bool get_fieldA() const {
     return fieldA;
@@ -348,6 +602,28 @@ class containerStruct : private apache::thrift::detail::st::ComparisonOperators<
   std::map<std::set<std::vector<int32_t>>, std::map<std::vector<std::set<std::string>>, std::string>> get_fieldM() &&;
   template <typename T_containerStruct_fieldM_struct_setter>
   std::map<std::set<std::vector<int32_t>>, std::map<std::vector<std::set<std::string>>, std::string>>& set_fieldM(T_containerStruct_fieldM_struct_setter&& fieldM_);
+  const std::vector< ::cpp2::IndirectionA>& get_fieldN() const&;
+  std::vector< ::cpp2::IndirectionA> get_fieldN() &&;
+  template <typename T_containerStruct_fieldN_struct_setter>
+  std::vector< ::cpp2::IndirectionA>& set_fieldN(T_containerStruct_fieldN_struct_setter&& fieldN_);
+  const std::vector< ::cpp2::IndirectionB>& get_fieldO() const&;
+  std::vector< ::cpp2::IndirectionB> get_fieldO() &&;
+  template <typename T_containerStruct_fieldO_struct_setter>
+  std::vector< ::cpp2::IndirectionB>& set_fieldO(T_containerStruct_fieldO_struct_setter&& fieldO_);
+  const std::vector< ::cpp2::IndirectionC>& get_fieldP() const&;
+  std::vector< ::cpp2::IndirectionC> get_fieldP() &&;
+  template <typename T_containerStruct_fieldP_struct_setter>
+  std::vector< ::cpp2::IndirectionC>& set_fieldP(T_containerStruct_fieldP_struct_setter&& fieldP_);
+
+   ::cpp2::MyEnumA get_fieldQ() const {
+    return fieldQ;
+  }
+
+   ::cpp2::MyEnumA& set_fieldQ( ::cpp2::MyEnumA fieldQ_) {
+    fieldQ = fieldQ_;
+    __isset.fieldQ = true;
+    return fieldQ;
+  }
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);

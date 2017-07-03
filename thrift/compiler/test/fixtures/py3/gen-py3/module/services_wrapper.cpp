@@ -12,8 +12,8 @@
 namespace py3 {
 namespace simple {
 
-SimpleServiceWrapper::SimpleServiceWrapper(PyObject *obj)
-  : if_object(obj)
+SimpleServiceWrapper::SimpleServiceWrapper(PyObject *obj, folly::Executor* exc)
+  : if_object(obj), executor(exc)
   {
     import_module__services();
     Py_XINCREF(this->if_object);
@@ -26,10 +26,17 @@ SimpleServiceWrapper::~SimpleServiceWrapper() {
 folly::Future<int32_t> SimpleServiceWrapper::future_get_five() {
   folly::Promise<int32_t> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_get_five(
-    this->if_object,
-    std::move(promise)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise)    ]() mutable {
+        call_cy_SimpleService_get_five(
+            this->if_object,
+            ctx,
+            std::move(promise)        );
+    });
+
   return future;
 }
 
@@ -38,21 +45,36 @@ folly::Future<int32_t> SimpleServiceWrapper::future_add_five(
 ) {
   folly::Promise<int32_t> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_add_five(
-    this->if_object,
-    std::move(promise),
-    num
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+num    ]() mutable {
+        call_cy_SimpleService_add_five(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            num        );
+    });
+
   return future;
 }
 
 folly::Future<folly::Unit> SimpleServiceWrapper::future_do_nothing() {
   folly::Promise<folly::Unit> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_do_nothing(
-    this->if_object,
-    std::move(promise)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise)    ]() mutable {
+        call_cy_SimpleService_do_nothing(
+            this->if_object,
+            ctx,
+            std::move(promise)        );
+    });
+
   return future;
 }
 
@@ -62,12 +84,21 @@ folly::Future<std::unique_ptr<std::string>> SimpleServiceWrapper::future_concat(
 ) {
   folly::Promise<std::unique_ptr<std::string>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_concat(
-    this->if_object,
-    std::move(promise),
-    std::move(first),
-    std::move(second)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+first = std::move(first),
+second = std::move(second)    ]() mutable {
+        call_cy_SimpleService_concat(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(first),
+            std::move(second)        );
+    });
+
   return future;
 }
 
@@ -76,11 +107,19 @@ folly::Future<int32_t> SimpleServiceWrapper::future_get_value(
 ) {
   folly::Promise<int32_t> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_get_value(
-    this->if_object,
-    std::move(promise),
-    std::move(simple_struct)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+simple_struct = std::move(simple_struct)    ]() mutable {
+        call_cy_SimpleService_get_value(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(simple_struct)        );
+    });
+
   return future;
 }
 
@@ -89,11 +128,19 @@ folly::Future<bool> SimpleServiceWrapper::future_negate(
 ) {
   folly::Promise<bool> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_negate(
-    this->if_object,
-    std::move(promise),
-    input
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+input    ]() mutable {
+        call_cy_SimpleService_negate(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            input        );
+    });
+
   return future;
 }
 
@@ -102,11 +149,19 @@ folly::Future<int8_t> SimpleServiceWrapper::future_tiny(
 ) {
   folly::Promise<int8_t> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_tiny(
-    this->if_object,
-    std::move(promise),
-    input
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+input    ]() mutable {
+        call_cy_SimpleService_tiny(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            input        );
+    });
+
   return future;
 }
 
@@ -115,11 +170,19 @@ folly::Future<int16_t> SimpleServiceWrapper::future_small(
 ) {
   folly::Promise<int16_t> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_small(
-    this->if_object,
-    std::move(promise),
-    input
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+input    ]() mutable {
+        call_cy_SimpleService_small(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            input        );
+    });
+
   return future;
 }
 
@@ -128,11 +191,19 @@ folly::Future<int64_t> SimpleServiceWrapper::future_big(
 ) {
   folly::Promise<int64_t> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_big(
-    this->if_object,
-    std::move(promise),
-    input
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+input    ]() mutable {
+        call_cy_SimpleService_big(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            input        );
+    });
+
   return future;
 }
 
@@ -141,31 +212,53 @@ folly::Future<double> SimpleServiceWrapper::future_two(
 ) {
   folly::Promise<double> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_two(
-    this->if_object,
-    std::move(promise),
-    input
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+input    ]() mutable {
+        call_cy_SimpleService_two(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            input        );
+    });
+
   return future;
 }
 
 folly::Future<folly::Unit> SimpleServiceWrapper::future_expected_exception() {
   folly::Promise<folly::Unit> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_expected_exception(
-    this->if_object,
-    std::move(promise)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise)    ]() mutable {
+        call_cy_SimpleService_expected_exception(
+            this->if_object,
+            ctx,
+            std::move(promise)        );
+    });
+
   return future;
 }
 
 folly::Future<int32_t> SimpleServiceWrapper::future_unexpected_exception() {
   folly::Promise<int32_t> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_unexpected_exception(
-    this->if_object,
-    std::move(promise)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise)    ]() mutable {
+        call_cy_SimpleService_unexpected_exception(
+            this->if_object,
+            ctx,
+            std::move(promise)        );
+    });
+
   return future;
 }
 
@@ -174,11 +267,19 @@ folly::Future<int32_t> SimpleServiceWrapper::future_sum_i16_list(
 ) {
   folly::Promise<int32_t> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_sum_i16_list(
-    this->if_object,
-    std::move(promise),
-    std::move(numbers)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+numbers = std::move(numbers)    ]() mutable {
+        call_cy_SimpleService_sum_i16_list(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(numbers)        );
+    });
+
   return future;
 }
 
@@ -187,11 +288,19 @@ folly::Future<int32_t> SimpleServiceWrapper::future_sum_i32_list(
 ) {
   folly::Promise<int32_t> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_sum_i32_list(
-    this->if_object,
-    std::move(promise),
-    std::move(numbers)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+numbers = std::move(numbers)    ]() mutable {
+        call_cy_SimpleService_sum_i32_list(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(numbers)        );
+    });
+
   return future;
 }
 
@@ -200,11 +309,19 @@ folly::Future<int32_t> SimpleServiceWrapper::future_sum_i64_list(
 ) {
   folly::Promise<int32_t> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_sum_i64_list(
-    this->if_object,
-    std::move(promise),
-    std::move(numbers)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+numbers = std::move(numbers)    ]() mutable {
+        call_cy_SimpleService_sum_i64_list(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(numbers)        );
+    });
+
   return future;
 }
 
@@ -213,11 +330,19 @@ folly::Future<std::unique_ptr<std::string>> SimpleServiceWrapper::future_concat_
 ) {
   folly::Promise<std::unique_ptr<std::string>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_concat_many(
-    this->if_object,
-    std::move(promise),
-    std::move(words)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+words = std::move(words)    ]() mutable {
+        call_cy_SimpleService_concat_many(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(words)        );
+    });
+
   return future;
 }
 
@@ -226,11 +351,19 @@ folly::Future<int32_t> SimpleServiceWrapper::future_count_structs(
 ) {
   folly::Promise<int32_t> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_count_structs(
-    this->if_object,
-    std::move(promise),
-    std::move(items)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+items = std::move(items)    ]() mutable {
+        call_cy_SimpleService_count_structs(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(items)        );
+    });
+
   return future;
 }
 
@@ -239,11 +372,19 @@ folly::Future<int32_t> SimpleServiceWrapper::future_sum_set(
 ) {
   folly::Promise<int32_t> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_sum_set(
-    this->if_object,
-    std::move(promise),
-    std::move(numbers)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+numbers = std::move(numbers)    ]() mutable {
+        call_cy_SimpleService_sum_set(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(numbers)        );
+    });
+
   return future;
 }
 
@@ -253,12 +394,21 @@ folly::Future<bool> SimpleServiceWrapper::future_contains_word(
 ) {
   folly::Promise<bool> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_contains_word(
-    this->if_object,
-    std::move(promise),
-    std::move(words),
-    std::move(word)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+words = std::move(words),
+word = std::move(word)    ]() mutable {
+        call_cy_SimpleService_contains_word(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(words),
+            std::move(word)        );
+    });
+
   return future;
 }
 
@@ -268,12 +418,21 @@ folly::Future<std::unique_ptr<std::string>> SimpleServiceWrapper::future_get_map
 ) {
   folly::Promise<std::unique_ptr<std::string>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_get_map_value(
-    this->if_object,
-    std::move(promise),
-    std::move(words),
-    std::move(key)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+words = std::move(words),
+key = std::move(key)    ]() mutable {
+        call_cy_SimpleService_get_map_value(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(words),
+            std::move(key)        );
+    });
+
   return future;
 }
 
@@ -282,11 +441,19 @@ folly::Future<int16_t> SimpleServiceWrapper::future_map_length(
 ) {
   folly::Promise<int16_t> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_map_length(
-    this->if_object,
-    std::move(promise),
-    std::move(items)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+items = std::move(items)    ]() mutable {
+        call_cy_SimpleService_map_length(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(items)        );
+    });
+
   return future;
 }
 
@@ -295,11 +462,19 @@ folly::Future<int16_t> SimpleServiceWrapper::future_sum_map_values(
 ) {
   folly::Promise<int16_t> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_sum_map_values(
-    this->if_object,
-    std::move(promise),
-    std::move(items)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+items = std::move(items)    ]() mutable {
+        call_cy_SimpleService_sum_map_values(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(items)        );
+    });
+
   return future;
 }
 
@@ -308,11 +483,19 @@ folly::Future<int32_t> SimpleServiceWrapper::future_complex_sum_i32(
 ) {
   folly::Promise<int32_t> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_complex_sum_i32(
-    this->if_object,
-    std::move(promise),
-    std::move(counter)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+counter = std::move(counter)    ]() mutable {
+        call_cy_SimpleService_complex_sum_i32(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(counter)        );
+    });
+
   return future;
 }
 
@@ -321,21 +504,36 @@ folly::Future<std::unique_ptr<std::string>> SimpleServiceWrapper::future_repeat_
 ) {
   folly::Promise<std::unique_ptr<std::string>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_repeat_name(
-    this->if_object,
-    std::move(promise),
-    std::move(counter)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+counter = std::move(counter)    ]() mutable {
+        call_cy_SimpleService_repeat_name(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(counter)        );
+    });
+
   return future;
 }
 
 folly::Future<std::unique_ptr<py3::simple::SimpleStruct>> SimpleServiceWrapper::future_get_struct() {
   folly::Promise<std::unique_ptr<py3::simple::SimpleStruct>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_get_struct(
-    this->if_object,
-    std::move(promise)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise)    ]() mutable {
+        call_cy_SimpleService_get_struct(
+            this->if_object,
+            ctx,
+            std::move(promise)        );
+    });
+
   return future;
 }
 
@@ -344,11 +542,19 @@ folly::Future<std::unique_ptr<std::vector<int32_t>>> SimpleServiceWrapper::futur
 ) {
   folly::Promise<std::unique_ptr<std::vector<int32_t>>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_fib(
-    this->if_object,
-    std::move(promise),
-    n
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+n    ]() mutable {
+        call_cy_SimpleService_fib(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            n        );
+    });
+
   return future;
 }
 
@@ -357,11 +563,19 @@ folly::Future<std::unique_ptr<std::set<std::string>>> SimpleServiceWrapper::futu
 ) {
   folly::Promise<std::unique_ptr<std::set<std::string>>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_unique_words(
-    this->if_object,
-    std::move(promise),
-    std::move(words)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+words = std::move(words)    ]() mutable {
+        call_cy_SimpleService_unique_words(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(words)        );
+    });
+
   return future;
 }
 
@@ -370,11 +584,19 @@ folly::Future<std::unique_ptr<std::map<std::string,int16_t>>> SimpleServiceWrapp
 ) {
   folly::Promise<std::unique_ptr<std::map<std::string,int16_t>>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_words_count(
-    this->if_object,
-    std::move(promise),
-    std::move(words)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+words = std::move(words)    ]() mutable {
+        call_cy_SimpleService_words_count(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(words)        );
+    });
+
   return future;
 }
 
@@ -383,11 +605,19 @@ folly::Future<py3::simple::AnEnum> SimpleServiceWrapper::future_set_enum(
 ) {
   folly::Promise<py3::simple::AnEnum> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_set_enum(
-    this->if_object,
-    std::move(promise),
-    in_enum
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+in_enum    ]() mutable {
+        call_cy_SimpleService_set_enum(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            in_enum        );
+    });
+
   return future;
 }
 
@@ -397,12 +627,21 @@ folly::Future<std::unique_ptr<std::vector<std::vector<int32_t>>>> SimpleServiceW
 ) {
   folly::Promise<std::unique_ptr<std::vector<std::vector<int32_t>>>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_list_of_lists(
-    this->if_object,
-    std::move(promise),
-    num_lists,
-    num_items
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+num_lists,
+num_items    ]() mutable {
+        call_cy_SimpleService_list_of_lists(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            num_lists,
+            num_items        );
+    });
+
   return future;
 }
 
@@ -411,11 +650,19 @@ folly::Future<std::unique_ptr<std::map<std::string,std::map<std::string,int32_t>
 ) {
   folly::Promise<std::unique_ptr<std::map<std::string,std::map<std::string,int32_t>>>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_word_character_frequency(
-    this->if_object,
-    std::move(promise),
-    std::move(sentence)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+sentence = std::move(sentence)    ]() mutable {
+        call_cy_SimpleService_word_character_frequency(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(sentence)        );
+    });
+
   return future;
 }
 
@@ -424,11 +671,19 @@ folly::Future<std::unique_ptr<std::vector<std::set<std::string>>>> SimpleService
 ) {
   folly::Promise<std::unique_ptr<std::vector<std::set<std::string>>>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_list_of_sets(
-    this->if_object,
-    std::move(promise),
-    std::move(some_words)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+some_words = std::move(some_words)    ]() mutable {
+        call_cy_SimpleService_list_of_sets(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(some_words)        );
+    });
+
   return future;
 }
 
@@ -437,11 +692,19 @@ folly::Future<int32_t> SimpleServiceWrapper::future_nested_map_argument(
 ) {
   folly::Promise<int32_t> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_nested_map_argument(
-    this->if_object,
-    std::move(promise),
-    std::move(struct_map)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+struct_map = std::move(struct_map)    ]() mutable {
+        call_cy_SimpleService_nested_map_argument(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(struct_map)        );
+    });
+
   return future;
 }
 
@@ -450,11 +713,19 @@ folly::Future<std::unique_ptr<std::string>> SimpleServiceWrapper::future_make_se
 ) {
   folly::Promise<std::unique_ptr<std::string>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_make_sentence(
-    this->if_object,
-    std::move(promise),
-    std::move(word_chars)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+word_chars = std::move(word_chars)    ]() mutable {
+        call_cy_SimpleService_make_sentence(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(word_chars)        );
+    });
+
   return future;
 }
 
@@ -463,11 +734,19 @@ folly::Future<std::unique_ptr<std::set<int32_t>>> SimpleServiceWrapper::future_g
 ) {
   folly::Promise<std::unique_ptr<std::set<int32_t>>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_get_union(
-    this->if_object,
-    std::move(promise),
-    std::move(sets)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+sets = std::move(sets)    ]() mutable {
+        call_cy_SimpleService_get_union(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(sets)        );
+    });
+
   return future;
 }
 
@@ -476,11 +755,19 @@ folly::Future<std::unique_ptr<std::set<std::string>>> SimpleServiceWrapper::futu
 ) {
   folly::Promise<std::unique_ptr<std::set<std::string>>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_get_keys(
-    this->if_object,
-    std::move(promise),
-    std::move(string_map)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+string_map = std::move(string_map)    ]() mutable {
+        call_cy_SimpleService_get_keys(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(string_map)        );
+    });
+
   return future;
 }
 
@@ -489,11 +776,19 @@ folly::Future<double> SimpleServiceWrapper::future_lookup_double(
 ) {
   folly::Promise<double> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_lookup_double(
-    this->if_object,
-    std::move(promise),
-    key
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+key    ]() mutable {
+        call_cy_SimpleService_lookup_double(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            key        );
+    });
+
   return future;
 }
 
@@ -502,11 +797,19 @@ folly::Future<std::unique_ptr<std::string>> SimpleServiceWrapper::future_retriev
 ) {
   folly::Promise<std::unique_ptr<std::string>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_retrieve_binary(
-    this->if_object,
-    std::move(promise),
-    std::move(something)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+something = std::move(something)    ]() mutable {
+        call_cy_SimpleService_retrieve_binary(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(something)        );
+    });
+
   return future;
 }
 
@@ -515,11 +818,19 @@ folly::Future<std::unique_ptr<std::set<std::string>>> SimpleServiceWrapper::futu
 ) {
   folly::Promise<std::unique_ptr<std::set<std::string>>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_contain_binary(
-    this->if_object,
-    std::move(promise),
-    std::move(binaries)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+binaries = std::move(binaries)    ]() mutable {
+        call_cy_SimpleService_contain_binary(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(binaries)        );
+    });
+
   return future;
 }
 
@@ -528,16 +839,80 @@ folly::Future<std::unique_ptr<std::vector<py3::simple::AnEnum>>> SimpleServiceWr
 ) {
   folly::Promise<std::unique_ptr<std::vector<py3::simple::AnEnum>>> promise;
   auto future = promise.getFuture();
-  call_cy_SimpleService_contain_enum(
-    this->if_object,
-    std::move(promise),
-    std::move(the_enum)
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+the_enum = std::move(the_enum)    ]() mutable {
+        call_cy_SimpleService_contain_enum(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(the_enum)        );
+    });
+
   return future;
 }
 
-std::shared_ptr<apache::thrift::ServerInterface> SimpleServiceInterface(PyObject *if_object) {
-  return std::make_shared<SimpleServiceWrapper>(if_object);
+std::shared_ptr<apache::thrift::ServerInterface> SimpleServiceInterface(PyObject *if_object, folly::Executor *exc) {
+  return std::make_shared<SimpleServiceWrapper>(if_object, exc);
+}
+
+
+DerivedServiceWrapper::DerivedServiceWrapper(PyObject *obj, folly::Executor* exc)
+  : py3::simple::SimpleServiceWrapper(obj, exc)
+  {
+    import_module__services();
+  }
+
+folly::Future<int32_t> DerivedServiceWrapper::future_get_six() {
+  folly::Promise<int32_t> promise;
+  auto future = promise.getFuture();
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise)    ]() mutable {
+        call_cy_DerivedService_get_six(
+            this->if_object,
+            ctx,
+            std::move(promise)        );
+    });
+
+  return future;
+}
+
+std::shared_ptr<apache::thrift::ServerInterface> DerivedServiceInterface(PyObject *if_object, folly::Executor *exc) {
+  return std::make_shared<DerivedServiceWrapper>(if_object, exc);
+}
+
+
+RederivedServiceWrapper::RederivedServiceWrapper(PyObject *obj, folly::Executor* exc)
+  : py3::simple::DerivedServiceWrapper(obj, exc)
+  {
+    import_module__services();
+  }
+
+folly::Future<int32_t> RederivedServiceWrapper::future_get_seven() {
+  folly::Promise<int32_t> promise;
+  auto future = promise.getFuture();
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise)    ]() mutable {
+        call_cy_RederivedService_get_seven(
+            this->if_object,
+            ctx,
+            std::move(promise)        );
+    });
+
+  return future;
+}
+
+std::shared_ptr<apache::thrift::ServerInterface> RederivedServiceInterface(PyObject *if_object, folly::Executor *exc) {
+  return std::make_shared<RederivedServiceWrapper>(if_object, exc);
 }
 } // namespace py3
 } // namespace simple

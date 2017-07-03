@@ -46,6 +46,12 @@ file.
 }}{{#value:double?}}{{value:doubleValue}}{{/value:double?}}{{!
 }}{{/constant:value}}
 {{/type:double?}}
+{{#type:float?}}
+{{constant:name}} = {{#constant:value}}{{!
+}}{{#value:integer?}}{{value:integerValue}}.0{{/value:integer?}}{{!
+}}{{#value:double?}}{{value:doubleValue}}{{/value:double?}}{{!
+}}{{/constant:value}}
+{{/type:float?}}
 {{#type:string?}}
 {{constant:name}} = c{{constant:name}}().decode('UTF-8')
 {{/type:string?}}
@@ -54,27 +60,27 @@ file.
 {{/type:binary?}}
 {{#type:struct}}
 {{constant:name}} = {{#type:externalProgram?}}{{!
-    }}{{> ModulePath}}.{{/type:externalProgram?}}{{type:name}}.create(
-    make_shared[{{#type:externalProgram?}}{{> ModulePath}}.{{!
+    }}{{> common/ModulePath}}.{{/type:externalProgram?}}{{type:name}}.create(
+    make_shared[{{#type:externalProgram?}}{{> common/ModulePath}}.{{!
       }}{{/type:externalProgram?}}c{{type:name}}](c{{constant:name}}()))
 {{/type:struct}}
 {{#type:list?}}
 {{constant:name}} = {{type:flat_name}}.create(make_shared[vector[{{!
-    }}{{#type:listElemType}}{{> ContainerCythonFieldTypeConditionally}}{{!
+    }}{{#type:listElemType}}{{> types/CythonCppType}}{{!
     }}{{/type:listElemType}}]](c{{constant:name}}()))
 {{/type:list?}}
 {{#type:set?}}
-{{constant:name}} = {{type:flat_name}}.create(make_shared[cset[{{!
-    }}{{#type:setElemType}}{{> ContainerCythonFieldTypeConditionally}}{{!
+{{constant:name}} = {{type:flat_name}}.create(make_shared[c{{#type:unordered?}}u{{/type:unordered?}}set[{{!
+    }}{{#type:setElemType}}{{> types/CythonCppType}}{{!
     }}{{/type:setElemType}}]](c{{constant:name}}()))
 {{/type:set?}}
 {{#type:map?}}
 {{constant:name}} = {{type:flat_name}}.create({{!
-    }}make_shared[cmap[{{> CythonMapKeyValueConditionally}}{{!
+    }}make_shared[c{{#type:unordered?}}u{{/type:unordered?}}map[{{> CythonMapKeyValue}}{{!
     }}]](c{{constant:name}}()))
 {{/type:map?}}
 {{#type:enum}}
-{{constant:name}} = {{#type:externalProgram?}}{{> ModulePath}}.{{!
+{{constant:name}} = {{#type:externalProgram?}}{{> common/ModulePath}}.{{!
     }}{{/type:externalProgram?}}{{enum:name}}(<int> (c{{constant:name}}()))
 {{/type:enum}}
 {{/constant:type}}

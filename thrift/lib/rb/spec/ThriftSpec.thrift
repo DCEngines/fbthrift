@@ -43,8 +43,8 @@ struct Hello {
 }
 
 enum SomeEnum {
-  ONE
-  TWO
+  ONE = 0,
+  TWO = 1,
 }
 
 struct StructWithSomeEnum {
@@ -129,4 +129,3 @@ struct Struct_with_union {
 
 struct StructWithEnumMap {
   1: map<SomeEnum, list<SomeEnum>> my_map;
-}

@@ -336,15 +336,15 @@ void ThriftServer::setup() {
           task->expired();
         }
     });
-    threadManager_->setCodelCallback([&](std::shared_ptr<Runnable> r) {
-        auto observer = getObserver();
-        if (observer) {
-          if (getEnableCodel()) {
-            observer->queueTimeout();
-          } else {
-            observer->shadowQueueTimeout();
-          }
+    threadManager_->setCodelCallback([&](std::shared_ptr<Runnable>) {
+      auto observer = getObserver();
+      if (observer) {
+        if (getEnableCodel()) {
+          observer->queueTimeout();
+        } else {
+          observer->shadowQueueTimeout();
         }
+      }
     });
 
     if (!serverChannel_) {
@@ -614,7 +614,8 @@ bool ThriftServer::isOverloaded(const THeader* header) {
   }
 
   if (maxRequests_ > 0) {
-    return activeRequests_ + getPendingCount() >= maxRequests_;
+    return static_cast<uint32_t>(activeRequests_ + getPendingCount()) >=
+        maxRequests_;
   }
 
   return false;

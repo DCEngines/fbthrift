@@ -1,4 +1,6 @@
 /*
+ * Copyright 2017-present Facebook, Inc.
+ *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
@@ -16,7 +18,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 /**
  * thrift - a lightweight cross-language rpc/serialization tool
  *
@@ -32,8 +33,9 @@
 #endif
 #include <ctime>
 
-#include <thrift/compiler/platform.h>
 #include <thrift/compiler/generate/t_generator.h>
+#include <thrift/compiler/mutator.h>
+#include <thrift/compiler/platform.h>
 #include <thrift/compiler/validator.h>
 
 /**
@@ -46,7 +48,6 @@ bool gen_javabean = false;
 bool gen_rb = false;
 bool gen_py = false;
 bool gen_py_newstyle = false;
-bool gen_xsd = false;
 bool gen_php = false;
 bool gen_phpi = false;
 bool gen_phps = true;
@@ -68,7 +69,7 @@ bool record_genfiles = false;
 /**
  * Diplays the usage message and then exits with an error code.
  */
-static void usage() {
+[[noreturn]] static void usage() {
   fprintf(stderr, "Usage: thrift [options] file\n");
   fprintf(stderr, "Options:\n");
   fprintf(stderr, "  -o dir      Set the output directory for gen-* packages\n");
@@ -113,18 +114,27 @@ static void usage() {
 /**
  * Generate code
  */
-static bool generate(t_program* program,
-                     const vector<string>& generator_strings,
-                     char** argv) {
+static bool generate(
+    t_program* program,
+    const vector<string>& generator_strings,
+    std::set<std::string>& already_generated,
+    char** argv) {
   // Oooohh, recursive code generation, hot!!
   if (gen_recurse) {
     const vector<t_program*>& includes = program->get_includes();
-    for (size_t i = 0; i < includes.size(); ++i) {
-      // Propogate output path from parent to child programs
-      includes[i]->set_out_path(program->get_out_path(), program->is_out_path_absolute());
+    for (const auto& include : includes) {
+      if (already_generated.count(include->get_path())) {
+        continue;
+      }
 
-      if (!generate(includes[i], generator_strings, argv)) {
+      // Propogate output path from parent to child programs
+      include->set_out_path(
+          program->get_out_path(), program->is_out_path_absolute());
+
+      if (!generate(include, generator_strings, already_generated, argv)) {
         return false;
+      } else {
+        already_generated.insert(include->get_path());
       }
     }
   }
@@ -229,8 +239,9 @@ int main(int argc, char** argv) {
   // Hacky parameter handling... I didn't feel like using a library sorry!
   for (i = 1; i < argc-1; i++) {
     char* arg;
+    char* saveptr;
+    arg = strtok_r(argv[i], " ", &saveptr);
 
-    arg = strtok(argv[i], " ");
     while (arg != nullptr) {
       // Treat double dashes as single dashes
       if (arg[0] == '-' && arg[1] == '-') {
@@ -303,8 +314,6 @@ int main(int argc, char** argv) {
         gen_py_newstyle = true;
       } else if (strcmp(arg, "-rb") == 0) {
         gen_rb = true;
-      } else if (strcmp(arg, "-xsd") == 0) {
-        gen_xsd = true;
       } else if (strcmp(arg, "-perl") == 0) {
         gen_perl = true;
       } else if (strcmp(arg, "-erl") == 0) {
@@ -383,7 +392,7 @@ int main(int argc, char** argv) {
       }
 
       // Tokenize more
-      arg = strtok(nullptr, " ");
+      arg = strtok_r(nullptr, " ", &saveptr);
     }
   }
 
@@ -459,10 +468,6 @@ int main(int argc, char** argv) {
     pwarning(1, "-hs is deprecated.  Use --gen hs");
     generator_strings.push_back("hs");
   }
-  if (gen_xsd) {
-    pwarning(1, "-xsd is deprecated.  Use --gen xsd");
-    generator_strings.push_back("xsd");
-  }
 
   // You gotta generate something!
   if (generator_strings.empty()) {
@@ -512,7 +517,12 @@ int main(int argc, char** argv) {
   g_type_float  = new t_base_type("float",  t_base_type::TYPE_FLOAT);
 
   // Parse it!
-  parse(program, nullptr);
+  g_scope_cache = program->scope();
+  std::set<std::string> already_parsed_paths;
+  parse(program, already_parsed_paths);
+
+  // Mutate it!
+  apache::thrift::compiler::mutator::mutate(program);
 
   // Validate it!
   auto errors = apache::thrift::compiler::validator::validate(program);
@@ -533,7 +543,8 @@ int main(int argc, char** argv) {
   // Generate it!
   bool success;
   try {
-    success = generate(program, generator_strings, argv);
+    std::set<std::string> already_generated{program->get_path()};
+    success = generate(program, generator_strings, already_generated, argv);
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
     return 1;

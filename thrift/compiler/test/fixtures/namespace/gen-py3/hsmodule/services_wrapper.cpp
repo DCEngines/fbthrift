@@ -11,8 +11,8 @@
 
 namespace cpp2 {
 
-HsTestServiceWrapper::HsTestServiceWrapper(PyObject *obj)
-  : if_object(obj)
+HsTestServiceWrapper::HsTestServiceWrapper(PyObject *obj, folly::Executor* exc)
+  : if_object(obj), executor(exc)
   {
     import_hsmodule__services();
     Py_XINCREF(this->if_object);
@@ -27,15 +27,23 @@ folly::Future<int64_t> HsTestServiceWrapper::future_init(
 ) {
   folly::Promise<int64_t> promise;
   auto future = promise.getFuture();
-  call_cy_HsTestService_init(
-    this->if_object,
-    std::move(promise),
-    int1
-  );
+  auto ctx = getConnectionContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     promise = std::move(promise),
+int1    ]() mutable {
+        call_cy_HsTestService_init(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            int1        );
+    });
+
   return future;
 }
 
-std::shared_ptr<apache::thrift::ServerInterface> HsTestServiceInterface(PyObject *if_object) {
-  return std::make_shared<HsTestServiceWrapper>(if_object);
+std::shared_ptr<apache::thrift::ServerInterface> HsTestServiceInterface(PyObject *if_object, folly::Executor *exc) {
+  return std::make_shared<HsTestServiceWrapper>(if_object, exc);
 }
 } // namespace cpp2

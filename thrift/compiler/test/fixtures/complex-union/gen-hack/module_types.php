@@ -9,12 +9,17 @@
 enum ComplexUnionEnum: int {
   _EMPTY_ = 0;
   intValue = 1;
-  stringValue = 2;
-  intListValue = 3;
-  stringListValue = 4;
-  stringRef = 5;
+  stringValue = 5;
+  intListValue = 2;
+  stringListValue = 3;
+  typedefValue = 9;
+  stringRef = 14;
 }
 
+/**
+ * Original thrift struct:-
+ * ComplexUnion
+ */
 class ComplexUnion implements \IThriftStruct, \IThriftUnion<ComplexUnionEnum> {
   public static array $_TSPEC = array(
     1 => array(
@@ -22,12 +27,12 @@ class ComplexUnion implements \IThriftStruct, \IThriftUnion<ComplexUnionEnum> {
       'union' => true,
       'type' => \TType::I64,
       ),
-    2 => array(
+    5 => array(
       'var' => 'stringValue',
       'union' => true,
       'type' => \TType::STRING,
       ),
-    3 => array(
+    2 => array(
       'var' => 'intListValue',
       'union' => true,
       'type' => \TType::LST,
@@ -37,7 +42,7 @@ class ComplexUnion implements \IThriftStruct, \IThriftUnion<ComplexUnionEnum> {
         ),
         'format' => 'collection',
       ),
-    4 => array(
+    3 => array(
       'var' => 'stringListValue',
       'union' => true,
       'type' => \TType::LST,
@@ -47,7 +52,21 @@ class ComplexUnion implements \IThriftStruct, \IThriftUnion<ComplexUnionEnum> {
         ),
         'format' => 'collection',
       ),
-    5 => array(
+    9 => array(
+      'var' => 'typedefValue',
+      'union' => true,
+      'type' => \TType::MAP,
+      'ktype' => \TType::I16,
+      'vtype' => \TType::STRING,
+      'key' => array(
+        'type' => \TType::I16,
+      ),
+      'val' => array(
+        'type' => \TType::STRING,
+        ),
+        'format' => 'collection',
+      ),
+    14 => array(
       'var' => 'stringRef',
       'union' => true,
       'type' => \TType::STRING,
@@ -55,20 +74,46 @@ class ComplexUnion implements \IThriftStruct, \IThriftUnion<ComplexUnionEnum> {
     );
   public static Map<string, int> $_TFIELDMAP = Map {
     'intValue' => 1,
-    'stringValue' => 2,
-    'intListValue' => 3,
-    'stringListValue' => 4,
-    'stringRef' => 5,
+    'stringValue' => 5,
+    'intListValue' => 2,
+    'stringListValue' => 3,
+    'typedefValue' => 9,
+    'stringRef' => 14,
   };
-  const int STRUCTURAL_ID = 6550502502248501709;
+  const int STRUCTURAL_ID = 1260275021738383280;
+  /**
+   * Original thrift field:-
+   * 1: i64 intValue
+   */
   public ?int $intValue;
+  /**
+   * Original thrift field:-
+   * 5: string stringValue
+   */
   public ?string $stringValue;
+  /**
+   * Original thrift field:-
+   * 2: list<i64> intListValue
+   */
   public ?Vector<int> $intListValue;
+  /**
+   * Original thrift field:-
+   * 3: list<string> stringListValue
+   */
   public ?Vector<string> $stringListValue;
+  /**
+   * Original thrift field:-
+   * 9: map<i16, string> typedefValue
+   */
+  public ?Map<int, string> $typedefValue;
+  /**
+   * Original thrift field:-
+   * 14: string stringRef
+   */
   public ?string $stringRef;
   protected ComplexUnionEnum $_type = ComplexUnionEnum::_EMPTY_;
 
-  public function __construct(?int $intValue = null, ?string $stringValue = null, ?Vector<int> $intListValue = null, ?Vector<string> $stringListValue = null, ?string $stringRef = null  ) {
+  public function __construct(?int $intValue = null, ?string $stringValue = null, ?Vector<int> $intListValue = null, ?Vector<string> $stringListValue = null, ?Map<int, string> $typedefValue = null, ?string $stringRef = null  ) {
     $this->_type = ComplexUnionEnum::_EMPTY_;
     if ($intValue !== null) {
       $this->intValue = $intValue;
@@ -85,6 +130,10 @@ class ComplexUnion implements \IThriftStruct, \IThriftUnion<ComplexUnionEnum> {
     if ($stringListValue !== null) {
       $this->stringListValue = $stringListValue;
       $this->_type = ComplexUnionEnum::stringListValue;
+    }
+    if ($typedefValue !== null) {
+      $this->typedefValue = $typedefValue;
+      $this->_type = ComplexUnionEnum::typedefValue;
     }
     if ($stringRef !== null) {
       $this->stringRef = $stringRef;
@@ -160,6 +209,21 @@ class ComplexUnion implements \IThriftStruct, \IThriftUnion<ComplexUnionEnum> {
     return nullthrows($this->stringListValue);
   }
 
+  public function set_typedefValue(Map<int, string> $typedefValue): this {
+    $this->_type = ComplexUnionEnum::typedefValue;
+    $this->typedefValue = $typedefValue;
+    return $this;
+  }
+
+  public function get_typedefValue(): Map<int, string> {
+    invariant(
+      $this->_type === ComplexUnionEnum::typedefValue,
+      'get_typedefValue called on an instance of ComplexUnion whose current type is %s',
+      $this->_type,
+    );
+    return nullthrows($this->typedefValue);
+  }
+
   public function set_stringRef(string $stringRef): this {
     $this->_type = ComplexUnionEnum::stringRef;
     $this->stringRef = $stringRef;
@@ -204,7 +268,7 @@ class ComplexUnion implements \IThriftStruct, \IThriftUnion<ComplexUnionEnum> {
             $xfer += $input->skip($ftype);
           }
           break;
-        case 2:
+        case 5:
           if ($ftype == \TType::STRING) {
             $xfer += $input->readString($this->stringValue);
             $this->_type = ComplexUnionEnum::stringValue;
@@ -212,7 +276,7 @@ class ComplexUnion implements \IThriftStruct, \IThriftUnion<ComplexUnionEnum> {
             $xfer += $input->skip($ftype);
           }
           break;
-        case 3:
+        case 2:
           if ($ftype == \TType::LST) {
             $_size1 = 0;
             $_val0 = Vector {};
@@ -236,7 +300,7 @@ class ComplexUnion implements \IThriftStruct, \IThriftUnion<ComplexUnionEnum> {
             $xfer += $input->skip($ftype);
           }
           break;
-        case 4:
+        case 3:
           if ($ftype == \TType::LST) {
             $_size8 = 0;
             $_val7 = Vector {};
@@ -260,7 +324,34 @@ class ComplexUnion implements \IThriftStruct, \IThriftUnion<ComplexUnionEnum> {
             $xfer += $input->skip($ftype);
           }
           break;
-        case 5:
+        case 9:
+          if ($ftype == \TType::MAP) {
+            $_size15 = 0;
+            $_val14 = Map {};
+            $_ktype16 = 0;
+            $_vtype17 = 0;
+            $xfer += $input->readMapBegin($_ktype16, $_vtype17, $_size15);
+            for ($_i19 = 0; $_size15 === null || $_i19 < $_size15; ++$_i19)
+            {
+              if ($_size15 === null && !$input->readMapHasNext()) {
+                break;
+              }
+              $key20 = null;
+              $xfer += $input->readI16($key20);
+              $val21 = null;
+              $xfer += $input->readString($val21);
+              if ($key20 !== null && $val21 !== null) {
+                $_val14[$key20] = $val21;
+              }
+            }
+            $xfer += $input->readMapEnd();
+            $this->typedefValue = $_val14;
+            $this->_type = ComplexUnionEnum::typedefValue;
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 14:
           if ($ftype == \TType::STRING) {
             $xfer += $input->readString($this->stringRef);
             $this->_type = ComplexUnionEnum::stringRef;
@@ -287,50 +378,227 @@ class ComplexUnion implements \IThriftStruct, \IThriftUnion<ComplexUnionEnum> {
       $xfer += $output->writeI64($_val0);
       $xfer += $output->writeFieldEnd();
     }
-    if ($this->stringValue !== null) {
-      $_val1 = $this->stringValue;
-      $xfer += $output->writeFieldBegin('stringValue', \TType::STRING, 2);
-      $xfer += $output->writeString($_val1);
-      $xfer += $output->writeFieldEnd();
-    }
     if ($this->intListValue !== null) {
-      $_val2 = $this->intListValue;
-      if (!($_val2 instanceof \Indexish) && !(($_val2 instanceof \Iterator || $_val2 instanceof \IteratorAggregate) && $_val2 instanceof \Countable)) {
+      $_val1 = $this->intListValue;
+      if (!($_val1 instanceof \Indexish) && !(($_val1 instanceof \Iterator || $_val1 instanceof \IteratorAggregate) && $_val1 instanceof \Countable)) {
         throw new \TProtocolException('Bad type in structure.', \TProtocolException::INVALID_DATA);
       }
-      $xfer += $output->writeFieldBegin('intListValue', \TType::LST, 3);
-      $output->writeListBegin(\TType::I64, count($_val2));
-      if ($_val2 !== null)
+      $xfer += $output->writeFieldBegin('intListValue', \TType::LST, 2);
+      $output->writeListBegin(\TType::I64, count($_val1));
+      if ($_val1 !== null)
       {
-        foreach ($_val2 as $iter3)
+        foreach ($_val1 as $iter2)
         {
-          $xfer += $output->writeI64($iter3);
+          $xfer += $output->writeI64($iter2);
         }
       }
       $output->writeListEnd();
       $xfer += $output->writeFieldEnd();
     }
     if ($this->stringListValue !== null) {
-      $_val4 = $this->stringListValue;
-      if (!($_val4 instanceof \Indexish) && !(($_val4 instanceof \Iterator || $_val4 instanceof \IteratorAggregate) && $_val4 instanceof \Countable)) {
+      $_val3 = $this->stringListValue;
+      if (!($_val3 instanceof \Indexish) && !(($_val3 instanceof \Iterator || $_val3 instanceof \IteratorAggregate) && $_val3 instanceof \Countable)) {
         throw new \TProtocolException('Bad type in structure.', \TProtocolException::INVALID_DATA);
       }
-      $xfer += $output->writeFieldBegin('stringListValue', \TType::LST, 4);
-      $output->writeListBegin(\TType::STRING, count($_val4));
-      if ($_val4 !== null)
+      $xfer += $output->writeFieldBegin('stringListValue', \TType::LST, 3);
+      $output->writeListBegin(\TType::STRING, count($_val3));
+      if ($_val3 !== null)
       {
-        foreach ($_val4 as $iter5)
+        foreach ($_val3 as $iter4)
         {
-          $xfer += $output->writeString($iter5);
+          $xfer += $output->writeString($iter4);
         }
       }
       $output->writeListEnd();
       $xfer += $output->writeFieldEnd();
     }
+    if ($this->stringValue !== null) {
+      $_val5 = $this->stringValue;
+      $xfer += $output->writeFieldBegin('stringValue', \TType::STRING, 5);
+      $xfer += $output->writeString($_val5);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->typedefValue !== null) {
+      $_val6 = $this->typedefValue;
+      if (!($_val6 instanceof \Indexish) && !(($_val6 instanceof \Iterator || $_val6 instanceof \IteratorAggregate) && $_val6 instanceof \Countable)) {
+        throw new \TProtocolException('Bad type in structure.', \TProtocolException::INVALID_DATA);
+      }
+      $xfer += $output->writeFieldBegin('typedefValue', \TType::MAP, 9);
+      $output->writeMapBegin(\TType::I16, \TType::STRING, count($_val6));
+      if ($_val6 !== null)
+      {
+        foreach ($_val6 as $kiter7 => $viter8)
+        {
+          $xfer += $output->writeI16($kiter7);
+          $xfer += $output->writeString($viter8);
+        }
+      }
+      $output->writeMapEnd();
+      $xfer += $output->writeFieldEnd();
+    }
     if ($this->stringRef !== null) {
-      $_val6 = $this->stringRef;
-      $xfer += $output->writeFieldBegin('stringRef', \TType::STRING, 5);
-      $xfer += $output->writeString($_val6);
+      $_val9 = $this->stringRef;
+      $xfer += $output->writeFieldBegin('stringRef', \TType::STRING, 14);
+      $xfer += $output->writeString($_val9);
+      $xfer += $output->writeFieldEnd();
+    }
+    $xfer += $output->writeFieldStop();
+    $xfer += $output->writeStructEnd();
+    return $xfer;
+  }
+
+}
+
+enum FinalComplexUnionEnum: int {
+  _EMPTY_ = 0;
+  thingOne = 1;
+  thingTwo = 2;
+}
+
+/**
+ * Original thrift struct:-
+ * FinalComplexUnion
+ */
+class FinalComplexUnion implements \IThriftStruct, \IThriftUnion<FinalComplexUnionEnum> {
+  public static array $_TSPEC = array(
+    1 => array(
+      'var' => 'thingOne',
+      'union' => true,
+      'type' => \TType::STRING,
+      ),
+    2 => array(
+      'var' => 'thingTwo',
+      'union' => true,
+      'type' => \TType::STRING,
+      ),
+    );
+  public static Map<string, int> $_TFIELDMAP = Map {
+    'thingOne' => 1,
+    'thingTwo' => 2,
+  };
+  const int STRUCTURAL_ID = 8657642278595798833;
+  /**
+   * Original thrift field:-
+   * 1: string thingOne
+   */
+  public ?string $thingOne;
+  /**
+   * Original thrift field:-
+   * 2: string thingTwo
+   */
+  public ?string $thingTwo;
+  protected FinalComplexUnionEnum $_type = FinalComplexUnionEnum::_EMPTY_;
+
+  public function __construct(?string $thingOne = null, ?string $thingTwo = null  ) {
+    $this->_type = FinalComplexUnionEnum::_EMPTY_;
+    if ($thingOne !== null) {
+      $this->thingOne = $thingOne;
+      $this->_type = FinalComplexUnionEnum::thingOne;
+    }
+    if ($thingTwo !== null) {
+      $this->thingTwo = $thingTwo;
+      $this->_type = FinalComplexUnionEnum::thingTwo;
+    }
+  }
+
+  public function getName(): string {
+    return 'FinalComplexUnion';
+  }
+
+  public function getType(): FinalComplexUnionEnum {
+    return $this->_type;
+  }
+
+  public function set_thingOne(string $thingOne): this {
+    $this->_type = FinalComplexUnionEnum::thingOne;
+    $this->thingOne = $thingOne;
+    return $this;
+  }
+
+  public function get_thingOne(): string {
+    invariant(
+      $this->_type === FinalComplexUnionEnum::thingOne,
+      'get_thingOne called on an instance of FinalComplexUnion whose current type is %s',
+      $this->_type,
+    );
+    return nullthrows($this->thingOne);
+  }
+
+  public function set_thingTwo(string $thingTwo): this {
+    $this->_type = FinalComplexUnionEnum::thingTwo;
+    $this->thingTwo = $thingTwo;
+    return $this;
+  }
+
+  public function get_thingTwo(): string {
+    invariant(
+      $this->_type === FinalComplexUnionEnum::thingTwo,
+      'get_thingTwo called on an instance of FinalComplexUnion whose current type is %s',
+      $this->_type,
+    );
+    return nullthrows($this->thingTwo);
+  }
+
+  public function read(\TProtocol $input): int {
+    $xfer = 0;
+    $fname = '';
+    $ftype = 0;
+    $fid = 0;
+    $this->_type = FinalComplexUnionEnum::_EMPTY_;
+    $xfer += $input->readStructBegin($fname);
+    while (true)
+    {
+      $xfer += $input->readFieldBegin($fname, $ftype, $fid);
+      if ($ftype == \TType::STOP) {
+        break;
+      }
+      if (!$fid && $fname !== null) {
+        $fid = (int) self::$_TFIELDMAP->get($fname);
+        if ($fid !== 0) {
+          $ftype = self::$_TSPEC[$fid]['type'];
+        }
+      }
+      switch ($fid)
+      {
+        case 1:
+          if ($ftype == \TType::STRING) {
+            $xfer += $input->readString($this->thingOne);
+            $this->_type = FinalComplexUnionEnum::thingOne;
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
+          if ($ftype == \TType::STRING) {
+            $xfer += $input->readString($this->thingTwo);
+            $this->_type = FinalComplexUnionEnum::thingTwo;
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        default:
+          $xfer += $input->skip($ftype);
+          break;
+      }
+      $xfer += $input->readFieldEnd();
+    }
+    $xfer += $input->readStructEnd();
+    return $xfer;
+  }
+
+  public function write(\TProtocol $output): int {
+    $xfer = 0;
+    $xfer += $output->writeStructBegin('FinalComplexUnion');
+    if ($this->thingOne !== null) {
+      $_val0 = $this->thingOne;
+      $xfer += $output->writeFieldBegin('thingOne', \TType::STRING, 1);
+      $xfer += $output->writeString($_val0);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->thingTwo !== null) {
+      $_val1 = $this->thingTwo;
+      $xfer += $output->writeFieldBegin('thingTwo', \TType::STRING, 2);
+      $xfer += $output->writeString($_val1);
       $xfer += $output->writeFieldEnd();
     }
     $xfer += $output->writeFieldStop();

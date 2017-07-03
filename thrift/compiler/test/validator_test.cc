@@ -39,7 +39,7 @@ TEST_F(ValidatorTest, run_validator) {
   class fake_validator : public validator {
    public:
     using visitor::visit;
-    bool visit(t_program const* const program) final {
+    bool visit(t_program* const program) final {
       EXPECT_TRUE(validator::visit(program));
       add_error(50, "sadface");
       return true;
@@ -74,6 +74,7 @@ TEST_F(ValidatorTest, ReapeatedNamesInService) {
   auto service = create_fake_service("bar");
   auto fn1 = create_fake_function<void(int, int)>("foo");
   auto fn2 = create_fake_function<int(double)>("foo");
+  fn2->set_lineno(1);
   service->add_function(fn1.get());
   service->add_function(fn2.get());
 
@@ -114,6 +115,7 @@ TEST_F(ValidatorTest, RepeatedNameInExtendedService) {
 
   // Add an overlapping function in the second service
   auto fn4 = create_fake_function<void(double)>("foo");
+  fn4->set_lineno(1);
   service_2->add_function(fn4.get());
 
   // An error will be found
@@ -142,6 +144,7 @@ TEST_F(ValidatorTest, RepeatedNamesInEnumValues) {
 
   // Add enum with repeated value
   t_enum_value enum_value_3("bar", 3);
+  enum_value_3.set_lineno(1);
   tenum->append(&enum_value_3);
 
   // An error will be found
@@ -161,6 +164,7 @@ TEST_F(ValidatorTest, DuplicatedEnumValues) {
 
   t_enum_value enum_value_1("bar", 1);
   t_enum_value enum_value_2("foo", 1);
+  enum_value_2.set_lineno(1);
   tenum->append(&enum_value_1);
   tenum->append(&enum_value_2);
 
@@ -177,4 +181,28 @@ TEST_F(ValidatorTest, DuplicatedEnumValues) {
   tenum->annotations_["thrift.duplicate_values"] = "";
   errors = run_validator<enum_values_uniqueness_validator>(&program);
   EXPECT_TRUE(errors.empty());
+}
+
+TEST_F(ValidatorTest, UnsetEnumValues) {
+  auto tenum = create_fake_enum("Foo");
+
+  t_program program("/path/to/file.thrift");
+  program.add_enum(tenum.get());
+
+  t_enum_value enum_value_1("Bar");
+  t_enum_value enum_value_2("Baz");
+  enum_value_1.set_lineno(2);
+  enum_value_2.set_lineno(3);
+  tenum->append(&enum_value_1);
+  tenum->append(&enum_value_2);
+
+  // An error will be found
+  auto errors = run_validator<enum_values_set_validator>(&program);
+  EXPECT_THAT(
+      errors,
+      testing::ElementsAre(
+          "[FAILURE:/path/to/file.thrift:2] Unset enum value Bar in enum Foo. "
+          "Add an explicit value to suppress this error",
+          "[FAILURE:/path/to/file.thrift:3] Unset enum value Baz in enum Foo. "
+          "Add an explicit value to suppress this error"));
 }

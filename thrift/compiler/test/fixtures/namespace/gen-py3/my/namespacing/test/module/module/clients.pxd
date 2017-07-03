@@ -5,15 +5,16 @@
 #  @generated
 #
 from libcpp.memory cimport shared_ptr
+cimport thrift.py3.client
 
 
 from my.namespacing.test.module.module.clients_wrapper cimport cTestServiceClientWrapper
 
-cdef class TestService:
+cdef class TestService(thrift.py3.client.Client):
     cdef shared_ptr[cTestServiceClientWrapper] _module_TestService_client
-    cdef object loop
-    cdef object __weakref__
 
     @staticmethod
     cdef _module_TestService_set_client(TestService inst, shared_ptr[cTestServiceClientWrapper] c_obj)
 
+    cdef _module_TestService_reset_client(TestService self)
+    

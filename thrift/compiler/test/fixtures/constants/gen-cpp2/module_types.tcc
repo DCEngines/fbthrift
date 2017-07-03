@@ -13,6 +13,7 @@
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 #include <thrift/lib/cpp2/GeneratedCodeHelper.h>
+#include <thrift/lib/cpp2/GeneratedSerializationCodeHelper.h>
 
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
@@ -101,9 +102,7 @@ uint32_t Internship::read(Protocol_* iprot) {
       case 3:
       {
         if (ftype == apache::thrift::protocol::T_I32) {
-          int32_t ecast0;
-          xfer += iprot->readI32(ecast0);
-          this->employer = ( ::cpp2::Company)ecast0;
+          xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::cpp2::Company>::read(*iprot, this->employer);
           this->__isset.employer = true;
         } else {
           xfer += iprot->skip(ftype);
@@ -136,7 +135,7 @@ uint32_t Internship::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedSizeString(this->title);
   if (this->__isset.employer) {
     xfer += prot_->serializedFieldSize("employer", apache::thrift::protocol::T_I32, 3);
-    xfer += prot_->serializedSizeI32((int32_t)this->employer);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::cpp2::Company>::serializedSize<false>(*prot_, this->employer);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -152,7 +151,7 @@ uint32_t Internship::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedSizeString(this->title);
   if (this->__isset.employer) {
     xfer += prot_->serializedFieldSize("employer", apache::thrift::protocol::T_I32, 3);
-    xfer += prot_->serializedSizeI32((int32_t)this->employer);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::cpp2::Company>::serializedSize<false>(*prot_, this->employer);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -170,7 +169,7 @@ uint32_t Internship::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldEnd();
   if (this->__isset.employer) {
     xfer += prot_->writeFieldBegin("employer", apache::thrift::protocol::T_I32, 3);
-    xfer += prot_->writeI32((int32_t)this->employer);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::cpp2::Company>::write(*prot_, this->employer);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();
@@ -211,9 +210,7 @@ uint32_t UnEnumStruct::read(Protocol_* iprot) {
       case 1:
       {
         if (ftype == apache::thrift::protocol::T_I32) {
-          int32_t ecast1;
-          xfer += iprot->readI32(ecast1);
-          this->city = ( ::cpp2::City)ecast1;
+          xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::cpp2::City>::read(*iprot, this->city);
           this->__isset.city = true;
         } else {
           xfer += iprot->skip(ftype);
@@ -238,7 +235,7 @@ uint32_t UnEnumStruct::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("UnEnumStruct");
   xfer += prot_->serializedFieldSize("city", apache::thrift::protocol::T_I32, 1);
-  xfer += prot_->serializedSizeI32((int32_t)this->city);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::cpp2::City>::serializedSize<false>(*prot_, this->city);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -248,7 +245,7 @@ uint32_t UnEnumStruct::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("UnEnumStruct");
   xfer += prot_->serializedFieldSize("city", apache::thrift::protocol::T_I32, 1);
-  xfer += prot_->serializedSizeI32((int32_t)this->city);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::cpp2::City>::serializedSize<false>(*prot_, this->city);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -258,7 +255,7 @@ uint32_t UnEnumStruct::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("UnEnumStruct");
   xfer += prot_->writeFieldBegin("city", apache::thrift::protocol::T_I32, 1);
-  xfer += prot_->writeI32((int32_t)this->city);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::cpp2::City>::write(*prot_, this->city);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

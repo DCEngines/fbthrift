@@ -28,18 +28,38 @@
 
 
 
+<% > module_types_cpp/declare_enums%>
 <%#program:structs%><%!
 %><% > common/namespace_cpp2_begin%>
 
 
-<% > module_types_cpp/declare_members%>
+<%#struct:fields_contain_cpp_ref?%>
+<% > module_types_cpp/copy_ctor%>
+
 
 <% > module_types_cpp/eq_overload%>
 
-<%#struct:fields?%>
+
+<%/struct:fields_contain_cpp_ref?%>
+<%^struct:union?%>
+<% > module_types_cpp/declare_members%>
+
+
+<% > module_types_cpp/equality_overload%>
+
+
+<%#struct:getters_setters?%>
 <% > module_types_cpp/getters_setters%>
-<%/struct:fields?%>
+<%/struct:getters_setters?%>
 <% > module_types_cpp/swap%>
+<%/struct:union?%>
+<%#struct:union?%>
+<% > module_types_cpp/union_declare_members%>
+
+<% > module_types_cpp/union_equality_overload%>
+
+<% > module_types_cpp/union_swap%>
+<%/struct:union?%>
 
 template uint32_t <%struct:name%>::read<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t <%struct:name%>::write<>(apache::thrift::BinaryProtocolWriter*) const;

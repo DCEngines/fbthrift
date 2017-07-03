@@ -47,7 +47,6 @@ typedef std::shared_ptr<AsyncClientWorker2::Client> LoadTestClientPtr;
 
 const int kTimeout = 60000;
 const int MAX_LOOPS = 0;
-const int MAX_MESSAGE_SIZE = 64;
 
 class OpData {
  public:
@@ -168,8 +167,8 @@ LoadTestClientPtr AsyncClientWorker2::createConnection() {
           ->getSelection(config->srTier());
 
         options["single_host"] = {
-          selection.hosts->at(0)->getIp(),
-          folly::to<std::string>(selection.hosts->at(0)->port)};
+            selection.hosts.at(0)->getIp(),
+            folly::to<std::string>(selection.hosts.at(0)->port)};
       } else {
         // hit the specified server/port
         auto socketAddr = config->getAddress();
@@ -213,14 +212,11 @@ LoadTestClientPtr AsyncClientWorker2::createConnection() {
       return std::make_shared<LoadTestAsyncClient>(std::move(channel));
     } else if (config->useHTTP2Protocol()) {
       TAsyncTransport::UniquePtr socket(
-          new TAsyncSocket(&eb_, *config->getAddress(), kTimeout));
-      std::unique_ptr<apache::thrift::HTTPClientChannel,
-                      folly::DelayedDestruction::Destructor>
-          channel(HTTPClientChannel::newHTTP2Channel(
-                    std::move(socket)));
-      channel->setHTTPHost("localhost");
+          new TAsyncSocket(&eb_, config->server(), config->port(), kTimeout));
+      auto channel = HTTPClientChannel::newHTTP2Channel(std::move(socket));
+      channel->setHTTPHost("localhost6");
       channel->setHTTPUrl("/");
-
+      channel->setProtocolId(T_COMPACT_PROTOCOL);
       return std::make_shared<LoadTestAsyncClient>(std::move(channel));
     }
 
@@ -287,6 +283,7 @@ LoadTestClientPtr AsyncClientWorker2::createConnection() {
 
 void AsyncClientWorker2::run() {
   int loopCount = 0;
+  int maxLoops = MAX_LOOPS;
   std::list<AsyncRunner2*> clients;
   std::list<AsyncRunner2*>::iterator it;
   LoopTerminator loopTerminator(&eb_);
@@ -340,7 +337,7 @@ void AsyncClientWorker2::run() {
     }
     clients.clear();
 
-  } while (MAX_LOOPS == 0 || ++loopCount < MAX_LOOPS);
+  } while (maxLoops == 0 || ++loopCount < MAX_LOOPS);
 
   stopWorker();
 }

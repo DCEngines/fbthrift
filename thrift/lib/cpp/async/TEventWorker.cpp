@@ -88,8 +88,9 @@ void TEventWorker::returnConnection(TEventConnection* connection) {
   }
 }
 
-void TEventWorker::connectionAccepted(int fd, const folly::SocketAddress& clientAddr)
-  noexcept {
+void TEventWorker::connectionAccepted(
+    int fd,
+    const folly::SocketAddress& /* clientAddr */) noexcept {
   TAsyncSocket *asyncSock = nullptr;
   TAsyncSSLSocket *sslSock = nullptr;
   if (server_->getSSLContext()) {
@@ -101,7 +102,8 @@ void TEventWorker::connectionAccepted(int fd, const folly::SocketAddress& client
   }
 
   if (maxNumActiveConnections_ > 0 &&
-      maxNumActiveConnections_ <= activeConnectionList_.size()) {
+      static_cast<uint32_t>(maxNumActiveConnections_) <=
+          activeConnectionList_.size()) {
     T_ERROR("Too many active connections (%ld), max allowed is (%d)",
             activeConnectionList_.size(), maxNumActiveConnections_);
     asyncSock->destroy();

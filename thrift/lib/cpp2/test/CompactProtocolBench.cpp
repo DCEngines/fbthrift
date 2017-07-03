@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2004-present Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,18 +36,18 @@ const size_t kMultExp = 0;
 
 Shallow makeShallow() {
   Shallow data;
-  data.one = 750;
-  data.two = 750 << 22;
+  data.one = 750ll;
+  data.two = 750ll << 22;
   return data;
 }
 
 Deep makeDeep(size_t triplesz) {
   Deep data;
-  for (size_t i = 0; i < 16; ++i) {
+  for (size_t i = 0; i < triplesz; ++i) {
     Deep1 data1;
-    for (size_t j = 0; j < 16; ++j) {
+    for (size_t j = 0; j < triplesz; ++j) {
       Deep2 data2;
-      for (size_t k = 0; k < 16; ++k) {
+      for (size_t k = 0; k < triplesz; ++k) {
         data2.datas.push_back(sformat("omg[{}, {}, {}]", i, j, k));
       }
       data1.deeps.push_back(move(data2));

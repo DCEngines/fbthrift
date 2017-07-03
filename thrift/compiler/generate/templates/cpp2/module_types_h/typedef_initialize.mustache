@@ -18,10 +18,9 @@
 Form:
 typedef type name;
 
-%><%#first?%><%#program:typedefs%><%#typedef:type%>
+%>
+<%#first?%><%#program:typedefs%><%#typedef:type%>
 <% > module_types_h/typedef_recursive_forward_declare%>
 typedef <% > Type%> <%typedef:symbolic%>;
-<%^last?%>
 
-<%/last?%>
 <%/typedef:type%><%/program:typedefs%><%/first?%>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2014-present Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ template <class V>
 class VectorAsSet : public std::vector<V> {
   typedef std::vector<V> Base;
  public:
+  using Base::Base;
   /**
    * Insert value into the set at unspecified location.
    */
@@ -51,26 +52,30 @@ class VectorAsSet : public std::vector<V> {
    * Insert value into the set with a specified hint location.
    * Note: Hint is ignored, insertion always adds to the end.
    */
-  void insert(typename Base::iterator hint, const V& value) {
+  void insert(typename Base::iterator /* hint */, const V& value) {
     this->emplace_back(value);
   }
 
-  void insert(typename Base::iterator hint, V&& value) {
+  void insert(typename Base::iterator /* hint */, V&& value) {
     this->emplace_back(std::move(value));
   }
 
   template <class T>
-  void emplace(typename Base::iterator hint, T&& value) {
+  void emplace(typename Base::iterator /* hint */, T&& value) {
     this->emplace_back(std::forward<T>(value));
   }
 };
 
 template <class V>
-class VectorAsHashSet : public VectorAsSet<V> {};
+class VectorAsHashSet : public VectorAsSet<V> {
+  using VectorAsSet<V>::VectorAsSet;
+};
 
 template <class K, class V>
 class VectorAsMap : public VectorAsSet<std::pair<K, V>> {
  public:
+  using VectorAsSet<std::pair<K, V>>::VectorAsSet;
+
   typedef K key_type;
   typedef V mapped_type;
   V& operator[](K key) {
@@ -84,6 +89,7 @@ class VectorAsMap : public VectorAsSet<std::pair<K, V>> {
 
 template <class K, class V>
 class VectorAsHashMap : public VectorAsMap<K, V> {
+  using VectorAsMap<K, V>::VectorAsMap;
 };
 
 }}}

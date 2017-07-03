@@ -18,11 +18,8 @@
 # under the License.
 #
 
-import functools
-import os
 import re
 
-from t_output import DummyOutput
 from t_output import CompositeOutput
 from t_output_aggregator import create_scope_factory
 from t_output_aggregator import OutputContext
@@ -266,7 +263,7 @@ class Case(Primitive):
 
     def exit_scope_callback(self, context, scope):
         context.output.line_feed()
-        if 'nobreak' not in self:
+        if 'nobreak' not in self or not self.nobreak:
             print >>context.output, 'break;'
         context.output.unindent(2)
         print >>context.output, '}',
@@ -455,6 +452,8 @@ class CppOutputContext(OutputContext):
                         '#include <thrift/lib/cpp2/server/Cpp2ConnContext.h>'
                 print >>self._output_tcc, \
                         '#include <thrift/lib/cpp2/GeneratedCodeHelper.h>'
+                print >>self._output_tcc, \
+                        '#include <thrift/lib/cpp2/GeneratedSerializationCodeHelper.h>'
                 print >>self._output_tcc, ''
             return
 

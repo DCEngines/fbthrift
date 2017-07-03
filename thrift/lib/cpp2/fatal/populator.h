@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Facebook, Inc.
+ * Copyright 2004-present Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@
 #include <folly/io/Cursor.h>
 
 #include <fatal/type/array.h>
+#include <fatal/type/conditional.h>
 #include <fatal/type/convert.h>
 
 namespace apache { namespace thrift { namespace populator {
@@ -61,15 +62,15 @@ Int rand_in_range(
 {
   // uniform_int_distribution undefined for char,
   // use the next larger type if it's small
-  using int_type = typename std::conditional<
+  using int_type = fatal::conditional<
     (sizeof(Int) > 1),
       Int,
-      typename std::conditional<
+      fatal::conditional<
         std::numeric_limits<Int>::is_signed,
           signed short,
           unsigned short
-      >::type
-    >::type;
+      >
+    >;
 
   std::uniform_int_distribution<int_type> gen(range.min, range.max);
   int_type tmp = gen(rng);
@@ -94,7 +95,7 @@ struct populator_methods;
 template <typename Int>
 struct populator_methods<type_class::integral, Int> {
   template <typename Rng>
-  static void populate(Rng& rng, populator_opts const& opts, Int& out) {
+  static void populate(Rng& rng, populator_opts const&, Int& out) {
     using limits = std::numeric_limits<Int>;
     out = detail::rand_in_range(
       rng, populator_opts::range<Int>(limits::min(), limits::max())
@@ -106,7 +107,7 @@ struct populator_methods<type_class::integral, Int> {
 template <typename Fp>
 struct populator_methods<type_class::floating_point, Fp> {
   template <typename Rng>
-  static void populate(Rng& rng, populator_opts const& opts, Fp& out) {
+  static void populate(Rng& rng, populator_opts const&, Fp& out) {
     std::uniform_real_distribution<Fp> gen;
     out = gen(rng);
     DVLOG(4) << "generated real: " << out;
@@ -121,9 +122,11 @@ struct populator_methods<type_class::string, std::string> {
     populator_opts const& opts,
     std::string& str)
   {
-    using larger_char = typename std::conditional<
+    using larger_char = fatal::conditional<
       std::numeric_limits<char>::is_signed,
-      int, unsigned>::type;
+      int,
+      unsigned
+    >;
 
     // all printable chars (see `man ascii`)
     std::uniform_int_distribution<larger_char> char_gen(0x20, 0x7E);
@@ -142,7 +145,7 @@ struct populator_methods<type_class::string, std::string> {
 template <typename Rng, typename Binary, typename WriteFunc>
 void generate_bytes(
   Rng& rng,
-  Binary& bin,
+  Binary&,
   const std::size_t length,
   WriteFunc const& write_func)
 {

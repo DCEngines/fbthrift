@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2014-present Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,13 +42,79 @@ class FrozenFileForwardIncompatible : public std::runtime_error {
 };
 
 /**
- * Returns the number of bytes needed to freeze the given object, not including
- * padding bytes
+ * A FreezeRoot that mallocs buffers as needed.
+ */
+class MallocFreezer final : public FreezeRoot {
+ public:
+  explicit MallocFreezer() {}
+
+  template <class T>
+  void freeze(const Layout<T>& layout, const T& root) {
+    doFreeze(layout, root);
+  }
+
+  void appendTo(std::string& out) const {
+    out.reserve(size_ + out.size());
+    for (auto& segment : segments_) {
+      out.append(segment.buffer, segment.buffer + segment.size);
+    }
+  }
+
+ private:
+  size_t distanceToEnd(const byte* origin) const;
+  size_t offsetOf(const byte* origin) const;
+
+  folly::MutableByteRange appendBuffer(size_t size);
+
+  void doAppendBytes(
+      byte* origin,
+      size_t n,
+      folly::MutableByteRange& range,
+      size_t& distance,
+      size_t alignment) override;
+
+  struct Segment {
+    explicit Segment(size_t size);
+    Segment(Segment&& other) : size(other.size), buffer(other.buffer) {
+      other.buffer = nullptr;
+    }
+
+    ~Segment();
+
+    size_t size{0};
+    byte* buffer{nullptr}; // owned
+  };
+  std::map<const byte*, size_t> offsets_;
+  std::vector<Segment> segments_;
+  size_t size_{0};
+};
+
+/**
+ * Returns an upper bound estimate of the number of bytes required to freeze
+ * this object with a minimal layout. Actual bytes required will depend on the
+ * alignment of the freeze buffer.
  */
 template <class T>
 size_t frozenSize(const T& v) {
   Layout<T> layout;
   return LayoutRoot::layout(v, layout) - LayoutRoot::kPaddingBytes;
+}
+
+/**
+ * Returns an upper bound estimate of the number of bytes required to freeze
+ * this object with a given layout. Actual bytes required will depend on on
+ * the alignment of the freeze buffer.
+ */
+template <class T>
+size_t frozenSize(const T& v, const Layout<T>& fixedLayout) {
+  Layout<T> layout = fixedLayout;
+  size_t size;
+  bool changed;
+  LayoutRoot::layout(v, layout, changed, size);
+  if (changed) {
+    throw LayoutException();
+  }
+  return size;
 }
 
 template <class T>
@@ -87,28 +153,52 @@ void freezeToFile(const T& x, folly::File file) {
 
   serializeRootLayout(*layout, schemaStr);
 
-  folly::MemoryMapping mapping(std::move(file),
-                               0,
-                               contentSize + schemaStr.size(),
-                               folly::MemoryMapping::writable());
+  size_t initialBufferSize = contentSize + schemaStr.size();
+  folly::MemoryMapping mapping(
+      file.dup(), 0, initialBufferSize, folly::MemoryMapping::writable());
+  auto mappingRange = mapping.writableRange();
   auto writeRange = mapping.writableRange();
   std::copy(schemaStr.begin(), schemaStr.end(), writeRange.begin());
   writeRange.advance(schemaStr.size());
   ByteRangeFreezer::freeze(*layout, x, writeRange);
+  size_t finalBufferSize = writeRange.begin() - mappingRange.begin();
+  ftruncate(file.fd(), finalBufferSize);
 }
 
 template <class T>
 void freezeToString(const T& x, std::string& out) {
   out.clear();
-  auto layout = std::make_unique<Layout<T>>();
-  size_t contentSize = LayoutRoot::layout(x, *layout);
-  serializeRootLayout(*layout, out);
+  Layout<T> layout;
+  size_t contentSize = LayoutRoot::layout(x, layout);
+  serializeRootLayout(layout, out);
 
   size_t schemaSize = out.size();
-  out.resize(schemaSize + contentSize);
-  folly::MutableByteRange writeRange(reinterpret_cast<byte*>(&out[schemaSize]),
-                                     contentSize);
-  ByteRangeFreezer::freeze(*layout, x, writeRange);
+  size_t bufferSize = schemaSize + contentSize;
+  out.resize(bufferSize, 0);
+  folly::MutableByteRange writeRange(
+      reinterpret_cast<byte*>(&out[schemaSize]), contentSize);
+  ByteRangeFreezer::freeze(layout, x, writeRange);
+  out.resize(out.size() - writeRange.size());
+}
+
+template <class T>
+std::string freezeDataToString(const T& x, const Layout<T>& layout) {
+  std::string out;
+  MallocFreezer freezer;
+  freezer.freeze(layout, x);
+  freezer.appendTo(out);
+  return out;
+}
+
+template <class T>
+void freezeToStringMalloc(const T& x, std::string& out) {
+  Layout<T> layout;
+  LayoutRoot::layout(x, layout);
+  out.clear();
+  serializeRootLayout(layout, out);
+  MallocFreezer freezer;
+  freezer.freeze(layout, x);
+  freezer.appendTo(out);
 }
 
 /**
@@ -169,7 +259,7 @@ MappedFrozen<T> mapFrozen(std::string&& str, bool trim = true) {
     size_t trimSize = range.begin() - rangeBefore.begin();
     ownedStr.erase(ownedStr.begin(), ownedStr.begin() + trimSize);
     ownedStr.shrink_to_fit();
-    range = folly::StringPiece(holder->t_);
+    range = folly::StringPiece(ownedStr);
   }
   MappedFrozen<T> ret(layout->view({range.begin(), 0}));
   ret.holdImpl(std::move(holder));

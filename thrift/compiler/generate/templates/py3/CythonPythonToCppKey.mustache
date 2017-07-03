@@ -31,16 +31,19 @@ keys (conventionally used for sets, lists, and map values).
 }}{{#type:i32?}}key{{/type:i32?}}{{!
 }}{{#type:i64?}}key{{/type:i64?}}{{!
 }}{{#type:double?}}key{{/type:double?}}{{!
+}}{{#type:float?}}key{{/type:float?}}{{!
 }}{{#type:string?}}key.encode('UTF-8'){{/type:string?}}{{!
 }}{{#type:binary?}}key{{/type:binary?}}{{!
-}}{{#type:struct}}deref((<{{> ModulePath}}.{{struct:name}}> key{{!
+}}{{#type:struct}}deref((<{{> common/ModulePath}}.{{struct:name}}> key{{!
   }}).c_{{struct:name}}){{/type:struct}}{{!
 }}{{#type:list?}}deref({{type:flat_name}}(key)._vector.get()){{/type:list?}}{{!
-}}{{#type:set?}}cset[{{!
-  }}{{#type:setElemType}}{{> ContainerCythonFieldType}}{{/type:setElemType}}{{!
+}}{{#type:set?}}c{{#type:unordered?}}u{{/type:unordered?}}set[{{!
+  }}{{#type:setElemType}}{{> types/CythonCppType}}{{/type:setElemType}}{{!
   }}](deref({{type:flat_name}}(key)._set.get())){{/type:set?}}{{!
-}}{{#type:map?}}cmap[{{!
-  }}{{#type:keyType}}{{> ContainerCythonFieldType}}{{/type:keyType}},{{!
-  }}{{#type:valueType}}{{> ContainerCythonFieldType}}{{/type:valueType}}{{!
+}}{{#type:map?}}c{{#type:unordered?}}u{{/type:unordered?}}map[{{!
+  }}{{#type:keyType}}{{> types/CythonCppType}}{{/type:keyType}},{{!
+  }}{{#type:valueType}}{{> types/CythonCppType}}{{/type:valueType}}{{!
   }}](deref({{type:flat_name}}(key)._map.get())){{/type:map?}}{{!
-}}{{#type:enum}}{{> ModulePath}}.{{enum:name}}_to_cpp(key){{/type:enum}}
+}}{{#type:enum}}{{!
+  }}{{#type:externalProgram?}}{{> common/ModulePath}}.{{/type:externalProgram?}}{{!
+  }}{{enum:name}}_to_cpp(key){{/type:enum}}

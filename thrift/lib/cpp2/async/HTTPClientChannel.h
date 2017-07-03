@@ -22,7 +22,6 @@
 
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/EventBase.h>
-#include <folly/io/async/HHWheelTimer.h>
 #include <folly/io/async/Request.h>
 #include <proxygen/lib/http/HTTPConnector.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
@@ -58,6 +57,11 @@ class HTTPClientChannel : public ClientChannel,
   void setHTTPHost(const std::string& host) { httpHost_ = host; }
   void setHTTPUrl(const std::string& url) { httpUrl_ = url; }
 
+  // Sets the maximum pending outgoing requests allowed on this channel.
+  // Subject to negotiation with the server, which may dictate a smaller
+  // maximum.
+  void setMaxPendingRequests(uint32_t num);
+
   void setProtocolId(uint16_t protocolId) { protocolId_ = protocolId; }
 
   // apache::thrift::ClientChannel methods
@@ -65,6 +69,8 @@ class HTTPClientChannel : public ClientChannel,
   void closeNow() override;
 
   bool good() override;
+
+  SaturationStatus getSaturationStatus() override;
 
   void attachEventBase(folly::EventBase*) override;
   void detachEventBase() override;
@@ -145,8 +151,7 @@ class HTTPClientChannel : public ClientChannel,
   class HTTPTransactionCallback
       : public MessageChannel::SendCallback,
         public proxygen::HTTPTransactionHandler,
-        public proxygen::HTTPTransaction::TransportCallback,
-        public folly::HHWheelTimer::Callback {
+        public proxygen::HTTPTransaction::TransportCallback {
    public:
     HTTPTransactionCallback(
         bool oneway,
@@ -155,11 +160,7 @@ class HTTPClientChannel : public ClientChannel,
         bool isSecurityActive,
         uint16_t protoId);
 
-    ~HTTPTransactionCallback();
-
-    void startTimer(
-        folly::HHWheelTimer& timer,
-        std::chrono::milliseconds timeout);
+    ~HTTPTransactionCallback() override;
 
     // MessageChannel::SendCallback methods
 
@@ -241,12 +242,6 @@ class HTTPClientChannel : public ClientChannel,
 
     // end proxygen::HTTPTransaction::TransportCallback methods
 
-    // folly::HHWheelTimer::Callback methods
-
-    void timeoutExpired() noexcept override;
-
-    // end folly::HHWheelTimer::Callback methods
-
     void requestError(folly::exception_wrapper ex);
 
     proxygen::HTTPTransaction* getTransaction() noexcept { return txn_; }
@@ -305,7 +300,6 @@ class HTTPClientChannel : public ClientChannel,
   std::string httpHost_;
   std::string httpUrl_;
   std::chrono::milliseconds timeout_;
-  proxygen::WheelTimerInstance timer_;
   uint16_t protocolId_;
   CloseCallback* closeCallback_;
 

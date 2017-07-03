@@ -6,3 +6,14 @@
  */
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_data.h"
 
+namespace some { namespace valid { namespace ns {
+
+constexpr const std::size_t _MyEnumAEnumDataStorage::size;
+constexpr const std::array<MyEnumA, 3> _MyEnumAEnumDataStorage::values;
+constexpr const std::array<folly::StringPiece, 3> _MyEnumAEnumDataStorage::names;
+
+}}} // some::valid::ns
+namespace apache { namespace thrift {
+
+}} // apache::thrift
+

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Facebook, Inc.
+ * Copyright 2014-present Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -2345,7 +2345,11 @@ void t_php_generator::_generate_service_client(
     string funname = (*f_iter)->get_name();
 
     // Open function
-    generate_php_docstring(out, *f_iter);
+    if (async_) {
+      indent(out) << "<<__Deprecated('use gen_" << funname << "()')>>" << endl;
+    } else {
+      generate_php_docstring(out, *f_iter);
+    }
     indent(out) <<
       "public function " << function_signature(*f_iter) << endl;
     scope_up(out);
@@ -2375,7 +2379,8 @@ void t_php_generator::_generate_service_client(
     out << endl;
 
     if (async_) {
-      // Gen function
+      // Async function
+      generate_php_docstring(out, *f_iter);
       indent(out) <<
         "public async function " << function_signature(*f_iter, "gen_") << endl;
       scope_up(out);
@@ -2745,7 +2750,6 @@ void t_php_generator::generate_deserialize_field(ofstream& out,
           case t_base_type::TYPE_VOID:
             throw "compiler error: cannot serialize void field in a struct: " +
               name;
-            break;
           case t_base_type::TYPE_STRING:
             out <<
               indent() << "$len = unpack('N', " << itrans << "->readAll(4));" << endl <<
@@ -2827,7 +2831,6 @@ void t_php_generator::generate_deserialize_field(ofstream& out,
           case t_base_type::TYPE_VOID:
             throw "compiler error: cannot serialize void field in a struct: " +
               name;
-            break;
           case t_base_type::TYPE_STRING:
             out << "readString($" << name << ");";
             break;
@@ -3086,7 +3089,6 @@ void t_php_generator::generate_serialize_field(ofstream& out,
         case t_base_type::TYPE_VOID:
           throw
             "compiler error: cannot serialize void field in a struct: " + name;
-          break;
         case t_base_type::TYPE_STRING:
           out <<
             indent() << "$output .= pack('N', strlen($" << name << "));" << endl <<
@@ -3138,7 +3140,6 @@ void t_php_generator::generate_serialize_field(ofstream& out,
         case t_base_type::TYPE_VOID:
           throw
             "compiler error: cannot serialize void field in a struct: " + name;
-          break;
         case t_base_type::TYPE_STRING:
           out << "writeString($" << name << ");";
           break;

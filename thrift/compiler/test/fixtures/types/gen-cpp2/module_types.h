@@ -38,30 +38,51 @@ inline constexpr has_bitwise_ops operator&(has_bitwise_ops a, has_bitwise_ops b)
   using U = std::underlying_type_t<E>;
   return static_cast<E>(static_cast<U>(a) & static_cast<U>(b));
 }
+#if __cplusplus >= 201402L
 
 inline constexpr has_bitwise_ops& operator&=(has_bitwise_ops& a, has_bitwise_ops b) {
   return a = a & b;
 }
+#else
+
+inline has_bitwise_ops& operator&=(has_bitwise_ops& a, has_bitwise_ops b) {
+  return a = a & b;
+}
+#endif
 
 inline constexpr has_bitwise_ops operator|(has_bitwise_ops a, has_bitwise_ops b) {
   using E = has_bitwise_ops;
   using U = std::underlying_type_t<E>;
   return static_cast<E>(static_cast<U>(a) | static_cast<U>(b));
 }
+#if __cplusplus >= 201402L
 
 inline constexpr has_bitwise_ops& operator|=(has_bitwise_ops& a, has_bitwise_ops b) {
   return a = a | b;
 }
+#else
+
+inline has_bitwise_ops& operator|=(has_bitwise_ops& a, has_bitwise_ops b) {
+  return a = a | b;
+}
+#endif
 
 inline constexpr has_bitwise_ops operator^(has_bitwise_ops a, has_bitwise_ops b) {
   using E = has_bitwise_ops;
   using U = std::underlying_type_t<E>;
   return static_cast<E>(static_cast<U>(a) ^ static_cast<U>(b));
 }
+#if __cplusplus >= 201402L
 
 inline constexpr has_bitwise_ops& operator^=(has_bitwise_ops& a, has_bitwise_ops b) {
   return a = a ^ b;
 }
+#else
+
+inline has_bitwise_ops& operator^=(has_bitwise_ops& a, has_bitwise_ops b) {
+  return a = a ^ b;
+}
+#endif
 
 inline constexpr has_bitwise_ops operator~(has_bitwise_ops a) {
   using E = has_bitwise_ops;
@@ -79,17 +100,17 @@ template<> struct equal_to<typename  ::apache::thrift::fixtures::types::has_bitw
 namespace apache { namespace thrift {
 
 template <> struct TEnumDataStorage< ::apache::thrift::fixtures::types::has_bitwise_ops>;
-template <> const std::size_t TEnumTraitsBase< ::apache::thrift::fixtures::types::has_bitwise_ops>::size;
-template <> const folly::Range<const  ::apache::thrift::fixtures::types::has_bitwise_ops*> TEnumTraitsBase< ::apache::thrift::fixtures::types::has_bitwise_ops>::values;
-template <> const folly::Range<const folly::StringPiece*> TEnumTraitsBase< ::apache::thrift::fixtures::types::has_bitwise_ops>::names;
-template <> const char* TEnumTraitsBase< ::apache::thrift::fixtures::types::has_bitwise_ops>::findName( ::apache::thrift::fixtures::types::has_bitwise_ops value);
-template <> bool TEnumTraitsBase< ::apache::thrift::fixtures::types::has_bitwise_ops>::findValue(const char* name,  ::apache::thrift::fixtures::types::has_bitwise_ops* outValue);
+template <> const std::size_t TEnumTraits< ::apache::thrift::fixtures::types::has_bitwise_ops>::size;
+template <> const folly::Range<const  ::apache::thrift::fixtures::types::has_bitwise_ops*> TEnumTraits< ::apache::thrift::fixtures::types::has_bitwise_ops>::values;
+template <> const folly::Range<const folly::StringPiece*> TEnumTraits< ::apache::thrift::fixtures::types::has_bitwise_ops>::names;
+template <> const char* TEnumTraits< ::apache::thrift::fixtures::types::has_bitwise_ops>::findName( ::apache::thrift::fixtures::types::has_bitwise_ops value);
+template <> bool TEnumTraits< ::apache::thrift::fixtures::types::has_bitwise_ops>::findValue(const char* name,  ::apache::thrift::fixtures::types::has_bitwise_ops* outValue);
 
-template <> constexpr  ::apache::thrift::fixtures::types::has_bitwise_ops TEnumTraits< ::apache::thrift::fixtures::types::has_bitwise_ops>::min() {
+template <> inline constexpr  ::apache::thrift::fixtures::types::has_bitwise_ops TEnumTraits< ::apache::thrift::fixtures::types::has_bitwise_ops>::min() {
   return  ::apache::thrift::fixtures::types::has_bitwise_ops::none;
 }
 
-template <> constexpr  ::apache::thrift::fixtures::types::has_bitwise_ops TEnumTraits< ::apache::thrift::fixtures::types::has_bitwise_ops>::max() {
+template <> inline constexpr  ::apache::thrift::fixtures::types::has_bitwise_ops TEnumTraits< ::apache::thrift::fixtures::types::has_bitwise_ops>::max() {
   return  ::apache::thrift::fixtures::types::has_bitwise_ops::three;
 }
 
