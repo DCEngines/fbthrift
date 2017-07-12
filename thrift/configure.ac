@@ -57,6 +57,8 @@ AC_SUBST([PY_RUN_ENV])
 AC_ARG_VAR([DMD_LIBEVENT_FLAGS], [DMD flags for linking libevent (auto-detected if not set).])
 AC_ARG_VAR([DMD_OPENSSL_FLAGS], [DMD flags for linking OpenSSL (auto-detected if not set).])
 
+CFLAGS = "-g -O0"
+
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_CPP
